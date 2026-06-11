@@ -1,0 +1,35 @@
+{
+  "dependencies": {
+    "@tauri-apps/api": "^2",
+    "@tauri-apps/plugin-opener": "^2",
+    "@tauri-apps/plugin-sql": "^2.4.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.15",
+    "@sveltejs/adapter-static": "^3.0.6",
+    "@sveltejs/kit": "^2.9.0",
+    "@sveltejs/vite-plugin-svelte": "^5.0.0",
+    "@tauri-apps/cli": "^2",
+    "lefthook": "^2.1.8",
+    "svelte": "^5.0.0",
+    "svelte-check": "^4.0.0",
+    "typescript": "~5.6.2",
+    "ultracite": "^7.7.0",
+    "vite": "^6.0.3"
+  },
+  "name": "link-it",
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "ultracite check",
+    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+    "tauri": "tauri",
+    "fix": "ultracite fix",
+    "prepare": "lefthook install"
+  },
+  "type": "module",
+  "version": "0.1.0",
+  "description": "",
+  "license": "MIT"
+}
