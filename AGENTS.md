@@ -1,3 +1,302 @@
+# AGENTS.md
+
+## Project Overview
+
+link-it is a local-first desktop bookmark manager built with:
+
+* Tauri v2
+* SvelteKit 2
+* Svelte 5 (Runes)
+* TypeScript
+* SQLite
+* @tauri-apps/plugin-sql
+
+The application runs entirely on the client machine and does not use an HTTP backend.
+
+---
+
+# Architecture Principles
+
+The project follows a lightweight layered architecture:
+
+```text
+UI
+ ↓
+Store
+ ↓
+Actions
+ ↓
+Repository
+ ↓
+SQLite
+```
+
+The goal is to keep responsibilities isolated while avoiding unnecessary complexity.
+
+Do not introduce Clean Architecture, CQRS, DDD, ORMs, or additional abstraction layers unless explicitly requested.
+
+---
+
+# Feature-Based Organization
+
+All business functionality must be organized by feature.
+
+Preferred structure:
+
+```text
+src/lib/
+
+core/
+  database/
+  errors/
+  utils/
+
+features/
+  bookmarks/
+    types/
+    repositories/
+    actions/
+    stores/
+    validators/
+
+shared/
+  components/
+  constants/
+  types/
+```
+
+New functionality should be added inside a feature folder instead of creating global folders.
+
+---
+
+# Layer Responsibilities
+
+## UI Layer
+
+Svelte components are responsible only for presentation and user interaction.
+
+Allowed:
+
+* Rendering
+* Event handling
+* Calling stores
+
+Not allowed:
+
+* SQL queries
+* Business rules
+* Data validation
+* Direct database access
+
+---
+
+## Store Layer
+
+Stores manage reactive application state.
+
+Allowed:
+
+* UI state
+* Loading state
+* Error state
+* Optimistic updates
+
+Not allowed:
+
+* SQL
+* Database access
+* Complex business rules
+
+Stores communicate only with Actions.
+
+---
+
+## Action Layer
+
+Actions contain all business logic.
+
+Examples:
+
+* URL validation
+* Duplicate detection
+* Tag normalization
+* Sorting rules
+* Domain-specific behavior
+
+Services orchestrate repositories and return application data.
+
+All business rules belong here.
+
+---
+
+## Repository Layer
+
+Repositories are responsible only for data persistence.
+
+Allowed:
+
+* CRUD operations
+* SQL execution
+* Mapping database rows
+
+Not allowed:
+
+* Validation
+* Sorting
+* Business logic
+* UI concerns
+
+Repositories should remain thin.
+
+---
+
+# Dependency Injection
+
+Use simple factory-based dependency injection.
+
+Preferred:
+
+```ts
+createBookmarkStore(action)
+```
+
+Avoid hidden dependencies.
+
+Do not instantiate repositories directly inside stores or components.
+
+---
+
+# SQLite
+
+Use raw SQL.
+
+Do not introduce:
+
+* Prisma
+* Drizzle
+* TypeORM
+* Sequelize
+* Any ORM
+
+Repository implementations should use @tauri-apps/plugin-sql directly.
+
+---
+
+# Validation
+
+Use Zod for all external input validation.
+
+Examples:
+
+* Form submissions
+* Import operations
+* User-provided URLs
+* Future settings screens
+
+Validation should occur before business logic execution.
+
+---
+
+# TypeScript Guidelines
+
+Prefer explicit types.
+
+Separate:
+
+```text
+Bookmark
+CreateBookmarkInput
+UpdateBookmarkInput
+BookmarkWithTags
+```
+
+Avoid using a single type for all operations.
+
+Avoid `any`.
+
+---
+
+# Components
+
+Avoid large page components.
+
+As features grow, split UI into focused components.
+
+Example:
+
+```text
+components/
+
+BookmarkForm.svelte
+BookmarkList.svelte
+BookmarkItem.svelte
+SearchBar.svelte
+TagList.svelte
+```
+
+Components should be small and composable.
+
+---
+
+# Error Handling
+
+Never silently ignore errors.
+
+Actions should throw meaningful domain errors.
+
+Stores should convert errors into UI state.
+
+Repositories should only surface persistence errors.
+
+---
+
+# Performance
+
+Prefer simplicity over premature optimization.
+
+Optimize only when there is measurable evidence.
+
+Avoid:
+
+* Complex caching layers
+* Unnecessary memoization
+* Over-engineering
+
+---
+
+# Testing Philosophy
+
+Business logic should be testable without SQLite.
+
+Use repository interfaces to enable:
+
+* Memory repositories
+* Mock repositories
+* Future test doubles
+
+Actions should be the primary testing target.
+
+---
+
+# Code Generation Rules
+
+When generating code for this project:
+
+1. Follow the existing layered architecture.
+2. Respect feature boundaries.
+3. Keep repositories focused on persistence.
+4. Keep business rules inside actions.
+5. Keep stores focused on state management.
+6. Use TypeScript strict mode patterns.
+7. Prefer composition over inheritance.
+8. Use raw SQL.
+9. Use Svelte 5 runes.
+10. Avoid introducing new architectural patterns without justification.
+
+When in doubt, choose the simpler solution.
+
+
+
 # Ultracite Code Standards
 
 This project uses **Ultracite**, a zero-config preset that enforces strict code quality standards through automated formatting and linting.
@@ -39,85 +338,4 @@ Write code that is **accessible, performant, type-safe, and maintainable**. Focu
 - Use `async/await` syntax instead of promise chains for better readability
 - Handle errors appropriately in async code with try-catch blocks
 - Don't use async functions as Promise executors
-
-### React & JSX
-
-- Use function components over class components
-- Call hooks at the top level only, never conditionally
-- Specify all dependencies in hook dependency arrays correctly
-- Use the `key` prop for elements in iterables (prefer unique IDs over array indices)
-- Nest children between opening and closing tags instead of passing as props
-- Don't define components inside other components
-- Use semantic HTML and ARIA attributes for accessibility:
-  - Provide meaningful alt text for images
-  - Use proper heading hierarchy
-  - Add labels for form inputs
-  - Include keyboard event handlers alongside mouse events
-  - Use semantic elements (`<button>`, `<nav>`, etc.) instead of divs with roles
-
-### Error Handling & Debugging
-
-- Remove `console.log`, `debugger`, and `alert` statements from production code
-- Throw `Error` objects with descriptive messages, not strings or other values
-- Use `try-catch` blocks meaningfully - don't catch errors just to rethrow them
-- Prefer early returns over nested conditionals for error cases
-
-### Code Organization
-
-- Keep functions focused and under reasonable cognitive complexity limits
-- Extract complex conditions into well-named boolean variables
-- Use early returns to reduce nesting
-- Prefer simple conditionals over nested ternary operators
-- Group related code together and separate concerns
-
-### Security
-
-- Add `rel="noopener"` when using `target="_blank"` on links
-- Avoid `dangerouslySetInnerHTML` unless absolutely necessary
-- Don't use `eval()` or assign directly to `document.cookie`
-- Validate and sanitize user input
-
-### Performance
-
-- Avoid spread syntax in accumulators within loops
-- Use top-level regex literals instead of creating them in loops
-- Prefer specific imports over namespace imports
-- Avoid barrel files (index files that re-export everything)
-- Use proper image components (e.g., Next.js `<Image>`) over `<img>` tags
-
-### Framework-Specific Guidance
-
-**Next.js:**
-- Use Next.js `<Image>` component for images
-- Use `next/head` or App Router metadata API for head elements
-- Use Server Components for async data fetching instead of async Client Components
-
-**React 19+:**
-- Use ref as a prop instead of `React.forwardRef`
-
-**Solid/Svelte/Vue/Qwik:**
-- Use `class` and `for` attributes (not `className` or `htmlFor`)
-
----
-
-## Testing
-
-- Write assertions inside `it()` or `test()` blocks
-- Avoid done callbacks in async tests - use async/await instead
-- Don't use `.only` or `.skip` in committed code
-- Keep test suites reasonably flat - avoid excessive `describe` nesting
-
-## When Biome Can't Help
-
-Biome's linter will catch most issues automatically. Focus your attention on:
-
-1. **Business logic correctness** - Biome can't validate your algorithms
-2. **Meaningful naming** - Use descriptive names for functions, variables, and types
-3. **Architecture decisions** - Component structure, data flow, and API design
-4. **Edge cases** - Handle boundary conditions and error states
-5. **User experience** - Accessibility, performance, and usability considerations
-6. **Documentation** - Add comments for complex logic, but prefer self-documenting code
-
----
-
-Most formatting and common issues are automatically fixed by Biome. Run `npm exec -- ultracite fix` before committing to ensure compliance.
+ 
