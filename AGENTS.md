@@ -10,6 +10,7 @@ link-it is a local-first desktop bookmark manager built with:
 * TypeScript
 * SQLite
 * @tauri-apps/plugin-sql
+* tailwind css 
 
 The application runs entirely on the client machine and does not use an HTTP backend.
 
