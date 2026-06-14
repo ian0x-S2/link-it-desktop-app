@@ -25,7 +25,7 @@
   <!-- WORKSPACES Box -->
   <div class="relative p-4 flex flex-col bg-box-bg border border-border">
     <span
-      class="absolute px-1.5 text-[10px] font-bold uppercase tracking-wider -top-[7px] left-[10px] bg-background text-primary"
+      class="absolute px-1.5 text-[10px] font-bold uppercase tracking-wider -top-1.75 left-2.5 bg-background text-primary"
       >Workspaces</span
     >
     <div class="space-y-1 text-xs">
@@ -44,11 +44,11 @@
     class="relative flex flex-col bg-box-bg border border-border flex-1 min-h-0"
   >
     <span
-      class="absolute px-1.5 text-[10px] font-bold uppercase tracking-wider -top-[7px] left-[10px] bg-background text-primary z-10"
+      class="absolute px-1.5 text-[10px] font-bold uppercase tracking-wider -top-1.75 left-2.5 bg-background text-primary z-10"
       >Categories</span
     >
     <div
-      class="flex-1 overflow-y-auto p-4 min-h-0 [&::-webkit-scrollbar]:w-[4px] [&::-webkit-scrollbar-thumb]:bg-border hover:[&::-webkit-scrollbar-thumb]:bg-primary"
+      class="flex-1 overflow-y-auto p-4 min-h-0 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-border hover:[&::-webkit-scrollbar-thumb]:bg-primary"
     >
       <div class="space-y-1 text-xs">
         <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -98,13 +98,13 @@
     class="relative p-4 flex flex-col bg-box-bg border border-border gap-2 shrink-0"
   >
     <span
-      class="absolute px-1.5 text-[10px] font-bold uppercase tracking-wider -top-[7px] left-[10px] bg-background text-primary"
+      class="absolute px-1.5 text-[10px] font-bold uppercase tracking-wider -top-1.75 left-2.5 bg-background text-primary"
       >Actions</span
     >
     <Button
       onclick={onAddLinkClick}
       size="sm"
-      class="font-mono uppercase tracking-[0.05em] text-[0.65rem] rounded-none shadow-none border border-primary bg-primary text-background font-bold transition-all duration-100 ease-linear cursor-pointer h-auto py-0.5 px-2 hover:bg-foreground hover:border-foreground hover:text-background w-full"
+      class="font-mono uppercase tracking-wider text-[0.65rem] rounded-none shadow-none border border-primary bg-primary text-background font-bold transition-all duration-100 ease-linear cursor-pointer h-auto py-0.5 px-2 hover:bg-foreground hover:border-foreground hover:text-background w-full"
     >
       [a] Add Link
     </Button>
@@ -114,14 +114,14 @@
         changeTheme(themes[nextIdx]);
       }}
       size="sm"
-      class="font-mono uppercase tracking-[0.05em] text-[0.65rem] rounded-none shadow-none border border-border bg-transparent text-muted-foreground transition-all duration-100 ease-linear cursor-pointer h-auto py-0.5 px-2 hover:border-primary hover:bg-accent hover:text-primary w-full"
+      class="font-mono uppercase tracking-wider text-[0.65rem] rounded-none shadow-none border border-border bg-transparent text-muted-foreground transition-all duration-100 ease-linear cursor-pointer h-auto py-0.5 px-2 hover:border-primary hover:bg-accent hover:text-primary w-full"
     >
       [t] Toggle Theme: {currentTheme}
     </Button>
     <Button
       onclick={toggleMode}
       size="sm"
-      class="font-mono uppercase tracking-[0.05em] text-[0.65rem] rounded-none shadow-none border border-border bg-transparent text-muted-foreground transition-all duration-100 ease-linear cursor-pointer h-auto py-0.5 px-2 hover:border-primary hover:bg-accent hover:text-primary w-full"
+      class="font-mono uppercase tracking-wider text-[0.65rem] rounded-none shadow-none border border-border bg-transparent text-muted-foreground transition-all duration-100 ease-linear cursor-pointer h-auto py-0.5 px-2 hover:border-primary hover:bg-accent hover:text-primary w-full"
     >
       [m] Toggle Mode
     </Button>
