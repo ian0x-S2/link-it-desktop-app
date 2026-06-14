@@ -51,11 +51,9 @@ export class MemoryBookmarkRepository implements BookmarkRepository {
 
   async addTag(bookmarkId: string, tag: string): Promise<void> {
     const bookmark = bookmarks.find((b) => b.id === bookmarkId);
-    if (bookmark) {
-      if (!bookmark.tags.includes(tag)) {
-        bookmark.tags.push(tag);
-        bookmark.updatedAt = new Date().toISOString();
-      }
+    if (bookmark && !bookmark.tags.includes(tag)) {
+      bookmark.tags.push(tag);
+      bookmark.updatedAt = new Date().toISOString();
     }
   }
 

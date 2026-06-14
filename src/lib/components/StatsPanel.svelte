@@ -1,10 +1,11 @@
 <script lang="ts">
   import type { Bookmark } from "../types/bookmark";
+  import * as Chart from "$lib/components/ui/chart/index.js";
+  import { BarChart, AreaChart, Tooltip } from "layerchart";
 
   let { bookmarks = [] }: { bookmarks: Bookmark[] } = $props();
 
   let chartType = $state<"bar" | "line">("bar");
-  let hoveredIdx = $state<number | null>(null);
 
   // Generate last 7 days chronologically (oldest to newest)
   const last7Days = $derived(() => {
@@ -32,62 +33,22 @@
     return days;
   });
 
-  const maxCount = $derived(() => {
-    const counts = last7Days().map((d) => d.count);
-    const max = Math.max(...counts, 0);
-    return max === 0 ? 4 : max; // default minimum max value of 4 for nice spacing
-  });
+  const chartData = $derived(last7Days());
 
-  // Calculate SVG coordinates
-  const svgWidth = 260;
-  const svgHeight = 110;
-  const paddingLeft = 20;
-  const paddingRight = 10;
-  const paddingTop = 15;
-  const paddingBottom = 15;
-  const chartWidth = svgWidth - paddingLeft - paddingRight;
-  const chartHeight = svgHeight - paddingTop - paddingBottom;
-
-  const points = $derived(() => {
-    const days = last7Days();
-    const maxVal = maxCount();
-
-    return days.map((day, idx) => {
-      const x = paddingLeft + (idx / (days.length - 1)) * chartWidth;
-      const y = svgHeight - paddingBottom - (day.count / maxVal) * chartHeight;
-      return { x, y, ...day };
-    });
-  });
-
-  // SVG Line path string
-  const linePath = $derived(() => {
-    const pts = points();
-    if (pts.length === 0) {
-      return "";
+  const config = {
+    count: {
+      label: "added",
+      color: "var(--primary)"
     }
-    return pts
-      .map(
-        (p, i) => `${i === 0 ? "M" : "L"} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`
-      )
-      .join(" ");
-  });
+  } satisfies Chart.ChartConfig;
 
-  // SVG Area path string
-  const areaPath = $derived(() => {
-    const pts = points();
-    if (pts.length === 0) {
-      return "";
+  const series = [
+    {
+      key: "count",
+      label: "added",
+      color: "var(--color-count)"
     }
-    const firstX = pts[0].x;
-    const lastX = pts[pts.length - 1].x;
-    const baseY = svgHeight - paddingBottom;
-    const path = pts
-      .map(
-        (p, i) => `${i === 0 ? "M" : "L"} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`
-      )
-      .join(" ");
-    return `${path} L ${lastX.toFixed(1)} ${baseY} L ${firstX.toFixed(1)} ${baseY} Z`;
-  });
+  ];
 
   // Summary counts
   const totalCount = $derived(bookmarks.length);
@@ -125,117 +86,53 @@
 
   <!-- Chart Container -->
   <div class="relative flex-1 w-full min-h-0 flex items-center justify-center">
-    <svg
-      viewBox="0 0 {svgWidth} {svgHeight}"
-      class="w-full h-full text-muted-foreground"
-    >
-      <defs>
-        <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="var(--primary)" stop-opacity="0.25" />
-          <stop offset="100%" stop-color="var(--primary)" stop-opacity="0.0" />
-        </linearGradient>
-      </defs>
-
-      <!-- Grid lines -->
-      {#each [0, 0.25, 0.5, 0.75, 1] as ratio}
-        {@const y = paddingTop + ratio * chartHeight}
-        <line
-          x1={paddingLeft}
-          y1={y}
-          x2={svgWidth - paddingRight}
-          y2={y}
-          stroke="var(--border-dim)"
-          stroke-dasharray="2 2"
-        />
-      {/each}
-
-      <!-- Y axis mini indicators (max & 0) -->
-      <text
-        x={paddingLeft - 4}
-        y={paddingTop + 3}
-        class="fill-dim-foreground text-[7px] text-right font-bold"
-        text-anchor="end"
-      >
-        {maxCount()}
-      </text>
-      <text
-        x={paddingLeft - 4}
-        y={svgHeight - paddingBottom + 2}
-        class="fill-dim-foreground text-[7px] text-right font-bold"
-        text-anchor="end"
-      >
-        0
-      </text>
-
+    <Chart.Container {config} class="w-full h-full aspect-auto">
       {#if chartType === "bar"}
-        <!-- Bar Rendering -->
-        {#each points() as p, idx}
-          {@const barWidth = Math.max((chartWidth / 7) * 0.6, 8)}
-          {@const barHeight = Math.max(svgHeight - paddingBottom - p.y, 1)}
-          <!-- svelte-ignore a11y_mouse_events_have_key_events -->
-          <rect
-            x={p.x - barWidth / 2}
-            y={p.y}
-            width={barWidth}
-            height={barHeight}
-            fill={hoveredIdx === idx ? "var(--accent-foreground)" : "var(--primary)"}
-            class="transition-colors duration-150 cursor-pointer"
-            onmouseover={() => hoveredIdx = idx}
-            onmouseleave={() => hoveredIdx = null}
-          />
-        {/each}
-      {:else}
-        <!-- Line/Area Rendering -->
-        <path d={areaPath()} fill="url(#chartGradient)" />
-        <path
-          d={linePath()}
-          fill="none"
-          stroke="var(--primary)"
-          stroke-width="1.5"
-        />
-
-        {#each points() as p, idx}
-          <!-- svelte-ignore a11y_mouse_events_have_key_events -->
-          <circle
-            cx={p.x}
-            cy={p.y}
-            r={hoveredIdx === idx ? 4 : 2.5}
-            fill="var(--background)"
-            stroke="var(--primary)"
-            stroke-width="1.5"
-            class="cursor-pointer transition-all duration-150"
-            onmouseover={() => hoveredIdx = idx}
-            onmouseleave={() => hoveredIdx = null}
-          />
-        {/each}
-      {/if}
-
-      <!-- X Axis labels -->
-      {#each points() as p}
-        <text
-          x={p.x}
-          y={svgHeight - paddingBottom + 10}
-          class="fill-dim-foreground text-[7px] text-center font-bold"
-          text-anchor="middle"
+        <BarChart
+          data={chartData}
+          x="label"
+          y="count"
+          {series}
+          props={{
+            grid: { y: { style: "stroke-dasharray: 2 2; stroke: var(--border-dim);" } },
+            yAxis: { ticks: 3 }
+          }}
         >
-          {p.label}
-        </text>
-      {/each}
-    </svg>
-
-    <!-- Tooltip Overlay -->
-    {#if hoveredIdx !== null}
-      {@const p = points()[hoveredIdx]}
-      {@const tooltipLeft = Math.min(p.x, svgWidth - 65)}
-      {@const tooltipTop = Math.max(p.y - 28, 5)}
-      <div
-        class="absolute bg-card border border-border px-1.5 py-0.5 text-[8px] pointer-events-none z-20 font-mono shadow-md text-foreground flex flex-col leading-normal"
-        style="left: calc({(tooltipLeft / svgWidth) * 100}% - 20px); top: calc({(tooltipTop / svgHeight) * 100}%);"
-      >
-        <span class="font-bold text-muted-foreground">{p.fullDate}</span>
-        <span class="text-primary">{p.count} added</span>
-      </div>
-    {/if}
+          {#snippet tooltip()}
+            <Tooltip.Root variant="none">
+              {#snippet children({ data })}
+                <div class="border border-border bg-card px-2 py-1 text-[8px] font-mono text-foreground flex flex-col">
+                  <span class="font-bold text-muted-foreground">{data.fullDate}</span>
+                  <span class="text-primary">{data.count} added</span>
+                </div>
+              {/snippet}
+            </Tooltip.Root>
+          {/snippet}
+        </BarChart>
+      {:else}
+        <AreaChart
+          data={chartData}
+          x="label"
+          y="count"
+          {series}
+          props={{
+            grid: { y: { style: "stroke-dasharray: 2 2; stroke: var(--border-dim);" } },
+            yAxis: { ticks: 3 }
+          }}
+        >
+          {#snippet tooltip()}
+            <Tooltip.Root variant="none">
+              {#snippet children({ data })}
+                <div class="border border-border bg-card px-2 py-1 text-[8px] font-mono text-foreground flex flex-col">
+                  <span class="font-bold text-muted-foreground">{data.fullDate}</span>
+                  <span class="text-primary">{data.count} added</span>
+                </div>
+              {/snippet}
+            </Tooltip.Root>
+          {/snippet}
+        </AreaChart>
+      {/if}
+    </Chart.Container>
   </div>
 
   <!-- Bottom quick summary stats -->
@@ -252,3 +149,4 @@
     </div>
   </div>
 </div>
+

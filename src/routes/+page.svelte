@@ -192,7 +192,9 @@
 
     <!-- Center Column: Main Content (Bordered card wrapper) -->
     <div class="flex-1 flex flex-col min-h-100 lg:min-h-0 pt-2 min-w-0">
-      <div class="flex-1 flex flex-col overflow-hidden border border-border bg-box-bg relative">
+      <div
+        class="flex-1 flex flex-col overflow-hidden border border-border bg-box-bg relative"
+      >
         <!-- Center Box: LINKS header with view mode tabs -->
         <div
           class="flex items-center justify-between px-4 py-1.5 border-b border-border bg-box-bg text-xs text-muted-foreground shrink-0 select-none"
