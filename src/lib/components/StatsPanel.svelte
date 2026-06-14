@@ -1,7 +1,7 @@
 <script lang="ts">
-  import type { Bookmark } from "../types/bookmark";
+  import { AreaChart, BarChart, Tooltip } from "layerchart";
   import * as Chart from "$lib/components/ui/chart/index.js";
-  import { BarChart, AreaChart, Tooltip } from "layerchart";
+  import type { Bookmark } from "../types/bookmark";
 
   let { bookmarks = [] }: { bookmarks: Bookmark[] } = $props();
 
@@ -38,16 +38,16 @@
   const config = {
     count: {
       label: "added",
-      color: "var(--primary)"
-    }
+      color: "var(--primary)",
+    },
   } satisfies Chart.ChartConfig;
 
   const series = [
     {
       key: "count",
       label: "added",
-      color: "var(--color-count)"
-    }
+      color: "var(--color-count)",
+    },
   ];
 
   // Summary counts
@@ -101,8 +101,12 @@
           {#snippet tooltip()}
             <Tooltip.Root variant="none">
               {#snippet children({ data })}
-                <div class="border border-border bg-card px-2 py-1 text-[8px] font-mono text-foreground flex flex-col">
-                  <span class="font-bold text-muted-foreground">{data.fullDate}</span>
+                <div
+                  class="border border-border bg-card px-2 py-1 text-[8px] font-mono text-foreground flex flex-col"
+                >
+                  <span class="font-bold text-muted-foreground"
+                    >{data.fullDate}</span
+                  >
                   <span class="text-primary">{data.count} added</span>
                 </div>
               {/snippet}
@@ -123,8 +127,12 @@
           {#snippet tooltip()}
             <Tooltip.Root variant="none">
               {#snippet children({ data })}
-                <div class="border border-border bg-card px-2 py-1 text-[8px] font-mono text-foreground flex flex-col">
-                  <span class="font-bold text-muted-foreground">{data.fullDate}</span>
+                <div
+                  class="border border-border bg-card px-2 py-1 text-[8px] font-mono text-foreground flex flex-col"
+                >
+                  <span class="font-bold text-muted-foreground"
+                    >{data.fullDate}</span
+                  >
                   <span class="text-primary">{data.count} added</span>
                 </div>
               {/snippet}
@@ -149,4 +157,3 @@
     </div>
   </div>
 </div>
-

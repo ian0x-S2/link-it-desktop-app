@@ -43,9 +43,7 @@ async function initDatabase(database: Database): Promise<void> {
   // Safe migration: add deleted_at column to existing databases that don't have it yet.
   // SQLite will throw if the column already exists; we catch and ignore that error.
   try {
-    await database.execute(
-      "ALTER TABLE bookmarks ADD COLUMN deleted_at TEXT"
-    );
+    await database.execute("ALTER TABLE bookmarks ADD COLUMN deleted_at TEXT");
   } catch {
     // Column already exists — safe to ignore.
   }

@@ -1,13 +1,15 @@
-import { viewStore } from "$lib/stores/view.svelte";
-import { themeStore, THEMES } from "$lib/stores/theme.svelte";
 import { toggleMode } from "mode-watcher";
+import { THEMES, themeStore } from "$lib/stores/theme.svelte";
+import { viewStore } from "$lib/stores/view.svelte";
 
 export function setupKeyboardShortcuts(
   promptInput: () => HTMLInputElement | null
 ) {
   function handleKeydown(event: KeyboardEvent) {
     const tag = (event.target as HTMLElement)?.tagName?.toLowerCase();
-    if (tag === "input" || tag === "textarea") return;
+    if (tag === "input" || tag === "textarea") {
+      return;
+    }
 
     const actions: Record<string, () => void> = {
       "1": () => viewStore.setCategory("inbox"),
@@ -27,7 +29,9 @@ export function setupKeyboardShortcuts(
       m: () => toggleMode(),
       Escape: () => {
         (document.activeElement as HTMLElement)?.blur?.();
-        if (viewStore.mode === "search") viewStore.setMode("grid");
+        if (viewStore.mode === "search") {
+          viewStore.setMode("grid");
+        }
       },
     };
 

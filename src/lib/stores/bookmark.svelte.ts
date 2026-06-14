@@ -25,6 +25,37 @@ class BookmarkStore {
     this.items.unshift(bookmark);
   }
 
+  /** Normalizes, validates, fetches metadata if needed, and adds the bookmark. */
+  async addBookmark(
+    url: string,
+    metadata?: {
+      title: string;
+      description: string;
+      imageUrl: string;
+      faviconUrl: string;
+    }
+  ): Promise<void> {
+    const normalized = bookmarkActions.normalizeUrl(url);
+    if (!bookmarkActions.validateUrl(normalized)) {
+      throw new Error("Invalid URL");
+    }
+
+    let resolvedMetadata = metadata;
+    if (!resolvedMetadata) {
+      resolvedMetadata = await bookmarkActions.fetchMetadata(normalized);
+    }
+
+    await this.create({
+      url: normalized,
+      title: resolvedMetadata.title,
+      description: resolvedMetadata.description,
+      imageUrl: resolvedMetadata.imageUrl,
+      faviconUrl: resolvedMetadata.faviconUrl,
+      tags: [],
+      isFavorite: false,
+    });
+  }
+
   /** Moves a bookmark to the trash (soft delete). */
   async softDelete(id: string): Promise<void> {
     await bookmarkActions.softDeleteBookmark(id);
@@ -65,7 +96,9 @@ class BookmarkStore {
 
   async update(
     id: string,
-    data: Partial<Omit<Bookmark, "id" | "createdAt" | "updatedAt" | "deletedAt">>
+    data: Partial<
+      Omit<Bookmark, "id" | "createdAt" | "updatedAt" | "deletedAt">
+    >
   ): Promise<void> {
     await bookmarkActions.updateBookmark(id, data);
     const index = this.items.findIndex((b) => b.id === id);
@@ -105,7 +138,7 @@ class BookmarkStore {
   async renameTagGlobally(oldTag: string, newTag: string): Promise<void> {
     for (let i = 0; i < this.items.length; i++) {
       const b = this.items[i];
-      if (b.tags && b.tags.includes(oldTag)) {
+      if (b.tags?.includes(oldTag)) {
         await bookmarkActions.removeTag(b.id, oldTag);
         if (b.tags.includes(newTag)) {
           this.items[i] = {
@@ -126,7 +159,7 @@ class BookmarkStore {
   async deleteTagGlobally(tag: string): Promise<void> {
     for (let i = 0; i < this.items.length; i++) {
       const b = this.items[i];
-      if (b.tags && b.tags.includes(tag)) {
+      if (b.tags?.includes(tag)) {
         await bookmarkActions.removeTag(b.id, tag);
         this.items[i] = {
           ...b,

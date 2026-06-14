@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import { setupKeyboardShortcuts } from "$lib/actions/keyboardShortcuts";
   import BookmarkGrid from "$lib/components/BookmarkGrid.svelte";
   import BookmarkList from "$lib/components/BookmarkList.svelte";
   import FooterBar from "$lib/components/FooterBar.svelte";
@@ -8,11 +9,10 @@
   import Sidebar from "$lib/components/Sidebar.svelte";
   import StatsPanel from "$lib/components/StatsPanel.svelte";
   import TagsPanel from "$lib/components/TagsPanel.svelte";
-  import { bookmarkStore } from "$lib/stores/bookmark.svelte";
-  import { themeStore, THEMES } from "$lib/stores/theme.svelte";
-  import { viewStore } from "$lib/stores/view.svelte";
   import { filteredBookmarksStore } from "$lib/derived/filteredBookmarks.svelte";
-  import { setupKeyboardShortcuts } from "$lib/actions/keyboardShortcuts";
+  import { bookmarkStore } from "$lib/stores/bookmark.svelte";
+  import { THEMES, themeStore } from "$lib/stores/theme.svelte";
+  import { viewStore } from "$lib/stores/view.svelte";
 
   // Prompt input ref (local UI concern)
   let promptValue = $state("");
@@ -24,26 +24,16 @@
   );
   const trashCount = $derived(bookmarkStore.trashedItems.length);
 
-  async function handleAddLink(url: string) {
-    // Normalize URL
-    let normalizedUrl = url;
-    if (!/^https?:\/\//.test(url)) {
-      normalizedUrl = `https://${url}`;
-    }
-    let hostname = normalizedUrl;
-    try {
-      hostname = new URL(normalizedUrl).hostname;
-    } catch (_) {}
-
-    await bookmarkStore.create({
-      title: hostname,
-      url: normalizedUrl,
-      imageUrl: "",
-      faviconUrl: `https://www.google.com/s2/favicons?domain=${hostname}&sz=32`,
-      description: "",
-      tags: [],
-      isFavorite: false,
-    });
+  async function handleAddLink(
+    url: string,
+    metadata?: {
+      title: string;
+      description: string;
+      imageUrl: string;
+      faviconUrl: string;
+    } | null
+  ) {
+    await bookmarkStore.addBookmark(url, metadata || undefined);
   }
 
   function handleEdit(id: string) {
@@ -133,6 +123,7 @@
               <span class="underline">#{viewStore.selectedTag}</span>
             </div>
             <button
+              type="button"
               onclick={() => viewStore.clearTag()}
               class="text-destructive hover:text-red-400 font-bold tracking-wider cursor-pointer bg-transparent border-none p-0"
             >
@@ -153,7 +144,7 @@
               type="text"
               placeholder="Search links..."
               class="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-muted-foreground font-mono text-xs"
-            />
+            >
           </div>
         {:else}
           <div class="px-4 pt-4 shrink-0">

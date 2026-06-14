@@ -1,16 +1,16 @@
 <script lang="ts">
   const logo = ` _     _       _    ___ _   
-    | |   (_)_ __ | | _|_ _| |_ 
-    | |   | | '_ \\| |/ /| || __|
-    | |___| | | | |   &lt; | || |_ 
-    |_____|_|_| |_|_|\\_\\___|\\___|`;
+          | |   (_)_ __ | | _|_ _| |_ 
+          | |   | | '_ \\| |/ /| || __|
+          | |___| | | | |   &lt; | || |_ 
+          |_____|_|_| |_|_|\\_\\___|\\___|`;
 </script>
 
 <div
-  class="relative p-4 flex flex-col bg-box-bg border border-border lg:flex-[1.5] min-h-[110px] lg:min-h-0 select-none font-mono"
+  class="relative p-4 flex flex-col bg-box-bg border border-border lg:flex-[1.5] min-h-27.5 lg:min-h-0 select-none font-mono"
 >
   <span
-    class="absolute px-1.5 text-[10px] font-bold uppercase tracking-wider -top-[7px] left-[10px] bg-background text-primary"
+    class="absolute px-1.5 text-[10px] font-bold uppercase tracking-wider -top-1.75 left-2.5 bg-background text-primary"
     >Linkit</span
   >
 
