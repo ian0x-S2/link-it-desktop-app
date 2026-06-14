@@ -1,14 +1,12 @@
-import Database from '@tauri-apps/plugin-sql';
+import Database from "@tauri-apps/plugin-sql";
 
 let db: Database | null = null;
 
 export async function getDatabase(): Promise<Database> {
   if (!db) {
-
-    const connection = await Database.load('sqlite:link-it.db');
+    const connection = await Database.load("sqlite:link-it.db");
 
     await initDatabase(connection);
-
 
     db = connection;
   }
@@ -16,10 +14,7 @@ export async function getDatabase(): Promise<Database> {
 }
 
 async function initDatabase(database: Database): Promise<void> {
-
-  await database.execute('PRAGMA foreign_keys = ON');
-
-
+  await database.execute("PRAGMA foreign_keys = ON");
 
   await database.execute(`
     CREATE TABLE IF NOT EXISTS bookmarks (

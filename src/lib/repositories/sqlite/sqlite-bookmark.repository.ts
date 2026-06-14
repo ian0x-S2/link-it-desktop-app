@@ -1,18 +1,18 @@
-import type { BookmarkRepository } from '../bookmark.repository';
-import type { Bookmark } from '../../types/bookmark';
-import { getDatabase } from '../../db/database';
-import type Database from '@tauri-apps/plugin-sql';
+import type Database from "@tauri-apps/plugin-sql";
+import { getDatabase } from "../../db/database";
+import type { Bookmark } from "../../types/bookmark";
+import type { BookmarkRepository } from "../bookmark.repository";
 
 interface BookmarkRow {
-  id: string;
-  title: string;
-  url: string;
-  imageUrl: string;
-  faviconUrl: string;
-  description: string;
   createdAt: string;
-  updatedAt: string;
+  description: string;
+  faviconUrl: string;
+  id: string;
+  imageUrl: string;
   isFavorite: number;
+  title: string;
+  updatedAt: string;
+  url: string;
 }
 
 interface TagRow {
@@ -44,7 +44,7 @@ export class SqliteBookmarkRepository implements BookmarkRepository {
     const bookmarks = await Promise.all(
       rows.map(async (row) => {
         const tags = await db.select<TagRow[]>(
-          'SELECT tag FROM bookmark_tags WHERE bookmark_id = $1',
+          "SELECT tag FROM bookmark_tags WHERE bookmark_id = $1",
           [row.id]
         );
 
@@ -52,9 +52,9 @@ export class SqliteBookmarkRepository implements BookmarkRepository {
           id: row.id,
           title: row.title,
           url: row.url,
-          imageUrl: row.imageUrl || '',
-          faviconUrl: row.faviconUrl || '',
-          description: row.description || '',
+          imageUrl: row.imageUrl || "",
+          faviconUrl: row.faviconUrl || "",
+          description: row.description || "",
           createdAt: row.createdAt,
           updatedAt: row.updatedAt,
           isFavorite: row.isFavorite === 1,
@@ -66,7 +66,9 @@ export class SqliteBookmarkRepository implements BookmarkRepository {
     return bookmarks;
   }
 
-  async create(data: Omit<Bookmark, 'id' | 'createdAt' | 'updatedAt'>): Promise<Bookmark> {
+  async create(
+    data: Omit<Bookmark, "id" | "createdAt" | "updatedAt">
+  ): Promise<Bookmark> {
     const db = await this.getDb();
     const id = crypto.randomUUID();
     const now = new Date().toISOString();
@@ -79,9 +81,9 @@ export class SqliteBookmarkRepository implements BookmarkRepository {
         id,
         data.title,
         data.url,
-        data.imageUrl || '',
-        data.faviconUrl || '',
-        data.description || '',
+        data.imageUrl || "",
+        data.faviconUrl || "",
+        data.description || "",
         now,
         now,
         data.isFavorite ? 1 : 0,
@@ -91,7 +93,7 @@ export class SqliteBookmarkRepository implements BookmarkRepository {
     if (data.tags && data.tags.length > 0) {
       for (const tag of data.tags) {
         await db.execute(
-          'INSERT OR IGNORE INTO bookmark_tags (bookmark_id, tag) VALUES ($1, $2)',
+          "INSERT OR IGNORE INTO bookmark_tags (bookmark_id, tag) VALUES ($1, $2)",
           [id, tag]
         );
       }
@@ -101,9 +103,9 @@ export class SqliteBookmarkRepository implements BookmarkRepository {
       id,
       title: data.title,
       url: data.url,
-      imageUrl: data.imageUrl || '',
-      faviconUrl: data.faviconUrl || '',
-      description: data.description || '',
+      imageUrl: data.imageUrl || "",
+      faviconUrl: data.faviconUrl || "",
+      description: data.description || "",
       createdAt: now,
       updatedAt: now,
       isFavorite: data.isFavorite,
@@ -113,15 +115,69 @@ export class SqliteBookmarkRepository implements BookmarkRepository {
 
   async delete(id: string): Promise<void> {
     const db = await this.getDb();
-    await db.execute('DELETE FROM bookmarks WHERE id = $1', [id]);
+    await db.execute("DELETE FROM bookmarks WHERE id = $1", [id]);
   }
 
   async toggleFavorite(id: string): Promise<void> {
     const db = await this.getDb();
     const now = new Date().toISOString();
     await db.execute(
-      'UPDATE bookmarks SET is_favorite = NOT is_favorite, updated_at = $1 WHERE id = $2',
+      "UPDATE bookmarks SET is_favorite = NOT is_favorite, updated_at = $1 WHERE id = $2",
       [now, id]
+    );
+  }
+
+  async update(
+    id: string,
+    data: Partial<Omit<Bookmark, "id" | "createdAt" | "updatedAt">>
+  ): Promise<void> {
+    const db = await this.getDb();
+    const now = new Date().toISOString();
+    const sets: string[] = ["updated_at = $1"];
+    const params: any[] = [now];
+
+    let paramIndex = 2;
+    if (data.title !== undefined) {
+      sets.push(`title = $${paramIndex++}`);
+      params.push(data.title);
+    }
+    if (data.url !== undefined) {
+      sets.push(`url = $${paramIndex++}`);
+      params.push(data.url);
+    }
+    if (data.imageUrl !== undefined) {
+      sets.push(`image_url = $${paramIndex++}`);
+      params.push(data.imageUrl);
+    }
+    if (data.faviconUrl !== undefined) {
+      sets.push(`favicon_url = $${paramIndex++}`);
+      params.push(data.faviconUrl);
+    }
+    if (data.description !== undefined) {
+      sets.push(`description = $${paramIndex++}`);
+      params.push(data.description);
+    }
+
+    params.push(id);
+    await db.execute(
+      `UPDATE bookmarks SET ${sets.join(", ")} WHERE id = $${paramIndex}`,
+      params
+    );
+  }
+
+  async addTag(bookmarkId: string, tag: string): Promise<void> {
+    const db = await this.getDb();
+    await db.execute(
+      "INSERT OR IGNORE INTO bookmark_tags (bookmark_id, tag) VALUES ($1, $2)",
+      [bookmarkId, tag]
+    );
+  }
+
+  async removeTag(bookmarkId: string, tag: string): Promise<void> {
+    const db = await this.getDb();
+    await db.execute(
+      "DELETE FROM bookmark_tags WHERE bookmark_id = $1 AND tag = $2",
+      [bookmarkId, tag]
     );
   }
 }
