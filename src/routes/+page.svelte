@@ -12,9 +12,9 @@
   import { toggleMode } from "mode-watcher";
 
   // Theme
-  const themes = ["default", "catppuccin", "everforest", "nord"] as const;
+  const themes = ["catppuccin", "everforest", "nord"] as const;
   type Theme = (typeof themes)[number];
-  let currentTheme = $state<Theme>("default");
+  let currentTheme = $state<Theme>("catppuccin");
 
   function changeTheme(theme: Theme) {
     currentTheme = theme;
@@ -160,9 +160,11 @@
 
   onMount(() => {
     // Load saved theme
-    const saved = localStorage.getItem("tui-theme") as Theme;
+    const saved = localStorage.getItem("tui-theme") as any;
     if (saved && themes.includes(saved)) {
       changeTheme(saved);
+    } else {
+      changeTheme("catppuccin");
     }
 
     // Load bookmarks
