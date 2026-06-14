@@ -3,7 +3,8 @@
   import { toggleMode } from "mode-watcher";
 
   let {
-    selectedCategory = $bindable(),
+    selectedCategory,
+    onSelectCategory,
     bookmarkCount = 0,
     favoriteCount = 0,
     currentTheme,
@@ -12,6 +13,7 @@
     onAddLinkClick,
   }: {
     selectedCategory: "inbox" | "favorites" | "trash";
+    onSelectCategory: (cat: "inbox" | "favorites" | "trash") => void;
     bookmarkCount: number;
     favoriteCount: number;
     currentTheme: string;
@@ -54,7 +56,7 @@
         <!-- svelte-ignore a11y_click_events_have_key_events -->
         <!-- svelte-ignore a11y_no_static_element_interactions -->
         <div
-          onclick={() => selectedCategory = 'inbox'}
+          onclick={() => onSelectCategory('inbox')}
           class="flex items-center justify-between cursor-pointer py-0.5 px-1.5 transition-colors {selectedCategory === 'inbox' ? 'bg-primary text-background font-bold' : 'text-foreground hover:bg-accent'}"
         >
           <span>1 Inbox</span>
@@ -67,7 +69,7 @@
         <!-- svelte-ignore a11y_click_events_have_key_events -->
         <!-- svelte-ignore a11y_no_static_element_interactions -->
         <div
-          onclick={() => selectedCategory = 'favorites'}
+          onclick={() => onSelectCategory('favorites')}
           class="flex items-center justify-between cursor-pointer py-0.5 px-1.5 transition-colors {selectedCategory === 'favorites' ? 'bg-primary text-background font-bold' : 'text-foreground hover:bg-accent'}"
         >
           <span>2 Favorites</span>
@@ -80,7 +82,7 @@
         <!-- svelte-ignore a11y_click_events_have_key_events -->
         <!-- svelte-ignore a11y_no_static_element_interactions -->
         <div
-          onclick={() => selectedCategory = 'trash'}
+          onclick={() => onSelectCategory('trash')}
           class="flex items-center justify-between cursor-pointer py-0.5 px-1.5 transition-colors {selectedCategory === 'trash' ? 'bg-primary text-background font-bold' : 'text-foreground hover:bg-accent'}"
         >
           <span>3 Trash</span>

@@ -1,4 +1,4 @@
-import { BookmarkActions } from "../../actions/bookmark.actions";
+import { BookmarkActions } from "../../actions/bookmark";
 import { SqliteBookmarkRepository } from "../sqlite/sqlite-bookmark.repository";
 
 // import { MemoryBookmarkRepository } from "../mock/memory-bookmark.repository";
