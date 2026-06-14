@@ -26,7 +26,8 @@ async function initDatabase(database: Database): Promise<void> {
       description TEXT,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL,
-      is_favorite INTEGER NOT NULL DEFAULT 0
+      is_favorite INTEGER NOT NULL DEFAULT 0,
+      deleted_at TEXT
     )
   `);
 
@@ -38,4 +39,14 @@ async function initDatabase(database: Database): Promise<void> {
       FOREIGN KEY (bookmark_id) REFERENCES bookmarks(id) ON DELETE CASCADE
     )
   `);
+
+  // Safe migration: add deleted_at column to existing databases that don't have it yet.
+  // SQLite will throw if the column already exists; we catch and ignore that error.
+  try {
+    await database.execute(
+      "ALTER TABLE bookmarks ADD COLUMN deleted_at TEXT"
+    );
+  } catch {
+    // Column already exists — safe to ignore.
+  }
 }

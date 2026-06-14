@@ -4,19 +4,51 @@ import type { Bookmark } from "../types/bookmark";
 class BookmarkStore {
   items = $state<Bookmark[]>([]);
 
+  /** All bookmarks currently in the trash (soft-deleted). */
+  get trashedItems(): Bookmark[] {
+    return this.items.filter((b) => b.deletedAt !== null);
+  }
+
+  /** Active bookmarks (not in trash). */
+  get activeItems(): Bookmark[] {
+    return this.items.filter((b) => b.deletedAt === null);
+  }
+
   async load(): Promise<void> {
     this.items = await bookmarkActions.getBookmarks();
   }
 
   async create(
-    data: Omit<Bookmark, "id" | "createdAt" | "updatedAt">
+    data: Omit<Bookmark, "id" | "createdAt" | "updatedAt" | "deletedAt">
   ): Promise<void> {
     const bookmark = await bookmarkActions.createBookmark(data);
     this.items.unshift(bookmark);
   }
 
-  async delete(id: string): Promise<void> {
-    await bookmarkActions.deleteBookmark(id);
+  /** Moves a bookmark to the trash (soft delete). */
+  async softDelete(id: string): Promise<void> {
+    await bookmarkActions.softDeleteBookmark(id);
+    const index = this.items.findIndex((b) => b.id === id);
+    if (index >= 0) {
+      this.items[index] = {
+        ...this.items[index],
+        deletedAt: new Date().toISOString(),
+      };
+    }
+  }
+
+  /** Restores a trashed bookmark back to the inbox. */
+  async restore(id: string): Promise<void> {
+    await bookmarkActions.restoreBookmark(id);
+    const index = this.items.findIndex((b) => b.id === id);
+    if (index >= 0) {
+      this.items[index] = { ...this.items[index], deletedAt: null };
+    }
+  }
+
+  /** Permanently deletes a bookmark from the database. */
+  async deletePermanently(id: string): Promise<void> {
+    await bookmarkActions.permanentlyDeleteBookmark(id);
     this.items = this.items.filter((b) => b.id !== id);
   }
 
@@ -33,7 +65,7 @@ class BookmarkStore {
 
   async update(
     id: string,
-    data: Partial<Omit<Bookmark, "id" | "createdAt" | "updatedAt">>
+    data: Partial<Omit<Bookmark, "id" | "createdAt" | "updatedAt" | "deletedAt">>
   ): Promise<void> {
     await bookmarkActions.updateBookmark(id, data);
     const index = this.items.findIndex((b) => b.id === id);

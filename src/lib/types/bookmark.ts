@@ -7,6 +7,7 @@ export type Bookmark = {
   description: string;
   createdAt: string;
   updatedAt: string;
+  deletedAt: string | null;
   tags: string[];
   isFavorite: boolean;
 };

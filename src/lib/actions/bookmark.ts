@@ -9,13 +9,21 @@ export class BookmarkActions {
   }
 
   async createBookmark(
-    data: Omit<Bookmark, "id" | "createdAt" | "updatedAt">
+    data: Omit<Bookmark, "id" | "createdAt" | "updatedAt" | "deletedAt">
   ): Promise<Bookmark> {
     return this.repository.create({ ...data, isFavorite: false });
   }
 
-  async deleteBookmark(id: string): Promise<void> {
-    return this.repository.delete(id);
+  async softDeleteBookmark(id: string): Promise<void> {
+    return this.repository.softDelete(id);
+  }
+
+  async restoreBookmark(id: string): Promise<void> {
+    return this.repository.restore(id);
+  }
+
+  async permanentlyDeleteBookmark(id: string): Promise<void> {
+    return this.repository.deletePermanently(id);
   }
 
   async toggleFavorite(id: string): Promise<void> {
@@ -24,7 +32,7 @@ export class BookmarkActions {
 
   async updateBookmark(
     id: string,
-    data: Partial<Omit<Bookmark, "id" | "createdAt" | "updatedAt">>
+    data: Partial<Omit<Bookmark, "id" | "createdAt" | "updatedAt" | "deletedAt">>
   ): Promise<void> {
     return this.repository.update(id, data);
   }

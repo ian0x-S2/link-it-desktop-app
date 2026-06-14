@@ -9,20 +9,37 @@ export class MemoryBookmarkRepository implements BookmarkRepository {
   }
 
   async create(
-    data: Omit<Bookmark, "id" | "createdAt" | "updatedAt">
+    data: Omit<Bookmark, "id" | "createdAt" | "updatedAt" | "deletedAt">
   ): Promise<Bookmark> {
     const now = new Date().toISOString();
     const bookmark: Bookmark = {
       id: crypto.randomUUID(),
       createdAt: now,
       updatedAt: now,
+      deletedAt: null,
       ...data,
     };
     bookmarks.unshift(bookmark);
     return bookmark;
   }
 
-  async delete(id: string): Promise<void> {
+  async softDelete(id: string): Promise<void> {
+    const bookmark = bookmarks.find((b) => b.id === id);
+    if (bookmark) {
+      bookmark.deletedAt = new Date().toISOString();
+      bookmark.updatedAt = bookmark.deletedAt;
+    }
+  }
+
+  async restore(id: string): Promise<void> {
+    const bookmark = bookmarks.find((b) => b.id === id);
+    if (bookmark) {
+      bookmark.deletedAt = null;
+      bookmark.updatedAt = new Date().toISOString();
+    }
+  }
+
+  async deletePermanently(id: string): Promise<void> {
     const index = bookmarks.findIndex((b) => b.id === id);
     if (index >= 0) {
       bookmarks.splice(index, 1);
@@ -40,7 +57,7 @@ export class MemoryBookmarkRepository implements BookmarkRepository {
 
   async update(
     id: string,
-    data: Partial<Omit<Bookmark, "id" | "createdAt" | "updatedAt">>
+    data: Partial<Omit<Bookmark, "id" | "createdAt" | "updatedAt" | "deletedAt">>
   ): Promise<void> {
     const bookmark = bookmarks.find((b) => b.id === id);
     if (bookmark) {

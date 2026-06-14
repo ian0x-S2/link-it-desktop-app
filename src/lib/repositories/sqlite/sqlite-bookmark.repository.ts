@@ -5,6 +5,7 @@ import type { BookmarkRepository } from "../bookmark.repository";
 
 interface BookmarkRow {
   createdAt: string;
+  deletedAt: string | null;
   description: string;
   faviconUrl: string;
   id: string;
@@ -35,7 +36,8 @@ export class SqliteBookmarkRepository implements BookmarkRepository {
         favicon_url as faviconUrl, 
         description, 
         created_at as createdAt, 
-        updated_at as updatedAt, 
+        updated_at as updatedAt,
+        deleted_at as deletedAt,
         is_favorite as isFavorite 
       FROM bookmarks 
       ORDER BY created_at DESC
@@ -57,6 +59,7 @@ export class SqliteBookmarkRepository implements BookmarkRepository {
           description: row.description || "",
           createdAt: row.createdAt,
           updatedAt: row.updatedAt,
+          deletedAt: row.deletedAt ?? null,
           isFavorite: row.isFavorite === 1,
           tags: tags.map((t) => t.tag),
         };
@@ -108,12 +111,31 @@ export class SqliteBookmarkRepository implements BookmarkRepository {
       description: data.description || "",
       createdAt: now,
       updatedAt: now,
+      deletedAt: null,
       isFavorite: data.isFavorite,
       tags: data.tags || [],
     };
   }
 
-  async delete(id: string): Promise<void> {
+  async softDelete(id: string): Promise<void> {
+    const db = await this.getDb();
+    const now = new Date().toISOString();
+    await db.execute(
+      "UPDATE bookmarks SET deleted_at = $1, updated_at = $1 WHERE id = $2",
+      [now, id]
+    );
+  }
+
+  async restore(id: string): Promise<void> {
+    const db = await this.getDb();
+    const now = new Date().toISOString();
+    await db.execute(
+      "UPDATE bookmarks SET deleted_at = NULL, updated_at = $1 WHERE id = $2",
+      [now, id]
+    );
+  }
+
+  async deletePermanently(id: string): Promise<void> {
     const db = await this.getDb();
     await db.execute("DELETE FROM bookmarks WHERE id = $1", [id]);
   }

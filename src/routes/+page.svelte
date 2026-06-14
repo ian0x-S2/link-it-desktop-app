@@ -18,10 +18,11 @@
   let promptValue = $state("");
   let promptInput = $state<HTMLInputElement | null>(null);
 
-  const totalItems = $derived(bookmarkStore.items.length);
+  const totalItems = $derived(bookmarkStore.activeItems.length);
   const favoriteCount = $derived(
-    bookmarkStore.items.filter((b) => b.isFavorite).length
+    bookmarkStore.activeItems.filter((b) => b.isFavorite).length
   );
+  const trashCount = $derived(bookmarkStore.trashedItems.length);
 
   async function handleAddLink(url: string) {
     // Normalize URL
@@ -77,6 +78,7 @@
         onSelectCategory={(cat) => viewStore.setCategory(cat)}
         bookmarkCount={totalItems}
         {favoriteCount}
+        {trashCount}
         currentTheme={themeStore.current}
         themes={THEMES}
         changeTheme={(t) => themeStore.change(t)}
@@ -172,7 +174,7 @@
               <BookmarkList
                 bookmarks={filteredBookmarksStore.items}
                 onToggleFavorite={(id) => bookmarkStore.toggleFavorite(id)}
-                onDelete={(id) => bookmarkStore.delete(id)}
+                onDelete={(id) => viewStore.category === 'trash' ? bookmarkStore.deletePermanently(id) : bookmarkStore.softDelete(id)}
                 onAddTag={(id, tag) => bookmarkStore.addTag(id, tag)}
                 onRemoveTag={(id, tag) => bookmarkStore.removeTag(id, tag)}
                 onEdit={handleEdit}
@@ -181,7 +183,7 @@
               <BookmarkGrid
                 bookmarks={filteredBookmarksStore.items}
                 onToggleFavorite={(id) => bookmarkStore.toggleFavorite(id)}
-                onDelete={(id) => bookmarkStore.delete(id)}
+                onDelete={(id) => viewStore.category === 'trash' ? bookmarkStore.deletePermanently(id) : bookmarkStore.softDelete(id)}
                 onAddTag={(id, tag) => bookmarkStore.addTag(id, tag)}
                 onRemoveTag={(id, tag) => bookmarkStore.removeTag(id, tag)}
                 onEdit={handleEdit}

@@ -7,6 +7,7 @@
     onSelectCategory,
     bookmarkCount = 0,
     favoriteCount = 0,
+    trashCount = 0,
     currentTheme,
     themes = [],
     changeTheme,
@@ -16,6 +17,7 @@
     onSelectCategory: (cat: "inbox" | "favorites" | "trash") => void;
     bookmarkCount: number;
     favoriteCount: number;
+    trashCount: number;
     currentTheme: string;
     themes: readonly string[];
     changeTheme: (theme: any) => void;
@@ -88,7 +90,7 @@
           <span>3 Trash</span>
           <span
             class={selectedCategory === 'trash' ? 'text-background' : 'text-muted-foreground'}
-            >[0]</span
+            >[{trashCount}]</span
           >
         </div>
       </div>
