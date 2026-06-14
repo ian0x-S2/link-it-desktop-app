@@ -1,5 +1,6 @@
 <script lang="ts">
   import { AreaChart, BarChart, Tooltip } from "layerchart";
+  import { Button } from "$lib/components/ui/button";
   import * as Chart from "$lib/components/ui/chart/index.js";
   import type { Bookmark } from "../types/bookmark";
 
@@ -69,18 +70,22 @@
   >
     <span>7-Day Activity</span>
     <div class="flex items-center gap-1.5">
-      <button
+      <Button
+        variant="ghost"
+        size="xs"
         onclick={() => chartType = "bar"}
-        class="cursor-pointer transition-colors hover:text-foreground {chartType === 'bar' ? 'text-primary' : 'text-muted-foreground'}"
+        class="cursor-pointer transition-colors hover:text-foreground h-auto p-0 font-mono text-[9px] uppercase tracking-wider select-none bg-transparent hover:bg-transparent {chartType === 'bar' ? 'text-primary font-bold' : 'text-muted-foreground'}"
       >
         [bar]
-      </button>
-      <button
+      </Button>
+      <Button
+        variant="ghost"
+        size="xs"
         onclick={() => chartType = "line"}
-        class="cursor-pointer transition-colors hover:text-foreground {chartType === 'line' ? 'text-primary' : 'text-muted-foreground'}"
+        class="cursor-pointer transition-colors hover:text-foreground h-auto p-0 font-mono text-[9px] uppercase tracking-wider select-none bg-transparent hover:bg-transparent {chartType === 'line' ? 'text-primary font-bold' : 'text-muted-foreground'}"
       >
         [line]
-      </button>
+      </Button>
     </div>
   </div>
 

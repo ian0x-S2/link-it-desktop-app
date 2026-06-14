@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { Button } from "$lib/components/ui/button";
+  import { Input } from "$lib/components/ui/input";
   import type { Bookmark } from "../types/bookmark";
 
   let {
@@ -75,20 +77,22 @@
     class="flex items-center gap-1.5 px-2 py-0.5 border border-border-dim bg-transparent text-[10px] mb-2 shrink-0"
   >
     <span class="text-primary font-bold">/</span>
-    <input
+    <Input
       bind:value={tagSearch}
       type="text"
       placeholder="Filter tags..."
-      class="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-dim-foreground font-mono text-[10px]"
-    >
+      class="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-dim-foreground font-mono text-[10px] h-auto py-0 focus-visible:border-none focus-visible:ring-0 focus-visible:ring-offset-0"
+    />
     {#if tagSearch}
-      <button
+      <Button
+        variant="ghost"
+        size="xs"
         onclick={() => tagSearch = ""}
-        class="text-destructive hover:text-red-400 font-bold font-mono cursor-pointer bg-transparent border-none p-0"
+        class="text-destructive hover:text-red-400 font-bold font-mono cursor-pointer bg-transparent hover:bg-transparent border-none p-0 h-auto w-auto min-w-0"
         title="Clear filter"
       >
         ×
-      </button>
+      </Button>
     {/if}
   </div>
 
@@ -119,20 +123,24 @@
         <div
           class="opacity-0 group-hover:opacity-100 flex items-center gap-1.5 shrink-0 transition-opacity"
         >
-          <button
+          <Button
+            variant="outline"
+            size="xs"
             onclick={() => handleRename(tag.name)}
-            class="text-[8px] px-1 border border-border-dim hover:border-primary hover:text-primary bg-background text-foreground transition-colors cursor-pointer"
+            class="text-[8px] px-1 border border-border-dim hover:border-primary hover:text-primary bg-background text-foreground transition-colors cursor-pointer h-auto font-mono py-0.5 rounded-none"
             title="Rename tag globally"
           >
             edit
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="outline"
+            size="xs"
             onclick={() => handleDelete(tag.name)}
-            class="text-[8px] px-1 border border-border-dim hover:border-destructive hover:text-destructive bg-background text-foreground transition-colors cursor-pointer"
+            class="text-[8px] px-1 border border-border-dim hover:border-destructive hover:text-destructive bg-background text-foreground transition-colors cursor-pointer h-auto font-mono py-0.5 rounded-none"
             title="Delete tag globally"
           >
             del
-          </button>
+          </Button>
         </div>
       </div>
     {:else}

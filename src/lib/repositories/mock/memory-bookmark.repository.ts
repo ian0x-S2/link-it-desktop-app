@@ -57,7 +57,9 @@ export class MemoryBookmarkRepository implements BookmarkRepository {
 
   async update(
     id: string,
-    data: Partial<Omit<Bookmark, "id" | "createdAt" | "updatedAt" | "deletedAt">>
+    data: Partial<
+      Omit<Bookmark, "id" | "createdAt" | "updatedAt" | "deletedAt">
+    >
   ): Promise<void> {
     const bookmark = bookmarks.find((b) => b.id === id);
     if (bookmark) {

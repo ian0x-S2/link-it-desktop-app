@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { Badge } from "$lib/components/ui/badge";
   import { Button } from "$lib/components/ui/button";
   import type { Bookmark } from "../types/bookmark";
 
@@ -64,8 +65,9 @@
         {#if bookmark.tags.length || true}
           <div class="flex flex-wrap gap-1 mt-1 items-center">
             {#each bookmark.tags as tag}
-              <span
-                class="text-[10px] px-0.5 text-muted-foreground before:content-['\['] before:text-border after:content-['\]'] after:text-border flex items-center"
+              <Badge
+                variant="outline"
+                class="text-[10px] px-0.5 text-muted-foreground before:content-['\['] before:text-border after:content-['\]'] after:text-border flex items-center font-mono border-none"
               >
                 #{tag}
                 <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -75,14 +77,16 @@
                   class="text-destructive hover:text-red-400 cursor-pointer text-[8px] ml-0.5 select-none"
                   >x</span
                 >
-              </span>
+              </Badge>
             {/each}
-            <button
+            <Button
+              variant="ghost"
+              size="xs"
               onclick={() => handleAddTag(bookmark.id)}
-              class="text-[10px] text-dim-foreground hover:text-primary transition-colors select-none font-bold"
+              class="text-[10px] text-dim-foreground hover:text-primary transition-colors select-none font-bold h-auto p-0 bg-transparent hover:bg-transparent font-mono"
             >
               + add tag
-            </button>
+            </Button>
           </div>
         {/if}
       </div>

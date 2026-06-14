@@ -1,4 +1,7 @@
 <script lang="ts">
+  import { Badge } from "$lib/components/ui/badge";
+  import { Button } from "$lib/components/ui/button";
+  import * as Card from "$lib/components/ui/card";
   import type { Bookmark } from "../types/bookmark";
 
   let {
@@ -48,21 +51,25 @@
   );
 </script>
 
-<div
-  class="border border-border bg-box-bg flex flex-col hover:border-border-hover transition-colors min-w-0"
+<Card.Root
+  class="bg-box-bg border border-border flex flex-col hover:border-border-hover transition-colors min-w-0 py-0 gap-0 shadow-none ring-0 rounded-none"
 >
   <!-- Card Header -->
-  <div
-    class="flex items-center justify-between px-2 py-1 border-b border-border text-[10px] text-muted-foreground select-none shrink-0"
+  <Card.Header
+    class="p-0 gap-0 min-h-0 @container/card-header block rounded-none border-none"
   >
-    <div class="flex items-center gap-1.5 min-w-0">
-      <span
-        class="size-1.5 rounded-full shrink-0 {bookmark.isFavorite ? 'bg-primary' : 'bg-muted-foreground'}"
-      />
-      <span class="font-bold text-foreground truncate">{displayUrl}</span>
+    <div
+      class="flex items-center justify-between px-2 py-1 border-b border-border text-[10px] text-muted-foreground select-none shrink-0 w-full"
+    >
+      <div class="flex items-center gap-1.5 min-w-0">
+        <span
+          class="size-1.5 rounded-full shrink-0 {bookmark.isFavorite ? 'bg-primary' : 'bg-muted-foreground'}"
+        ></span>
+        <span class="font-bold text-foreground truncate">{displayUrl}</span>
+      </div>
+      <span class="shrink-0 ml-2">{calculateAge(bookmark.createdAt)}</span>
     </div>
-    <span class="shrink-0 ml-2">{calculateAge(bookmark.createdAt)}</span>
-  </div>
+  </Card.Header>
 
   <!-- Website Image Preview -->
   {#if bookmark.imageUrl}
@@ -87,7 +94,7 @@
   {/if}
 
   <!-- Card Body -->
-  <div class="p-3 flex flex-col flex-1 gap-2 min-h-0">
+  <Card.Content class="p-3 flex flex-col flex-1 gap-2 min-h-0 text-xs">
     <div class="min-w-0">
       <h3 class="font-bold text-xs text-foreground leading-tight truncate">
         <a
@@ -111,8 +118,9 @@
     <!-- Tags Row -->
     <div class="flex flex-wrap gap-1 items-center mt-auto pt-1">
       {#each bookmark.tags as tag}
-        <span
-          class="text-[9px] px-1 border border-border-dim text-muted-foreground flex items-center gap-1 select-none"
+        <Badge
+          variant="outline"
+          class="text-[9px] px-1 border border-border-dim text-muted-foreground flex items-center gap-1 select-none font-mono"
         >
           *{tag}
           <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -123,38 +131,46 @@
             title="Remove tag"
             >x</span
           >
-        </span>
+        </Badge>
       {/each}
-      <button
+      <Button
+        variant="ghost"
+        size="xs"
         onclick={handleAddTag}
-        class="text-[9px] text-dim-foreground hover:text-primary transition-colors select-none font-bold"
+        class="text-[9px] text-dim-foreground hover:text-primary transition-colors select-none font-bold h-auto p-0 bg-transparent hover:bg-transparent font-mono"
       >
         + add
-      </button>
+      </Button>
     </div>
 
     <!-- Actions Row -->
     <div
       class="flex items-center gap-3 pt-2 border-t border-dashed border-border-dim text-[9px] font-bold select-none shrink-0"
     >
-      <button
+      <Button
+        variant="ghost"
+        size="xs"
         onclick={() => onToggleFavorite(bookmark.id)}
-        class="text-muted-foreground hover:text-primary transition-colors uppercase"
+        class="text-muted-foreground hover:text-primary transition-colors uppercase h-auto p-0 bg-transparent hover:bg-transparent font-mono text-[9px] font-bold"
       >
         [{bookmark.isFavorite ? '★ unstar' : '☆ star'}]
-      </button>
-      <button
+      </Button>
+      <Button
+        variant="ghost"
+        size="xs"
         onclick={() => onEdit(bookmark.id)}
-        class="text-muted-foreground hover:text-primary transition-colors uppercase"
+        class="text-muted-foreground hover:text-primary transition-colors uppercase h-auto p-0 bg-transparent hover:bg-transparent font-mono text-[9px] font-bold"
       >
         [edit]
-      </button>
-      <button
+      </Button>
+      <Button
+        variant="ghost"
+        size="xs"
         onclick={() => onDelete(bookmark.id)}
-        class="text-destructive hover:text-red-400 transition-colors uppercase"
+        class="text-destructive hover:text-red-400 transition-colors uppercase h-auto p-0 bg-transparent hover:bg-transparent font-mono text-[9px] font-bold"
       >
         [del]
-      </button>
+      </Button>
     </div>
-  </div>
-</div>
+  </Card.Content>
+</Card.Root>

@@ -9,6 +9,8 @@
   import Sidebar from "$lib/components/Sidebar.svelte";
   import StatsPanel from "$lib/components/StatsPanel.svelte";
   import TagsPanel from "$lib/components/TagsPanel.svelte";
+  import { Button } from "$lib/components/ui/button";
+  import { Input } from "$lib/components/ui/input";
   import { filteredBookmarksStore } from "$lib/derived/filteredBookmarks.svelte";
   import { bookmarkStore } from "$lib/stores/bookmark.svelte";
   import { THEMES, themeStore } from "$lib/stores/theme.svelte";
@@ -122,13 +124,14 @@
               <span>FILTERED BY:</span>
               <span class="underline">#{viewStore.selectedTag}</span>
             </div>
-            <button
-              type="button"
+            <Button
+              variant="ghost"
+              size="xs"
               onclick={() => viewStore.clearTag()}
-              class="text-destructive hover:text-red-400 font-bold tracking-wider cursor-pointer bg-transparent border-none p-0"
+              class="text-destructive hover:text-red-400 font-bold tracking-wider cursor-pointer bg-transparent hover:bg-transparent border-none p-0 h-auto font-mono text-[10px]"
             >
               [x] CLEAR
-            </button>
+            </Button>
           </div>
         {/if}
 
@@ -138,13 +141,13 @@
             class="flex items-center gap-2 px-4 py-1.5 border-b border-border bg-background text-sm shrink-0"
           >
             <span class="text-primary font-bold select-none">?</span>
-            <input
-              bind:this={promptInput}
+            <Input
+              bind:ref={promptInput}
               bind:value={viewStore.searchQuery}
               type="text"
               placeholder="Search links..."
-              class="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-muted-foreground font-mono text-xs"
-            >
+              class="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-muted-foreground font-mono text-xs h-auto py-0 focus-visible:border-none focus-visible:ring-0 focus-visible:ring-offset-0"
+            />
           </div>
         {:else}
           <div class="px-4 pt-4 shrink-0">

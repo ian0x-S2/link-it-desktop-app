@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { Input } from "$lib/components/ui/input";
+  import { Skeleton } from "$lib/components/ui/skeleton";
   import { bookmarkActions } from "../repositories/config/repository";
 
   let {
@@ -113,14 +115,14 @@
     class="flex items-center gap-2 px-3 py-1.5 border border-border bg-transparent text-sm"
   >
     <span class="text-primary font-bold select-none">$</span>
-    <input
-      bind:this={inputElement}
+    <Input
+      bind:ref={inputElement}
       bind:value
       type="text"
       placeholder="Paste link to add..."
-      class="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-muted-foreground font-mono text-xs"
+      class="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-muted-foreground font-mono text-xs h-auto py-0 focus-visible:border-none focus-visible:ring-0 focus-visible:ring-offset-0"
       onkeydown={handleKeydown}
-    >
+    />
     {#if loading}
       <span class="text-[9px] text-muted-foreground animate-pulse"
         >[loading...]</span
@@ -156,15 +158,13 @@
       </div>
 
       {#if loading}
-        <div
-          class="flex flex-col gap-2 animate-pulse text-[10px] text-muted-foreground"
-        >
+        <div class="flex flex-col gap-2 text-[10px] text-muted-foreground">
           <div class="flex items-center gap-2">
-            <div class="size-4 bg-border/40 rounded-sm"></div>
-            <div class="h-3 bg-border/40 w-28 rounded-sm"></div>
+            <Skeleton class="size-4 bg-border/40 rounded-none shrink-0" />
+            <Skeleton class="h-3 bg-border/40 w-28 rounded-none shrink-0" />
           </div>
-          <div class="h-3.5 bg-border/40 w-3/4 rounded-sm mt-1"></div>
-          <div class="h-3 bg-border/40 w-full rounded-sm"></div>
+          <Skeleton class="h-3.5 bg-border/40 w-3/4 rounded-none" />
+          <Skeleton class="h-3 bg-border/40 w-full rounded-none" />
         </div>
       {:else if previewData}
         <div class="flex gap-3 text-xs items-start">
