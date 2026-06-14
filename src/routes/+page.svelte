@@ -108,8 +108,14 @@
             <!-- svelte-ignore a11y_click_events_have_key_events -->
             <!-- svelte-ignore a11y_no_static_element_interactions -->
             <span
-              onclick={() => { viewStore.setMode('search'); setTimeout(() => promptInput?.focus(), 50); }}
-              class="px-1.5 py-0.5 cursor-pointer transition-colors uppercase tracking-wider text-[10px] {viewStore.mode === 'search' ? 'bg-primary text-background font-bold' : 'hover:text-foreground'}"
+              onclick={() => {
+                const nextActive = !viewStore.searchActive;
+                viewStore.setSearchActive(nextActive);
+                if (nextActive) {
+                  setTimeout(() => promptInput?.focus(), 50);
+                }
+              }}
+              class="px-1.5 py-0.5 cursor-pointer transition-colors uppercase tracking-wider text-[10px] {viewStore.searchActive ? 'bg-primary text-background font-bold' : 'hover:text-foreground'}"
               >[s]earch</span
             >
           </div>
@@ -135,29 +141,31 @@
           </div>
         {/if}
 
-        <!-- Prompt Input / Search Bar -->
-        {#if viewStore.mode === "search"}
-          <div
-            class="flex items-center gap-2 px-4 py-1.5 border-b border-border bg-background text-sm shrink-0"
-          >
-            <span class="text-primary font-bold select-none">?</span>
-            <Input
-              bind:ref={promptInput}
-              bind:value={viewStore.searchQuery}
-              type="text"
-              placeholder="Search links..."
-              class="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-muted-foreground font-mono text-xs h-auto py-0 focus-visible:border-none focus-visible:ring-0 focus-visible:ring-offset-0"
-            />
-          </div>
-        {:else}
-          <div class="px-4 pt-4 shrink-0">
+        <!-- Input Container (prevents layout shift) -->
+        <div class="px-4 pt-4 shrink-0">
+          {#if viewStore.searchActive}
+            <div class="flex flex-col mb-4 shrink-0">
+              <div
+                class="flex items-center gap-2 px-3 py-1.5 border border-border bg-transparent text-sm"
+              >
+                <span class="text-primary font-bold select-none">?</span>
+                <Input
+                  bind:ref={promptInput}
+                  bind:value={viewStore.searchQuery}
+                  type="text"
+                  placeholder="Search links..."
+                  class="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-muted-foreground font-mono text-xs h-auto py-0 focus-visible:border-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                />
+              </div>
+            </div>
+          {:else}
             <PromptInput
               bind:value={promptValue}
               bind:inputElement={promptInput}
               onAdd={handleAddLink}
             />
-          </div>
-        {/if}
+          {/if}
+        </div>
 
         <!-- Bookmark content area -->
         <div
@@ -191,7 +199,7 @@
                 ✗ No records found
               </p>
               <p class="text-[10px] text-dim-foreground">
-                {viewStore.mode === "search" ? "> Refine your search query" : "> Press [a] or click $ to add a link"}
+                {viewStore.searchActive ? "> Refine your search query" : "> Press [a] or click $ to add a link"}
               </p>
             </div>
           {/if}

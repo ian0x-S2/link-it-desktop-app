@@ -18,7 +18,7 @@ export function setupKeyboardShortcuts(
       g: () => viewStore.setMode("grid"),
       l: () => viewStore.setMode("list"),
       s: () => {
-        viewStore.setMode("search");
+        viewStore.setSearchActive(true);
         setTimeout(() => promptInput()?.focus(), 50);
       },
       a: () => promptInput()?.focus(),
@@ -29,8 +29,8 @@ export function setupKeyboardShortcuts(
       m: () => toggleMode(),
       Escape: () => {
         (document.activeElement as HTMLElement)?.blur?.();
-        if (viewStore.mode === "search") {
-          viewStore.setMode("grid");
+        if (viewStore.searchActive) {
+          viewStore.setSearchActive(false);
         }
       },
     };

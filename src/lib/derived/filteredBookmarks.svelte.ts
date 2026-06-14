@@ -19,7 +19,7 @@ class FilteredBookmarksStore {
       items = items.filter((b) => b.tags?.includes(viewStore.selectedTag!));
     }
 
-    if (viewStore.mode === "search" && viewStore.searchQuery.trim()) {
+    if (viewStore.searchActive && viewStore.searchQuery.trim()) {
       const q = viewStore.searchQuery.toLowerCase();
       items = items.filter(
         (b) =>

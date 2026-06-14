@@ -1,4 +1,4 @@
-export type ViewMode = "grid" | "list" | "search";
+export type ViewMode = "grid" | "list";
 export type Category = "inbox" | "favorites" | "trash";
 
 class ViewStore {
@@ -6,6 +6,7 @@ class ViewStore {
   category = $state<Category>("inbox");
   selectedTag = $state<string | null>(null);
   searchQuery = $state("");
+  searchActive = $state(false);
 
   setCategory(cat: Category) {
     this.category = cat;
@@ -15,6 +16,13 @@ class ViewStore {
   setMode(mode: ViewMode) {
     this.mode = mode;
     this.selectedTag = null;
+  }
+
+  setSearchActive(active: boolean) {
+    this.searchActive = active;
+    if (!active) {
+      this.searchQuery = "";
+    }
   }
 
   clearTag() {
