@@ -56,10 +56,10 @@
 </script>
 
 <div
-  class="relative p-4 flex flex-col bg-box-bg border border-border lg:flex-[2.5] min-h-[180px] lg:min-h-0 select-none font-mono"
+  class="relative p-4 flex flex-col bg-box-bg border border-border lg:flex-[2.5] min-h-45 lg:min-h-0 select-none font-mono"
 >
   <span
-    class="absolute px-1.5 text-[10px] font-bold uppercase tracking-wider -top-[7px] left-[10px] bg-background text-primary"
+    class="absolute px-1.5 text-[10px] font-bold uppercase tracking-wider -top-1.75 left-2.5 bg-background text-primary"
     >Statistics</span
   >
 

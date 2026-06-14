@@ -9,6 +9,7 @@
   import StatsPanel from "$lib/components/StatsPanel.svelte";
   import TagsPanel from "$lib/components/TagsPanel.svelte";
   import { bookmarkStore } from "$lib/stores/bookmark.svelte";
+  import { toggleMode } from "mode-watcher";
 
   // Theme
   const themes = ["default", "catppuccin", "everforest", "nord"] as const;
@@ -145,6 +146,9 @@
         changeTheme(themes[nextIdx]);
         break;
       }
+      case "m":
+        toggleMode();
+        break;
       case "Escape":
         (document.activeElement as HTMLElement)?.blur?.();
         if (viewMode === "search") {

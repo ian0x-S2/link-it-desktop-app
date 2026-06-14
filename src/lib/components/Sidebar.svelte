@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Button } from "$lib/components/ui/button";
+  import { toggleMode } from "mode-watcher";
 
   let {
     selectedCategory = $bindable(),
@@ -116,6 +117,13 @@
       class="font-mono uppercase tracking-[0.05em] text-[0.65rem] rounded-none shadow-none border border-border bg-transparent text-muted-foreground transition-all duration-100 ease-linear cursor-pointer h-auto py-0.5 px-2 hover:border-primary hover:bg-accent hover:text-primary w-full"
     >
       [t] Toggle Theme: {currentTheme}
+    </Button>
+    <Button
+      onclick={toggleMode}
+      size="sm"
+      class="font-mono uppercase tracking-[0.05em] text-[0.65rem] rounded-none shadow-none border border-border bg-transparent text-muted-foreground transition-all duration-100 ease-linear cursor-pointer h-auto py-0.5 px-2 hover:border-primary hover:bg-accent hover:text-primary w-full"
+    >
+      [m] Toggle Mode
     </Button>
 
     <div class="space-y-0.5 text-[10px] text-muted-foreground mt-1 select-none">
