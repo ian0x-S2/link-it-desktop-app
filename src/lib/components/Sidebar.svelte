@@ -59,11 +59,11 @@
         <!-- svelte-ignore a11y_no_static_element_interactions -->
         <div
           onclick={() => onSelectCategory('inbox')}
-          class="flex items-center justify-between cursor-pointer py-0.5 px-1.5 transition-colors {selectedCategory === 'inbox' ? 'bg-primary text-background font-bold' : 'text-foreground hover:bg-accent'}"
+          class="group flex items-center justify-between cursor-pointer py-0.5 px-1.5 transition-colors {selectedCategory === 'inbox' ? 'bg-primary text-background font-bold' : 'text-foreground hover:bg-accent hover:text-accent-foreground'}"
         >
           <span>1 Inbox</span>
           <span
-            class={selectedCategory === 'inbox' ? 'text-background' : 'text-muted-foreground'}
+            class={selectedCategory === 'inbox' ? 'text-background' : 'text-muted-foreground group-hover:text-accent-foreground'}
             >[{bookmarkCount}]</span
           >
         </div>
@@ -72,11 +72,11 @@
         <!-- svelte-ignore a11y_no_static_element_interactions -->
         <div
           onclick={() => onSelectCategory('favorites')}
-          class="flex items-center justify-between cursor-pointer py-0.5 px-1.5 transition-colors {selectedCategory === 'favorites' ? 'bg-primary text-background font-bold' : 'text-foreground hover:bg-accent'}"
+          class="group flex items-center justify-between cursor-pointer py-0.5 px-1.5 transition-colors {selectedCategory === 'favorites' ? 'bg-primary text-background font-bold' : 'text-foreground hover:bg-accent hover:text-accent-foreground'}"
         >
           <span>2 Favorites</span>
           <span
-            class={selectedCategory === 'favorites' ? 'text-background' : 'text-muted-foreground'}
+            class={selectedCategory === 'favorites' ? 'text-background' : 'text-muted-foreground group-hover:text-accent-foreground'}
             >[{favoriteCount}]</span
           >
         </div>
@@ -85,11 +85,11 @@
         <!-- svelte-ignore a11y_no_static_element_interactions -->
         <div
           onclick={() => onSelectCategory('trash')}
-          class="flex items-center justify-between cursor-pointer py-0.5 px-1.5 transition-colors {selectedCategory === 'trash' ? 'bg-primary text-background font-bold' : 'text-foreground hover:bg-accent'}"
+          class="group flex items-center justify-between cursor-pointer py-0.5 px-1.5 transition-colors {selectedCategory === 'trash' ? 'bg-primary text-background font-bold' : 'text-foreground hover:bg-accent hover:text-accent-foreground'}"
         >
           <span>3 Trash</span>
           <span
-            class={selectedCategory === 'trash' ? 'text-background' : 'text-muted-foreground'}
+            class={selectedCategory === 'trash' ? 'text-background' : 'text-muted-foreground group-hover:text-accent-foreground'}
             >[{trashCount}]</span
           >
         </div>
@@ -118,14 +118,14 @@
         changeTheme(themes[nextIdx]);
       }}
       size="sm"
-      class="font-mono uppercase tracking-wider text-[0.65rem] rounded-none shadow-none border border-border bg-transparent text-muted-foreground transition-all duration-100 ease-linear cursor-pointer h-auto py-0.5 px-2 hover:border-primary hover:bg-accent hover:text-primary w-full"
+      class="font-mono uppercase tracking-wider text-[0.65rem] rounded-none shadow-none border border-border bg-transparent text-muted-foreground transition-all duration-100 ease-linear cursor-pointer h-auto py-0.5 px-2 hover:border-primary hover:bg-accent hover:text-accent-foreground w-full"
     >
       [t] Toggle Theme: {currentTheme}
     </Button>
     <Button
       onclick={toggleMode}
       size="sm"
-      class="font-mono uppercase tracking-wider text-[0.65rem] rounded-none shadow-none border border-border bg-transparent text-muted-foreground transition-all duration-100 ease-linear cursor-pointer h-auto py-0.5 px-2 hover:border-primary hover:bg-accent hover:text-primary w-full"
+      class="font-mono uppercase tracking-wider text-[0.65rem] rounded-none shadow-none border border-border bg-transparent text-muted-foreground transition-all duration-100 ease-linear cursor-pointer h-auto py-0.5 px-2 hover:border-primary hover:bg-accent hover:text-accent-foreground w-full"
     >
       [m] Toggle Mode
     </Button>
