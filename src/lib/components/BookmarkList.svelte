@@ -115,7 +115,7 @@
         <Button
           size="xs"
           variant="outline"
-          class="font-mono uppercase tracking-[0.05em] text-[0.65rem] rounded-none shadow-none border border-border bg-transparent text-muted-foreground transition-all duration-100 ease-linear cursor-pointer h-auto py-0.5 px-2 hover:border-primary hover:bg-accent hover:text-accent-foreground"
+          class="font-mono uppercase tracking-wider text-[0.65rem] rounded-none shadow-none border border-border bg-transparent text-muted-foreground transition-all duration-100 ease-linear cursor-pointer h-auto py-0.5 px-2 hover:border-primary hover:bg-accent hover:text-accent-foreground"
           onclick={() => onToggleFavorite(bookmark.id)}
         >
           {bookmark.isFavorite ? "★ unstar" : "☆ star"}
@@ -123,7 +123,7 @@
         <Button
           size="xs"
           variant="outline"
-          class="font-mono uppercase tracking-[0.05em] text-[0.65rem] rounded-none shadow-none border border-border bg-transparent text-muted-foreground transition-all duration-100 ease-linear cursor-pointer h-auto py-0.5 px-2 hover:border-primary hover:bg-accent hover:text-accent-foreground"
+          class="font-mono uppercase tracking-wider text-[0.65rem] rounded-none shadow-none border border-border bg-transparent text-muted-foreground transition-all duration-100 ease-linear cursor-pointer h-auto py-0.5 px-2 hover:border-primary hover:bg-accent hover:text-accent-foreground"
           onclick={() => onEdit(bookmark.id)}
         >
           edit
@@ -132,7 +132,7 @@
         <Button
           size="xs"
           variant="destructive"
-          class="font-mono uppercase tracking-[0.05em] text-[0.65rem] rounded-none shadow-none border border-border bg-transparent text-muted-foreground transition-all duration-100 ease-linear cursor-pointer h-auto py-0.5 px-2 hover:bg-destructive hover:border-destructive hover:text-destructive-foreground"
+          class="font-mono uppercase tracking-wider text-[0.65rem] rounded-none shadow-none border border-border bg-transparent text-muted-foreground transition-all duration-100 ease-linear cursor-pointer h-auto py-0.5 px-2 hover:bg-destructive hover:border-destructive hover:text-destructive-foreground"
           onclick={() => onDelete(bookmark.id)}
         >
           &#10007; delete

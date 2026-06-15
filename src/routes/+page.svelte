@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { untrack } from "svelte";
   import { setupKeyboardShortcuts } from "$lib/actions/keyboardShortcuts";
   import BookmarkGrid from "$lib/components/BookmarkGrid.svelte";
   import BookmarkList from "$lib/components/BookmarkList.svelte";
@@ -49,8 +50,10 @@
   }
 
   $effect(() => {
-    themeStore.load();
-    bookmarkStore.load();
+    untrack(() => {
+      themeStore.load();
+      bookmarkStore.load();
+    });
     return setupKeyboardShortcuts(() => promptInput);
   });
 </script>
