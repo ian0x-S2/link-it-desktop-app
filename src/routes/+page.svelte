@@ -11,6 +11,7 @@
   import TagsPanel from "$lib/components/TagsPanel.svelte";
   import { Button } from "$lib/components/ui/button";
   import { Input } from "$lib/components/ui/input";
+  import * as Dialog from "$lib/components/ui/dialog";
   import { filteredBookmarksStore } from "$lib/derived/filteredBookmarks.svelte";
   import { bookmarkStore } from "$lib/stores/bookmark.svelte";
   import { THEMES, themeStore } from "$lib/stores/theme.svelte";
@@ -19,6 +20,11 @@
   // Prompt input ref (local UI concern)
   let promptValue = $state("");
   let promptInput = $state<HTMLInputElement | null>(null);
+
+  // Edit bookmark title dialog state
+  let editDialogOpen = $state(false);
+  let editBookmarkId = $state<string | null>(null);
+  let editTitleValue = $state("");
 
   const totalItems = $derived(bookmarkStore.activeItems.length);
   const favoriteCount = $derived(
@@ -40,12 +46,25 @@
 
   function handleEdit(id: string) {
     const bookmark = bookmarkStore.items.find((b) => b.id === id);
-    if (!bookmark) {
-      return;
+    if (!bookmark) return;
+    editBookmarkId = id;
+    editTitleValue = bookmark.title;
+    editDialogOpen = true;
+  }
+
+  function confirmEditTitle() {
+    if (editBookmarkId && editTitleValue.trim()) {
+      bookmarkStore.update(editBookmarkId, { title: editTitleValue.trim() });
     }
-    const newTitle = prompt("Edit title:", bookmark.title);
-    if (newTitle && newTitle.trim()) {
-      bookmarkStore.update(id, { title: newTitle.trim() });
+    editDialogOpen = false;
+    editBookmarkId = null;
+    editTitleValue = "";
+  }
+
+  function handleEditKeydown(e: KeyboardEvent) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      confirmEditTitle();
     }
   }
 
@@ -235,3 +254,54 @@
   <!-- Footer -->
   <FooterBar />
 </div>
+
+<!-- Edit Bookmark Title Dialog -->
+<Dialog.Root bind:open={editDialogOpen}>
+  <Dialog.Content
+    class="rounded-none border border-border bg-box-bg font-mono text-foreground p-0 gap-0 max-w-sm shadow-xl"
+  >
+    <Dialog.Header class="px-4 pt-4 pb-3 border-b border-border">
+      <Dialog.Title class="text-xs font-bold uppercase tracking-widest text-primary">
+        // Edit Title
+      </Dialog.Title>
+      <Dialog.Description class="text-[10px] text-muted-foreground mt-1">
+        Update the display title for this bookmark.
+      </Dialog.Description>
+    </Dialog.Header>
+    <div class="px-4 py-3">
+      <div class="flex items-center gap-1.5 px-2 py-1.5 border border-border bg-transparent">
+        <span class="text-primary font-bold text-[10px] select-none">$</span>
+        <Input
+          id="edit-title-input"
+          bind:value={editTitleValue}
+          onkeydown={handleEditKeydown}
+          placeholder="Bookmark title..."
+          autofocus
+          class="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-dim-foreground font-mono text-xs h-auto py-0 focus-visible:border-none focus-visible:ring-0 focus-visible:ring-offset-0"
+        />
+      </div>
+    </div>
+    <Dialog.Footer class="px-4 pb-4 flex gap-2 justify-end border-t border-border pt-3">
+      <Dialog.Close>
+        {#snippet child({ props })}
+          <Button
+            {...props}
+            variant="outline"
+            size="xs"
+            class="font-mono text-[10px] rounded-none border border-border-dim hover:border-border text-muted-foreground hover:text-foreground uppercase tracking-wider h-auto py-1 px-3 cursor-pointer"
+          >
+            [cancel]
+          </Button>
+        {/snippet}
+      </Dialog.Close>
+      <Button
+        variant="outline"
+        size="xs"
+        onclick={confirmEditTitle}
+        class="font-mono text-[10px] rounded-none border border-primary text-primary hover:bg-primary hover:text-background uppercase tracking-wider h-auto py-1 px-3 cursor-pointer"
+      >
+        [save]
+      </Button>
+    </Dialog.Footer>
+  </Dialog.Content>
+</Dialog.Root>

@@ -1,6 +1,8 @@
 <script lang="ts">
   import { Button } from "$lib/components/ui/button";
   import { Input } from "$lib/components/ui/input";
+  import * as Dialog from "$lib/components/ui/dialog";
+  import * as AlertDialog from "$lib/components/ui/alert-dialog";
   import type { Bookmark } from "../types/bookmark";
 
   let {
@@ -16,6 +18,15 @@
   } = $props();
 
   let tagSearch = $state("");
+
+  // Rename dialog state
+  let renameDialogOpen = $state(false);
+  let tagToRename = $state<string | null>(null);
+  let newTagNameValue = $state("");
+
+  // Delete alert dialog state
+  let deleteDialogOpen = $state(false);
+  let tagToDelete = $state<string | null>(null);
 
   // Aggregate all unique tags with their bookmark counts
   const tagList = $derived(() => {
@@ -43,23 +54,41 @@
   });
 
   function handleRename(tag: string) {
-    const newName = prompt(`Rename tag "${tag}" globally to:`, tag);
+    tagToRename = tag;
+    newTagNameValue = tag;
+    renameDialogOpen = true;
+  }
+
+  function confirmRename() {
     if (
-      newName &&
-      newName.trim() &&
-      newName.trim().toLowerCase() !== tag.toLowerCase()
+      tagToRename &&
+      newTagNameValue.trim() &&
+      newTagNameValue.trim().toLowerCase() !== tagToRename.toLowerCase()
     ) {
-      onRenameTag(tag, newName.trim().toLowerCase());
+      onRenameTag(tagToRename, newTagNameValue.trim().toLowerCase());
     }
+    renameDialogOpen = false;
+    tagToRename = null;
+    newTagNameValue = "";
   }
 
   function handleDelete(tag: string) {
-    if (
-      confirm(
-        `Are you sure you want to delete tag "${tag}" globally from all bookmarks?`
-      )
-    ) {
-      onDeleteTag(tag);
+    tagToDelete = tag;
+    deleteDialogOpen = true;
+  }
+
+  function confirmDelete() {
+    if (tagToDelete) {
+      onDeleteTag(tagToDelete);
+    }
+    deleteDialogOpen = false;
+    tagToDelete = null;
+  }
+
+  function handleRenameKeydown(e: KeyboardEvent) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      confirmRename();
     }
   }
 </script>
@@ -150,3 +179,97 @@
     {/each}
   </div>
 </div>
+
+<!-- Rename Tag Dialog -->
+<Dialog.Root bind:open={renameDialogOpen}>
+  <Dialog.Content
+    class="rounded-none border border-border bg-box-bg font-mono text-foreground p-0 gap-0 max-w-sm shadow-xl"
+  >
+    <Dialog.Header class="px-4 pt-4 pb-3 border-b border-border">
+      <Dialog.Title class="text-xs font-bold uppercase tracking-widest text-primary">
+        // Rename Tag
+      </Dialog.Title>
+      <Dialog.Description class="text-[10px] text-muted-foreground mt-1">
+        Rename <span class="text-foreground font-bold">*{tagToRename}</span> globally across all bookmarks.
+      </Dialog.Description>
+    </Dialog.Header>
+    <div class="px-4 py-3">
+      <div class="flex items-center gap-1.5 px-2 py-1.5 border border-border bg-transparent">
+        <span class="text-primary font-bold text-[10px] select-none">*</span>
+        <Input
+          id="rename-tag-input"
+          bind:value={newTagNameValue}
+          onkeydown={handleRenameKeydown}
+          placeholder="new-tag-name"
+          autofocus
+          class="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-dim-foreground font-mono text-[10px] h-auto py-0 focus-visible:border-none focus-visible:ring-0 focus-visible:ring-offset-0"
+        />
+      </div>
+    </div>
+    <Dialog.Footer class="px-4 pb-4 flex gap-2 justify-end border-t border-border pt-3">
+      <Dialog.Close>
+        {#snippet child({ props })}
+          <Button
+            {...props}
+            variant="outline"
+            size="xs"
+            class="font-mono text-[10px] rounded-none border border-border-dim hover:border-border text-muted-foreground hover:text-foreground uppercase tracking-wider h-auto py-1 px-3 cursor-pointer"
+          >
+            [cancel]
+          </Button>
+        {/snippet}
+      </Dialog.Close>
+      <Button
+        variant="outline"
+        size="xs"
+        onclick={confirmRename}
+        class="font-mono text-[10px] rounded-none border border-primary text-primary hover:bg-primary hover:text-background uppercase tracking-wider h-auto py-1 px-3 cursor-pointer"
+      >
+        [confirm]
+      </Button>
+    </Dialog.Footer>
+  </Dialog.Content>
+</Dialog.Root>
+
+<!-- Delete Tag AlertDialog -->
+<AlertDialog.Root bind:open={deleteDialogOpen}>
+  <AlertDialog.Content
+    class="rounded-none border border-destructive/50 bg-box-bg font-mono text-foreground p-0 gap-0 max-w-sm shadow-xl"
+  >
+    <AlertDialog.Header class="px-4 pt-4 pb-3 border-b border-border">
+      <AlertDialog.Title class="text-xs font-bold uppercase tracking-widest text-destructive">
+        // Delete Tag
+      </AlertDialog.Title>
+      <AlertDialog.Description class="text-[10px] text-muted-foreground mt-1">
+        Remove <span class="text-foreground font-bold">*{tagToDelete}</span> from all bookmarks globally. This action cannot be undone.
+      </AlertDialog.Description>
+    </AlertDialog.Header>
+    <AlertDialog.Footer class="px-4 pb-4 flex gap-2 justify-end border-t border-border pt-3">
+      <AlertDialog.Cancel>
+        {#snippet child({ props })}
+          <Button
+            {...props}
+            variant="outline"
+            size="xs"
+            class="font-mono text-[10px] rounded-none border border-border-dim hover:border-border text-muted-foreground hover:text-foreground uppercase tracking-wider h-auto py-1 px-3 cursor-pointer"
+          >
+            [cancel]
+          </Button>
+        {/snippet}
+      </AlertDialog.Cancel>
+      <AlertDialog.Action>
+        {#snippet child({ props })}
+          <Button
+            {...props}
+            variant="outline"
+            size="xs"
+            onclick={confirmDelete}
+            class="font-mono text-[10px] rounded-none border border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground uppercase tracking-wider h-auto py-1 px-3 cursor-pointer"
+          >
+            [delete]
+          </Button>
+        {/snippet}
+      </AlertDialog.Action>
+    </AlertDialog.Footer>
+  </AlertDialog.Content>
+</AlertDialog.Root>

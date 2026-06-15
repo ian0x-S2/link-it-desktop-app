@@ -1,7 +1,16 @@
 <script lang="ts">
   import { Badge } from "$lib/components/ui/badge";
   import { Button } from "$lib/components/ui/button";
+  import * as Popover from "$lib/components/ui/popover";
+  import { Input } from "$lib/components/ui/input";
   import { getFavicon } from "$lib/utils";
+  import { bookmarkStore } from "$lib/stores/bookmark.svelte";
+  import {
+    getAllUniqueTags,
+    getTagSuggestions,
+    isNewTagValue,
+    normaliseTag,
+  } from "$lib/tag-popover-utils";
   import type { Bookmark } from "../types/bookmark";
 
   let {
@@ -20,13 +29,48 @@
     onEdit: (id: string) => void;
   } = $props();
 
-  function handleAddTag(id: string) {
-    const tag = prompt("Enter tag name:");
-    if (tag) {
-      const cleanTag = tag.trim().toLowerCase();
-      if (cleanTag) {
-        onAddTag(id, cleanTag);
-      }
+  // Per-item popover state: map of bookmarkId → open/value
+  let openPopoverId = $state<string | null>(null);
+  let tagInputValue = $state("");
+
+  // All unique tags across all bookmarks for autocomplete
+  const allTags = $derived(() => getAllUniqueTags(bookmarkStore.items));
+
+  function getTagSuggestionsForBookmark(bookmark: Bookmark) {
+    return getTagSuggestions(allTags(), bookmark.tags, tagInputValue);
+  }
+
+  function isNewTagForBookmark(bookmark: Bookmark) {
+    const q = tagInputValue.trim().toLowerCase();
+    return isNewTagValue(allTags(), tagInputValue) && !bookmark.tags.includes(q);
+  }
+
+  function openTagPopover(id: string) {
+    tagInputValue = "";
+    openPopoverId = id;
+  }
+
+  function closeTagPopover() {
+    tagInputValue = "";
+    openPopoverId = null;
+  }
+
+  function submitTag(bookmarkId: string, tag: string) {
+    const clean = normaliseTag(tag);
+    const bookmark = bookmarks.find((b) => b.id === bookmarkId);
+    if (clean && bookmark && !bookmark.tags.includes(clean)) {
+      onAddTag(bookmarkId, clean);
+    }
+    closeTagPopover();
+  }
+
+  function handleTagKeydown(e: KeyboardEvent, bookmarkId: string) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const q = tagInputValue.trim().toLowerCase();
+      if (q) submitTag(bookmarkId, q);
+    } else if (e.key === "Escape") {
+      closeTagPopover();
     }
   }
 </script>
@@ -97,14 +141,73 @@
                 >
               </Badge>
             {/each}
-            <Button
-              variant="ghost"
-              size="xs"
-              onclick={() => handleAddTag(bookmark.id)}
-              class="text-[10px] text-dim-foreground hover:text-primary transition-colors select-none font-bold h-auto p-0 bg-transparent hover:bg-transparent font-mono"
+
+            <!-- Per-item tag popover -->
+            <Popover.Root
+              open={openPopoverId === bookmark.id}
+              onOpenChange={(open) => {
+                if (open) openTagPopover(bookmark.id);
+                else closeTagPopover();
+              }}
             >
-              + add tag
-            </Button>
+              <Popover.Trigger>
+                {#snippet child({ props })}
+                  <Button
+                    {...props}
+                    variant="ghost"
+                    size="xs"
+                    class="text-[10px] text-dim-foreground hover:text-primary transition-colors select-none font-bold h-auto p-0 bg-transparent hover:bg-transparent font-mono"
+                  >
+                    + add tag
+                  </Button>
+                {/snippet}
+              </Popover.Trigger>
+              <Popover.Content
+                class="w-52 p-0 rounded-none border border-border bg-box-bg font-mono shadow-lg"
+                align="start"
+                sideOffset={4}
+              >
+                <!-- Input -->
+                <div class="flex items-center gap-1 px-2 py-1.5 border-b border-border">
+                  <span class="text-primary font-bold text-[10px] select-none">#</span>
+                  <Input
+                    bind:value={tagInputValue}
+                    onkeydown={(e) => handleTagKeydown(e, bookmark.id)}
+                    placeholder="tag name..."
+                    autofocus
+                    class="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-dim-foreground font-mono text-[10px] h-auto py-0 focus-visible:border-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                  />
+                </div>
+                <!-- Suggestions -->
+                <div class="flex flex-col py-0.5 max-h-40 overflow-y-auto">
+                  {#if isNewTagForBookmark(bookmark)}
+                    <!-- svelte-ignore a11y_click_events_have_key_events -->
+                    <!-- svelte-ignore a11y_no_static_element_interactions -->
+                    <div
+                      onclick={() => submitTag(bookmark.id, tagInputValue)}
+                      class="px-2 py-1 text-[10px] text-primary cursor-pointer hover:bg-accent/30 select-none"
+                    >
+                      [Create: "{tagInputValue.trim().toLowerCase()}"]
+                    </div>
+                  {/if}
+                  {#each getTagSuggestionsForBookmark(bookmark) as suggestion}
+                    <!-- svelte-ignore a11y_click_events_have_key_events -->
+                    <!-- svelte-ignore a11y_no_static_element_interactions -->
+                    <div
+                      onclick={() => submitTag(bookmark.id, suggestion)}
+                      class="px-2 py-1 text-[10px] text-muted-foreground cursor-pointer hover:bg-accent/30 hover:text-foreground select-none"
+                    >
+                      * {suggestion}
+                    </div>
+                  {/each}
+                  {#if getTagSuggestionsForBookmark(bookmark).length === 0 && !isNewTagForBookmark(bookmark)}
+                    <div class="px-2 py-1 text-[10px] text-dim-foreground italic select-none">
+                      No tags yet
+                    </div>
+                  {/if}
+                </div>
+              </Popover.Content>
+            </Popover.Root>
           </div>
         {/if}
       </div>
