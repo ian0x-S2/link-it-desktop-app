@@ -29,9 +29,7 @@ class WorkspaceStore {
 
   async rename(id: string, name: string): Promise<void> {
     await workspaceActions.renameWorkspace(id, name);
-    this.items = this.items.map((w) =>
-      w.id === id ? { ...w, name } : w
-    );
+    this.items = this.items.map((w) => (w.id === id ? { ...w, name } : w));
   }
 
   async delete(id: string): Promise<void> {

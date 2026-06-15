@@ -1,5 +1,5 @@
-import type { CreateWorkspaceInput, Workspace } from "../types/workspace";
 import type { WorkspaceRepository } from "../repositories/workspace.repository";
+import type { CreateWorkspaceInput, Workspace } from "../types/workspace";
 
 export class WorkspaceActions {
   private readonly repository: WorkspaceRepository;

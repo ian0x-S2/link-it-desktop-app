@@ -2,9 +2,8 @@
   import { Badge } from "$lib/components/ui/badge";
   import { Button } from "$lib/components/ui/button";
   import * as Card from "$lib/components/ui/card";
-  import * as Popover from "$lib/components/ui/popover";
   import { Input } from "$lib/components/ui/input";
-  import { getFavicon } from "$lib/utils";
+  import * as Popover from "$lib/components/ui/popover";
   import { bookmarkStore } from "$lib/stores/bookmark.svelte";
   import {
     getAllUniqueTags,
@@ -12,6 +11,7 @@
     isNewTagValue,
     normaliseTag,
   } from "$lib/tag-popover-utils";
+  import { getFavicon } from "$lib/utils";
   import type { Bookmark } from "../types/bookmark";
 
   let {
@@ -58,7 +58,9 @@
     if (e.key === "Enter") {
       e.preventDefault();
       const q = newTagValue.trim().toLowerCase();
-      if (q) submitTag(q);
+      if (q) {
+        submitTag(q);
+      }
     } else if (e.key === "Escape") {
       newTagValue = "";
       addTagOpen = false;
@@ -198,8 +200,12 @@
           sideOffset={4}
         >
           <!-- Input -->
-          <div class="flex items-center gap-1 px-2 py-1.5 border-b border-border">
-            <span class="text-primary font-bold text-[10px] select-none">#</span>
+          <div
+            class="flex items-center gap-1 px-2 py-1.5 border-b border-border"
+          >
+            <span class="text-primary font-bold text-[10px] select-none"
+              >#</span
+            >
             <Input
               bind:value={newTagValue}
               onkeydown={handleTagKeydown}
@@ -231,7 +237,9 @@
               </div>
             {/each}
             {#if tagSuggestions().length === 0 && !isNewTag()}
-              <div class="px-2 py-1 text-[10px] text-dim-foreground italic select-none">
+              <div
+                class="px-2 py-1 text-[10px] text-dim-foreground italic select-none"
+              >
                 No tags yet
               </div>
             {/if}

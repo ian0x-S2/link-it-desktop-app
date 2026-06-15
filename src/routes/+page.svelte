@@ -10,8 +10,8 @@
   import StatsPanel from "$lib/components/StatsPanel.svelte";
   import TagsPanel from "$lib/components/TagsPanel.svelte";
   import { Button } from "$lib/components/ui/button";
-  import { Input } from "$lib/components/ui/input";
   import * as Dialog from "$lib/components/ui/dialog";
+  import { Input } from "$lib/components/ui/input";
   import { filteredBookmarksStore } from "$lib/derived/filteredBookmarks.svelte";
   import { bookmarkStore } from "$lib/stores/bookmark.svelte";
   import { THEMES, themeStore } from "$lib/stores/theme.svelte";
@@ -47,7 +47,9 @@
 
   function handleEdit(id: string) {
     const bookmark = bookmarkStore.items.find((b) => b.id === id);
-    if (!bookmark) return;
+    if (!bookmark) {
+      return;
+    }
     editBookmarkId = id;
     editTitleValue = bookmark.title;
     editDialogOpen = true;
@@ -274,10 +276,13 @@
 <!-- Edit Bookmark Title Dialog -->
 <Dialog.Root bind:open={editDialogOpen}>
   <Dialog.Content
+    showCloseButton={false}
     class="rounded-none border border-border bg-box-bg font-mono text-foreground p-0 gap-0 max-w-sm shadow-xl"
   >
     <Dialog.Header class="px-4 pt-4 pb-3 border-b border-border">
-      <Dialog.Title class="text-xs font-bold uppercase tracking-widest text-primary">
+      <Dialog.Title
+        class="text-xs font-bold uppercase tracking-widest text-primary"
+      >
         // Edit Title
       </Dialog.Title>
       <Dialog.Description class="text-[10px] text-muted-foreground mt-1">
@@ -285,7 +290,9 @@
       </Dialog.Description>
     </Dialog.Header>
     <div class="px-4 py-3">
-      <div class="flex items-center gap-1.5 px-2 py-1.5 border border-border bg-transparent">
+      <div
+        class="flex items-center gap-1.5 px-2 py-1.5 border border-border bg-transparent"
+      >
         <span class="text-primary font-bold text-[10px] select-none">$</span>
         <Input
           id="edit-title-input"
@@ -297,7 +304,9 @@
         />
       </div>
     </div>
-    <Dialog.Footer class="px-4 pb-4 flex gap-2 justify-end border-t border-border pt-3">
+    <Dialog.Footer
+      class="px-4 pb-4 flex gap-2 justify-end border-t border-border pt-3"
+    >
       <Dialog.Close>
         {#snippet child({ props })}
           <Button

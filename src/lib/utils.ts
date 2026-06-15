@@ -31,4 +31,3 @@ export function getFavicon(url: string, faviconUrl: string): string {
     return "";
   }
 }
-

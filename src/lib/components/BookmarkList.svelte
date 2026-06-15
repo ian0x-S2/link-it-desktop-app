@@ -1,9 +1,8 @@
 <script lang="ts">
   import { Badge } from "$lib/components/ui/badge";
   import { Button } from "$lib/components/ui/button";
-  import * as Popover from "$lib/components/ui/popover";
   import { Input } from "$lib/components/ui/input";
-  import { getFavicon } from "$lib/utils";
+  import * as Popover from "$lib/components/ui/popover";
   import { bookmarkStore } from "$lib/stores/bookmark.svelte";
   import {
     getAllUniqueTags,
@@ -11,6 +10,7 @@
     isNewTagValue,
     normaliseTag,
   } from "$lib/tag-popover-utils";
+  import { getFavicon } from "$lib/utils";
   import type { Bookmark } from "../types/bookmark";
 
   let {
@@ -42,7 +42,9 @@
 
   function isNewTagForBookmark(bookmark: Bookmark) {
     const q = tagInputValue.trim().toLowerCase();
-    return isNewTagValue(allTags(), tagInputValue) && !bookmark.tags.includes(q);
+    return (
+      isNewTagValue(allTags(), tagInputValue) && !bookmark.tags.includes(q)
+    );
   }
 
   function openTagPopover(id: string) {
@@ -68,7 +70,9 @@
     if (e.key === "Enter") {
       e.preventDefault();
       const q = tagInputValue.trim().toLowerCase();
-      if (q) submitTag(bookmarkId, q);
+      if (q) {
+        submitTag(bookmarkId, q);
+      }
     } else if (e.key === "Escape") {
       closeTagPopover();
     }
@@ -168,8 +172,12 @@
                 sideOffset={4}
               >
                 <!-- Input -->
-                <div class="flex items-center gap-1 px-2 py-1.5 border-b border-border">
-                  <span class="text-primary font-bold text-[10px] select-none">#</span>
+                <div
+                  class="flex items-center gap-1 px-2 py-1.5 border-b border-border"
+                >
+                  <span class="text-primary font-bold text-[10px] select-none"
+                    >#</span
+                  >
                   <Input
                     bind:value={tagInputValue}
                     onkeydown={(e) => handleTagKeydown(e, bookmark.id)}
@@ -201,7 +209,9 @@
                     </div>
                   {/each}
                   {#if getTagSuggestionsForBookmark(bookmark).length === 0 && !isNewTagForBookmark(bookmark)}
-                    <div class="px-2 py-1 text-[10px] text-dim-foreground italic select-none">
+                    <div
+                      class="px-2 py-1 text-[10px] text-dim-foreground italic select-none"
+                    >
                       No tags yet
                     </div>
                   {/if}

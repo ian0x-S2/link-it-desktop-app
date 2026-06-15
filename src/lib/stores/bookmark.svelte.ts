@@ -16,7 +16,9 @@ class BookmarkStore {
   }
 
   async load(): Promise<void> {
-    if (!workspaceStore.activeId) return;
+    if (!workspaceStore.activeId) {
+      return;
+    }
     this.items = await bookmarkActions.getBookmarks(workspaceStore.activeId);
   }
 

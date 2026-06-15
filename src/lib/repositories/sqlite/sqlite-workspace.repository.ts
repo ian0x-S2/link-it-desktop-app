@@ -3,10 +3,10 @@ import type { CreateWorkspaceInput, Workspace } from "../../types/workspace";
 import type { WorkspaceRepository } from "../workspace.repository";
 
 interface WorkspaceRow {
+  createdAt: string;
   id: string;
   name: string;
   slug: string;
-  createdAt: string;
 }
 
 export class SqliteWorkspaceRepository implements WorkspaceRepository {

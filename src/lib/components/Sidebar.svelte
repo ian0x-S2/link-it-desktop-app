@@ -1,8 +1,8 @@
 <script lang="ts">
   import { toggleMode } from "mode-watcher";
   import { Button } from "$lib/components/ui/button";
-  import { Input } from "$lib/components/ui/input";
   import * as Dialog from "$lib/components/ui/dialog";
+  import { Input } from "$lib/components/ui/input";
   import type { Workspace } from "$lib/types/workspace";
 
   let {
@@ -59,7 +59,8 @@
       createDialogOpen = false;
       newWorkspaceName = "";
     } catch (e) {
-      createError = e instanceof Error ? e.message : "Failed to create workspace.";
+      createError =
+        e instanceof Error ? e.message : "Failed to create workspace.";
     } finally {
       isCreating = false;
     }
@@ -104,10 +105,13 @@
           onclick={() => onSelectWorkspace(workspace.id)}
         >
           <span
-            >{workspace.id === activeWorkspaceId ? "* " : "  "}{workspace.name}</span
+            >{workspace.id === activeWorkspaceId ? "* " : "  "}
+            {workspace.name}</span
           >
           <div class="flex items-center gap-1">
-            <span class="text-[10px] text-muted-foreground">@{workspace.slug}</span>
+            <span class="text-[10px] text-muted-foreground"
+              >@{workspace.slug}</span
+            >
             {#if workspaces.length > 1}
               <!-- svelte-ignore a11y_click_events_have_key_events -->
               <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -117,7 +121,8 @@
                   e.stopPropagation();
                   openDeleteDialog(workspace);
                 }}
-                title="Delete workspace">[x]</span
+                title="Delete workspace"
+                >[x]</span
               >
             {/if}
           </div>
@@ -237,10 +242,13 @@
 <!-- Create Workspace Dialog -->
 <Dialog.Root bind:open={createDialogOpen}>
   <Dialog.Content
+    showCloseButton={false}
     class="rounded-none border border-border bg-box-bg font-mono text-foreground p-0 gap-0 max-w-sm shadow-xl"
   >
     <Dialog.Header class="px-4 pt-4 pb-3 border-b border-border">
-      <Dialog.Title class="text-xs font-bold uppercase tracking-widest text-primary">
+      <Dialog.Title
+        class="text-xs font-bold uppercase tracking-widest text-primary"
+      >
         // New Workspace
       </Dialog.Title>
       <Dialog.Description class="text-[10px] text-muted-foreground mt-1">
@@ -248,7 +256,9 @@
       </Dialog.Description>
     </Dialog.Header>
     <div class="px-4 py-3">
-      <div class="flex items-center gap-1.5 px-2 py-1.5 border border-border bg-transparent">
+      <div
+        class="flex items-center gap-1.5 px-2 py-1.5 border border-border bg-transparent"
+      >
         <span class="text-primary font-bold text-[10px] select-none">$</span>
         <Input
           bind:value={newWorkspaceName}
@@ -262,7 +272,9 @@
         <p class="text-[10px] text-destructive mt-1.5 px-1">{createError}</p>
       {/if}
     </div>
-    <Dialog.Footer class="px-4 pb-4 flex gap-2 justify-end border-t border-border pt-3">
+    <Dialog.Footer
+      class="px-4 pb-4 flex gap-2 justify-end border-t border-border pt-3"
+    >
       <Dialog.Close>
         {#snippet child({ props })}
           <Button
@@ -291,14 +303,19 @@
 <!-- Delete Workspace Confirmation Dialog -->
 <Dialog.Root bind:open={deleteDialogOpen}>
   <Dialog.Content
+    showCloseButton={false}
     class="rounded-none border border-destructive bg-box-bg font-mono text-foreground p-0 gap-0 max-w-sm shadow-xl"
   >
     <Dialog.Header class="px-4 pt-4 pb-3 border-b border-border">
-      <Dialog.Title class="text-xs font-bold uppercase tracking-widest text-destructive">
+      <Dialog.Title
+        class="text-xs font-bold uppercase tracking-widest text-destructive"
+      >
         // Delete Workspace
       </Dialog.Title>
       <Dialog.Description class="text-[10px] text-muted-foreground mt-1">
-        This will permanently delete <span class="text-foreground font-bold">{workspaceToDelete?.name}</span> and all its bookmarks. This action cannot be undone.
+        This will permanently delete
+        <span class="text-foreground font-bold">{workspaceToDelete?.name}</span>
+        and all its bookmarks. This action cannot be undone.
       </Dialog.Description>
     </Dialog.Header>
     <Dialog.Footer class="px-4 py-4 flex gap-2 justify-end">
