@@ -4,8 +4,8 @@ import type { BookmarkRepository } from "../bookmark.repository";
 const bookmarks: Bookmark[] = [];
 
 export class MemoryBookmarkRepository implements BookmarkRepository {
-  async getAll(): Promise<Bookmark[]> {
-    return [...bookmarks];
+  async getAll(workspaceId: string): Promise<Bookmark[]> {
+    return bookmarks.filter((b) => b.workspaceId === workspaceId);
   }
 
   async create(

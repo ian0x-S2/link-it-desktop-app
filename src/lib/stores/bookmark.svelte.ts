@@ -1,5 +1,6 @@
 import { bookmarkActions } from "../repositories/config/repository";
 import type { Bookmark } from "../types/bookmark";
+import { workspaceStore } from "./workspace.svelte";
 
 class BookmarkStore {
   items = $state<Bookmark[]>([]);
@@ -15,7 +16,8 @@ class BookmarkStore {
   }
 
   async load(): Promise<void> {
-    this.items = await bookmarkActions.getBookmarks();
+    if (!workspaceStore.activeId) return;
+    this.items = await bookmarkActions.getBookmarks(workspaceStore.activeId);
   }
 
   async create(
@@ -35,6 +37,10 @@ class BookmarkStore {
       faviconUrl: string;
     }
   ): Promise<void> {
+    if (!workspaceStore.activeId) {
+      throw new Error("No active workspace selected.");
+    }
+
     const normalized = bookmarkActions.normalizeUrl(url);
     if (!bookmarkActions.validateUrl(normalized)) {
       throw new Error("Invalid URL");
@@ -46,6 +52,7 @@ class BookmarkStore {
     }
 
     await this.create({
+      workspaceId: workspaceStore.activeId,
       url: normalized,
       title: resolvedMetadata.title,
       description: resolvedMetadata.description,

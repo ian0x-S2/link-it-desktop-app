@@ -16,6 +16,7 @@
   import { bookmarkStore } from "$lib/stores/bookmark.svelte";
   import { THEMES, themeStore } from "$lib/stores/theme.svelte";
   import { viewStore } from "$lib/stores/view.svelte";
+  import { workspaceStore } from "$lib/stores/workspace.svelte";
 
   // Prompt input ref (local UI concern)
   let promptValue = $state("");
@@ -71,9 +72,16 @@
   $effect(() => {
     untrack(() => {
       themeStore.load();
-      bookmarkStore.load();
+      workspaceStore.load();
     });
     return setupKeyboardShortcuts(() => promptInput);
+  });
+
+  // Reload bookmarks whenever the active workspace changes.
+  $effect(() => {
+    if (workspaceStore.activeId) {
+      bookmarkStore.load();
+    }
   });
 </script>
 
@@ -87,6 +95,14 @@
     <!-- Left Column: Sidebar -->
     <div class="w-full lg:w-64 flex flex-col shrink-0 pt-2">
       <Sidebar
+        workspaces={workspaceStore.items}
+        activeWorkspaceId={workspaceStore.activeId}
+        onSelectWorkspace={(id) => {
+          workspaceStore.select(id);
+          viewStore.setCategory('inbox');
+        }}
+        onCreateWorkspace={(name) => workspaceStore.create(name)}
+        onDeleteWorkspace={(id) => workspaceStore.delete(id)}
         selectedCategory={viewStore.category}
         onSelectCategory={(cat) => viewStore.setCategory(cat)}
         bookmarkCount={totalItems}
@@ -94,7 +110,7 @@
         {trashCount}
         currentTheme={themeStore.current}
         themes={THEMES}
-        changeTheme={(t) => themeStore.change(t)}
+        changeTheme={(t) => themeStore.change(t as (typeof THEMES)[number])}
         onAddLinkClick={() => promptInput?.focus()}
       />
     </div>

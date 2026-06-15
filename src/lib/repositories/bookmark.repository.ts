@@ -6,7 +6,7 @@ export interface BookmarkRepository {
     data: Omit<Bookmark, "id" | "createdAt" | "updatedAt" | "deletedAt">
   ): Promise<Bookmark>;
   deletePermanently(id: string): Promise<void>;
-  getAll(): Promise<Bookmark[]>;
+  getAll(workspaceId: string): Promise<Bookmark[]>;
   removeTag(bookmarkId: string, tag: string): Promise<void>;
   restore(id: string): Promise<void>;
   softDelete(id: string): Promise<void>;

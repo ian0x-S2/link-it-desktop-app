@@ -94,10 +94,10 @@
 </script>
 
 <div
-  class="relative p-4 flex flex-col bg-box-bg border border-border lg:flex-[2] min-h-[140px] lg:min-h-0 select-none font-mono"
+  class="relative p-4 flex flex-col bg-box-bg border border-border lg:flex-2 min-h-35 lg:min-h-0 select-none font-mono"
 >
   <span
-    class="absolute px-1.5 text-[10px] font-bold uppercase tracking-wider -top-[7px] left-[10px] bg-background text-primary"
+    class="absolute px-1.5 text-[10px] font-bold uppercase tracking-wider -top-1.75 left-2.5 bg-background text-primary"
     >Tags</span
   >
 
@@ -127,7 +127,7 @@
 
   <!-- Scrollable Tags list -->
   <div
-    class="flex-1 overflow-y-auto pr-1 space-y-1 [&::-webkit-scrollbar]:w-[4px] [&::-webkit-scrollbar-thumb]:bg-border hover:[&::-webkit-scrollbar-thumb]:bg-primary min-h-0"
+    class="flex-1 overflow-y-auto pr-1 space-y-1 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-border hover:[&::-webkit-scrollbar-thumb]:bg-primary min-h-0"
   >
     {#each filteredTags() as tag (tag.name)}
       <div

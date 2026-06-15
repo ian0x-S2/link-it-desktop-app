@@ -69,8 +69,8 @@ export class BookmarkActions {
     }
   }
 
-  async getBookmarks(): Promise<Bookmark[]> {
-    return await this.repository.getAll();
+  async getBookmarks(workspaceId: string): Promise<Bookmark[]> {
+    return await this.repository.getAll(workspaceId);
   }
 
   async createBookmark(

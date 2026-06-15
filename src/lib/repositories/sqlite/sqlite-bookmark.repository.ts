@@ -14,6 +14,7 @@ interface BookmarkRow {
   title: string;
   updatedAt: string;
   url: string;
+  workspaceId: string;
 }
 
 interface TagRow {
@@ -25,23 +26,28 @@ export class SqliteBookmarkRepository implements BookmarkRepository {
     return await getDatabase();
   }
 
-  async getAll(): Promise<Bookmark[]> {
+  async getAll(workspaceId: string): Promise<Bookmark[]> {
     const db = await this.getDb();
-    const rows = await db.select<BookmarkRow[]>(`
-      SELECT 
-        id, 
-        title, 
-        url, 
-        image_url as imageUrl, 
-        favicon_url as faviconUrl, 
-        description, 
-        created_at as createdAt, 
+    const rows = await db.select<BookmarkRow[]>(
+      `
+      SELECT
+        id,
+        workspace_id as workspaceId,
+        title,
+        url,
+        image_url as imageUrl,
+        favicon_url as faviconUrl,
+        description,
+        created_at as createdAt,
         updated_at as updatedAt,
         deleted_at as deletedAt,
-        is_favorite as isFavorite 
-      FROM bookmarks 
+        is_favorite as isFavorite
+      FROM bookmarks
+      WHERE workspace_id = $1
       ORDER BY created_at DESC
-    `);
+    `,
+      [workspaceId]
+    );
 
     const bookmarks = await Promise.all(
       rows.map(async (row) => {
@@ -52,6 +58,7 @@ export class SqliteBookmarkRepository implements BookmarkRepository {
 
         return {
           id: row.id,
+          workspaceId: row.workspaceId,
           title: row.title,
           url: row.url,
           imageUrl: row.imageUrl || "",
@@ -77,11 +84,12 @@ export class SqliteBookmarkRepository implements BookmarkRepository {
     const now = new Date().toISOString();
 
     await db.execute(
-      `INSERT INTO bookmarks 
-       (id, title, url, image_url, favicon_url, description, created_at, updated_at, is_favorite)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+      `INSERT INTO bookmarks
+       (id, workspace_id, title, url, image_url, favicon_url, description, created_at, updated_at, is_favorite)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
       [
         id,
+        data.workspaceId,
         data.title,
         data.url,
         data.imageUrl || "",
@@ -104,6 +112,7 @@ export class SqliteBookmarkRepository implements BookmarkRepository {
 
     return {
       id,
+      workspaceId: data.workspaceId,
       title: data.title,
       url: data.url,
       imageUrl: data.imageUrl || "",
@@ -156,7 +165,7 @@ export class SqliteBookmarkRepository implements BookmarkRepository {
     const db = await this.getDb();
     const now = new Date().toISOString();
     const sets: string[] = ["updated_at = $1"];
-    const params: any[] = [now];
+    const params: unknown[] = [now];
 
     let paramIndex = 2;
     if (data.title !== undefined) {
