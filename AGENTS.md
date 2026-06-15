@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-link-it is a local-first desktop bookmark manager built with:
+link-it is a local-first desktop bookmark manager with TUI asthetics built with:
 
 * Tauri v2
 * SvelteKit 2
