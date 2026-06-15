@@ -2,6 +2,7 @@
   import { Badge } from "$lib/components/ui/badge";
   import { Button } from "$lib/components/ui/button";
   import * as Card from "$lib/components/ui/card";
+  import { getFavicon } from "$lib/utils";
   import type { Bookmark } from "../types/bookmark";
 
   let {
@@ -62,9 +63,18 @@
       class="flex items-center justify-between px-2 py-1 border-b border-border text-[10px] text-muted-foreground select-none shrink-0 w-full"
     >
       <div class="flex items-center gap-1.5 min-w-0">
-        <span
-          class="size-1.5 rounded-full shrink-0 {bookmark.isFavorite ? 'bg-primary' : 'bg-muted-foreground'}"
-        ></span>
+        {#if getFavicon(bookmark.url, bookmark.faviconUrl)}
+          <img
+            src={getFavicon(bookmark.url, bookmark.faviconUrl)}
+            alt=""
+            class="size-3.5 object-contain shrink-0"
+            onerror={(e) => {
+              (e.target as HTMLImageElement).style.display = "none";
+            }}
+          >
+        {:else}
+          <span class="size-3.5 block shrink-0 bg-primary/20 rounded-sm"></span>
+        {/if}
         <span class="font-bold text-foreground truncate">{displayUrl}</span>
       </div>
       <span class="shrink-0 ml-2">{calculateAge(bookmark.createdAt)}</span>

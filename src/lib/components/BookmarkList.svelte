@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Badge } from "$lib/components/ui/badge";
   import { Button } from "$lib/components/ui/button";
+  import { getFavicon } from "$lib/utils";
   import type { Bookmark } from "../types/bookmark";
 
   let {
@@ -37,9 +38,26 @@
     >
       <div class="flex items-center justify-between text-xs">
         <div class="flex items-center gap-2">
-          <span class="text-primary font-bold"
-            >[ {String(i + 1).padStart(2, '0')} ]</span
+          <span
+            class="text-primary font-bold flex items-center gap-1 select-none"
           >
+            <span>[</span>
+            {#if getFavicon(bookmark.url, bookmark.faviconUrl)}
+              <img
+                src={getFavicon(bookmark.url, bookmark.faviconUrl)}
+                alt=""
+                class="size-3.5 object-contain shrink-0"
+                onerror={(e) => {
+                  (e.target as HTMLImageElement).style.display = "none";
+                }}
+              >
+            {:else}
+              <span
+                class="size-3.5 block shrink-0 bg-primary/20 rounded-sm"
+              ></span>
+            {/if}
+            <span>]</span>
+          </span>
           <span class="font-bold text-sm text-foreground"
             >{bookmark.title}</span
           >

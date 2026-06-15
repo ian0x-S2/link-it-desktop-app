@@ -232,4 +232,3 @@
   <!-- Footer -->
   <FooterBar />
 </div>
-

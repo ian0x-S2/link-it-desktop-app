@@ -15,3 +15,20 @@ export type WithoutChildrenOrChild<T> = WithoutChildren<WithoutChild<T>>;
 export type WithElementRef<T, U extends HTMLElement = HTMLElement> = T & {
   ref?: U | null;
 };
+
+export function getFavicon(url: string, faviconUrl: string): string {
+  if (faviconUrl) {
+    return faviconUrl;
+  }
+  try {
+    const domain = url
+      .replace("https://", "")
+      .replace("http://", "")
+      .replace("www.", "")
+      .split("/")[0];
+    return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
+  } catch {
+    return "";
+  }
+}
+
