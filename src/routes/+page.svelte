@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { onMount } from "svelte";
   import { setupKeyboardShortcuts } from "$lib/actions/keyboardShortcuts";
   import BookmarkGrid from "$lib/components/BookmarkGrid.svelte";
   import BookmarkList from "$lib/components/BookmarkList.svelte";
@@ -49,7 +48,7 @@
     }
   }
 
-  onMount(() => {
+  $effect(() => {
     themeStore.load();
     bookmarkStore.load();
     return setupKeyboardShortcuts(() => promptInput);
@@ -234,14 +233,3 @@
   <FooterBar />
 </div>
 
-<style>
-  @keyframes blink {
-    0%,
-    100% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0;
-    }
-  }
-</style>
