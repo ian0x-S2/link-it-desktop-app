@@ -1,5 +1,7 @@
 use std::time::Duration;
 
+use scraper::{Html, Selector};
+
 #[derive(serde::Serialize)]
 struct Metadata {
     title: Option<String>,
@@ -8,93 +10,140 @@ struct Metadata {
     favicon_url: Option<String>,
 }
 
-fn decode_html_entities(s: &str) -> String {
-    s.replace("&amp;", "&")
-        .replace("&lt;", "<")
-        .replace("&gt;", ">")
-        .replace("&quot;", "\"")
-        .replace("&#39;", "'")
-        .replace("&apos;", "'")
+// ---------------------------------------------------------------------------
+// Selector helpers
+// ---------------------------------------------------------------------------
+
+/// Returns the `content` attribute of the first `<meta>` tag matching the given
+/// CSS selector string, or `None` if not found.
+fn meta_content(document: &Html, selector_str: &str) -> Option<String> {
+    let selector = Selector::parse(selector_str).ok()?;
+    document
+        .select(&selector)
+        .next()
+        .and_then(|el| el.value().attr("content"))
+        .map(|s| s.trim().to_string())
+        .filter(|s| !s.is_empty())
 }
 
-fn extract_title(html: &str) -> Option<String> {
-    let lower = html.to_lowercase();
-    if let Some(start_idx) = lower.find("<title>") {
-        let content_start = start_idx + 7;
-        if let Some(end_idx) = lower[content_start..].find("</title>") {
-            let title = html[content_start..content_start + end_idx].trim();
-            return Some(decode_html_entities(title));
+/// Returns the first non-empty value from a list of CSS selectors, each
+/// expected to have a `content` attribute.
+fn meta_content_cascade(document: &Html, selectors: &[&str]) -> Option<String> {
+    for &sel in selectors {
+        if let Some(val) = meta_content(document, sel) {
+            return Some(val);
         }
     }
     None
 }
 
-fn extract_meta_tag(html: &str, attr_name: &str, attr_val: &str) -> Option<String> {
-    let lower_html = html.to_lowercase();
-    let search_val = attr_val.to_lowercase();
-    
-    let mut search_pos = 0;
-    while let Some(idx) = lower_html[search_pos..].find(&search_val) {
-        let abs_idx = search_pos + idx;
-        if let Some(tag_start) = html[..abs_idx].rfind('<') {
-            if let Some(tag_end) = html[abs_idx..].find('>') {
-                let abs_tag_end = abs_idx + tag_end;
-                let tag_content = &html[tag_start..=abs_tag_end];
-                let tag_lower = tag_content.to_lowercase();
-                
-                if tag_lower.starts_with("<meta") {
-                    if tag_lower.contains(attr_name) && tag_lower.contains("content=") {
-                        if let Some(content_idx) = tag_lower.find("content=") {
-                            let content_part = &tag_content[content_idx + 8..];
-                            let mut chars = content_part.chars();
-                            if let Some(quote_char) = chars.next() {
-                                if quote_char == '"' || quote_char == '\'' {
-                                    if let Some(close_quote_idx) = content_part[1..].find(quote_char) {
-                                        let content = &content_part[1..=close_quote_idx];
-                                        return Some(decode_html_entities(content.trim()));
-                                    }
-                                }
-                            }
-                        }
+// ---------------------------------------------------------------------------
+// Field extractors
+// ---------------------------------------------------------------------------
+
+fn extract_title(document: &Html) -> Option<String> {
+    // 1. og:title
+    // 2. twitter:title
+    // 3. <title> tag
+    if let Some(val) = meta_content_cascade(
+        document,
+        &[
+            "meta[property='og:title']",
+            "meta[name='og:title']",
+            "meta[name='twitter:title']",
+            "meta[property='twitter:title']",
+        ],
+    ) {
+        return Some(val);
+    }
+
+    let selector = Selector::parse("title").ok()?;
+    document
+        .select(&selector)
+        .next()
+        .map(|el| el.text().collect::<String>().trim().to_string())
+        .filter(|s| !s.is_empty())
+}
+
+fn extract_description(document: &Html) -> Option<String> {
+    meta_content_cascade(
+        document,
+        &[
+            "meta[property='og:description']",
+            "meta[name='og:description']",
+            "meta[name='twitter:description']",
+            "meta[property='twitter:description']",
+            "meta[name='description']",
+        ],
+    )
+}
+
+fn extract_image(document: &Html) -> Option<String> {
+    meta_content_cascade(
+        document,
+        &[
+            "meta[property='og:image']",
+            "meta[name='og:image']",
+            "meta[property='og:image:url']",
+            "meta[name='twitter:image:src']",
+            "meta[name='twitter:image']",
+            "meta[property='twitter:image']",
+        ],
+    )
+}
+
+/// Extracts the best favicon `href` from `<link>` tags.
+/// Priority: apple-touch-icon → shortcut icon → icon
+fn extract_favicon_href(document: &Html) -> Option<String> {
+    // Ordered from most-preferred to least-preferred
+    let candidates = [
+        "link[rel~='apple-touch-icon']",
+        "link[rel~='apple-touch-icon-precomposed']",
+        "link[rel='shortcut icon']",
+        "link[rel~='icon']",
+    ];
+
+    for sel_str in &candidates {
+        if let Ok(selector) = Selector::parse(sel_str) {
+            if let Some(el) = document.select(&selector).next() {
+                if let Some(href) = el.value().attr("href") {
+                    let href = href.trim();
+                    if !href.is_empty() {
+                        return Some(href.to_string());
                     }
                 }
             }
         }
-        search_pos = abs_idx + search_val.len();
     }
     None
 }
 
-fn get_metadata_field(html: &str, keys: &[(&str, &str)]) -> Option<String> {
-    for &(attr_name, attr_val) in keys {
-        if let Some(content) = extract_meta_tag(html, attr_name, attr_val) {
-            return Some(content);
-        }
-    }
-    None
-}
+// ---------------------------------------------------------------------------
+// URL resolution
+// ---------------------------------------------------------------------------
 
 fn resolve_url(href: &str, base_url: &str) -> String {
     if href.starts_with("http://") || href.starts_with("https://") {
         return href.to_string();
     }
-    
-    let parts: Vec<&str> = base_url.split("://").collect();
-    if parts.len() < 2 {
+
+    let Some(scheme_end) = base_url.find("://") else {
         return href.to_string();
-    }
-    let protocol = parts[0];
-    let rest = parts[1];
-    let host = rest.split('/').next().unwrap_or(rest);
-    
+    };
+
+    let scheme = &base_url[..scheme_end];
+    let after_scheme = &base_url[scheme_end + 3..];
+    let host = after_scheme.split('/').next().unwrap_or(after_scheme);
+
     if href.starts_with("//") {
-        return format!("{}://{}", protocol, &href[2..]);
+        return format!("{}://{}", scheme, &href[2..]);
     }
-    
+
     if href.starts_with('/') {
-        return format!("{}://{}{}", protocol, host, href);
+        return format!("{}://{}{}", scheme, host, href);
     }
-    
+
+    // Relative path — resolve against base directory
     let base_dir = if base_url.ends_with('/') {
         base_url.to_string()
     } else {
@@ -106,93 +155,63 @@ fn resolve_url(href: &str, base_url: &str) -> String {
             base_url.to_string() + "/"
         }
     };
+
     format!("{}{}", base_dir, href)
 }
 
-fn extract_favicon(html: &str, base_url: &str) -> Option<String> {
-    let lower_html = html.to_lowercase();
-    let mut search_pos = 0;
-    
-    while let Some(rel_idx) = lower_html[search_pos..].find("rel=") {
-        let abs_rel_idx = search_pos + rel_idx;
-        if let Some(tag_start) = html[..abs_rel_idx].rfind('<') {
-            if let Some(tag_end) = html[abs_rel_idx..].find('>') {
-                let abs_tag_end = abs_rel_idx + tag_end;
-                let tag_content = &html[tag_start..=abs_tag_end];
-                let tag_lower = tag_content.to_lowercase();
-                
-                if tag_lower.starts_with("<link") && (tag_lower.contains("icon") || tag_lower.contains("shortcut icon") || tag_lower.contains("apple-touch-icon")) {
-                    if let Some(href_idx) = tag_lower.find("href=") {
-                        let href_part = &tag_content[href_idx + 5..];
-                        let mut chars = href_part.chars();
-                        if let Some(quote_char) = chars.next() {
-                            if quote_char == '"' || quote_char == '\'' {
-                                if let Some(close_quote_idx) = href_part[1..].find(quote_char) {
-                                    let href_val = &href_part[1..=close_quote_idx];
-                                    return Some(resolve_url(href_val.trim(), base_url));
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        search_pos = abs_rel_idx + 4;
-    }
-    None
+fn google_favicon_fallback(base_url: &str) -> String {
+    let host = base_url
+        .find("://")
+        .map(|i| &base_url[i + 3..])
+        .unwrap_or(base_url)
+        .split('/')
+        .next()
+        .unwrap_or(base_url);
+
+    format!("https://www.google.com/s2/favicons?domain={}&sz=32", host)
 }
 
-fn get_google_favicon(base_url: &str) -> String {
-    let parts: Vec<&str> = base_url.split("://").collect();
-    if parts.len() >= 2 {
-        let rest = parts[1];
-        let host = rest.split('/').next().unwrap_or(rest);
-        return format!("https://www.google.com/s2/favicons?domain={}&sz=32", host);
-    }
-    format!("https://www.google.com/s2/favicons?domain={}&sz=32", base_url)
-}
+// ---------------------------------------------------------------------------
+// Tauri command
+// ---------------------------------------------------------------------------
 
 #[tauri::command]
 async fn fetch_metadata(url: String) -> Result<Metadata, String> {
     let mut normalized_url = url.trim().to_string();
-    if !normalized_url.to_lowercase().starts_with("http://") && !normalized_url.to_lowercase().starts_with("https://") {
+    if !normalized_url.to_lowercase().starts_with("http://")
+        && !normalized_url.to_lowercase().starts_with("https://")
+    {
         normalized_url = format!("https://{}", normalized_url);
     }
-    
+
     let client = reqwest::Client::builder()
         .user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
-        .timeout(Duration::from_secs(5))
+        .timeout(Duration::from_secs(10))
         .build()
         .map_err(|e| e.to_string())?;
-        
-    let response = client.get(&normalized_url)
+
+    let response = client
+        .get(&normalized_url)
         .send()
         .await
         .map_err(|e| e.to_string())?;
-        
+
     let final_url = response.url().as_str().to_string();
-    
-    let html = response.text()
-        .await
-        .map_err(|e| e.to_string())?;
-        
-    let title = extract_title(&html);
-    
-    let description = get_metadata_field(&html, &[
-        ("property", "og:description"),
-        ("name", "description"),
-        ("property", "twitter:description"),
-    ]);
-    
-    let image_url = get_metadata_field(&html, &[
-        ("property", "og:image"),
-        ("name", "image"),
-        ("property", "twitter:image"),
-    ]).map(|img| resolve_url(&img, &final_url));
-    
-    let favicon_url = extract_favicon(&html, &final_url)
-        .unwrap_or_else(|| get_google_favicon(&final_url));
-        
+
+    let html = response.text().await.map_err(|e| e.to_string())?;
+
+    let document = Html::parse_document(&html);
+
+    let title = extract_title(&document);
+    let description = extract_description(&document);
+
+    let image_url = extract_image(&document)
+        .map(|img| resolve_url(&img, &final_url));
+
+    let favicon_url = extract_favicon_href(&document)
+        .map(|href| resolve_url(&href, &final_url))
+        .unwrap_or_else(|| google_favicon_fallback(&final_url));
+
     Ok(Metadata {
         title,
         description,
