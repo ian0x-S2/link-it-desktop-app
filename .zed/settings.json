@@ -1,6 +1,6 @@
 {
   "format_on_save": "on",
-  "formatter": "language_server",
+  "formatter": "prettier",
   "lsp": {
     "typescript-language-server": {
       "settings": {
@@ -15,35 +15,22 @@
   "languages": {
     "JavaScript": {
       "code_actions_on_format": {
-        "source.fixAll.biome": true,
-        "source.organizeImports.biome": true
-      },
-      "formatter": {
-        "language_server": {
-          "name": "biome"
-        }
+        "source.fixAll.eslint": true
       }
     },
     "TSX": {
       "code_actions_on_format": {
-        "source.fixAll.biome": true,
-        "source.organizeImports.biome": true
-      },
-      "formatter": {
-        "language_server": {
-          "name": "biome"
-        }
+        "source.fixAll.eslint": true
       }
     },
     "TypeScript": {
       "code_actions_on_format": {
-        "source.fixAll.biome": true,
-        "source.organizeImports.biome": true
-      },
-      "formatter": {
-        "language_server": {
-          "name": "biome"
-        }
+        "source.fixAll.eslint": true
+      }
+    },
+    "Svelte": {
+      "code_actions_on_format": {
+        "source.fixAll.eslint": true
       }
     }
   }

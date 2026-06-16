@@ -4,13 +4,13 @@
 
 link-it is a local-first desktop bookmark manager with TUI asthetics built with:
 
-* Tauri v2
-* SvelteKit 2
-* Svelte 5 (Runes)
-* TypeScript
-* SQLite
-* @tauri-apps/plugin-sql
-* tailwind css 
+- Tauri v2
+- SvelteKit 2
+- Svelte 5 (Runes)
+- TypeScript
+- SQLite
+- @tauri-apps/plugin-sql
+- tailwind css
 
 The application runs entirely on the client machine and does not use an HTTP backend.
 
@@ -78,16 +78,16 @@ Svelte components are responsible only for presentation and user interaction.
 
 Allowed:
 
-* Rendering
-* Event handling
-* Calling stores
+- Rendering
+- Event handling
+- Calling stores
 
 Not allowed:
 
-* SQL queries
-* Business rules
-* Data validation
-* Direct database access
+- SQL queries
+- Business rules
+- Data validation
+- Direct database access
 
 ---
 
@@ -97,16 +97,16 @@ Stores manage reactive application state.
 
 Allowed:
 
-* UI state
-* Loading state
-* Error state
-* Optimistic updates
+- UI state
+- Loading state
+- Error state
+- Optimistic updates
 
 Not allowed:
 
-* SQL
-* Database access
-* Complex business rules
+- SQL
+- Database access
+- Complex business rules
 
 Stores communicate only with Actions.
 
@@ -118,11 +118,11 @@ Actions contain all business logic.
 
 Examples:
 
-* URL validation
-* Duplicate detection
-* Tag normalization
-* Sorting rules
-* Domain-specific behavior
+- URL validation
+- Duplicate detection
+- Tag normalization
+- Sorting rules
+- Domain-specific behavior
 
 Services orchestrate repositories and return application data.
 
@@ -136,16 +136,16 @@ Repositories are responsible only for data persistence.
 
 Allowed:
 
-* CRUD operations
-* SQL execution
-* Mapping database rows
+- CRUD operations
+- SQL execution
+- Mapping database rows
 
 Not allowed:
 
-* Validation
-* Sorting
-* Business logic
-* UI concerns
+- Validation
+- Sorting
+- Business logic
+- UI concerns
 
 Repositories should remain thin.
 
@@ -158,7 +158,7 @@ Use simple factory-based dependency injection.
 Preferred:
 
 ```ts
-createBookmarkStore(action)
+createBookmarkStore(action);
 ```
 
 Avoid hidden dependencies.
@@ -173,11 +173,11 @@ Use raw SQL.
 
 Do not introduce:
 
-* Prisma
-* Drizzle
-* TypeORM
-* Sequelize
-* Any ORM
+- Prisma
+- Drizzle
+- TypeORM
+- Sequelize
+- Any ORM
 
 Repository implementations should use @tauri-apps/plugin-sql directly.
 
@@ -189,10 +189,10 @@ Use Zod for all external input validation.
 
 Examples:
 
-* Form submissions
-* Import operations
-* User-provided URLs
-* Future settings screens
+- Form submissions
+- Import operations
+- User-provided URLs
+- Future settings screens
 
 Validation should occur before business logic execution.
 
@@ -259,9 +259,9 @@ Optimize only when there is measurable evidence.
 
 Avoid:
 
-* Complex caching layers
-* Unnecessary memoization
-* Over-engineering
+- Complex caching layers
+- Unnecessary memoization
+- Over-engineering
 
 ---
 
@@ -271,9 +271,9 @@ Business logic should be testable without SQLite.
 
 Use repository interfaces to enable:
 
-* Memory repositories
-* Mock repositories
-* Future test doubles
+- Memory repositories
+- Mock repositories
+- Future test doubles
 
 Actions should be the primary testing target.
 
@@ -295,8 +295,6 @@ When generating code for this project:
 10. Avoid introducing new architectural patterns without justification.
 
 When in doubt, choose the simpler solution.
-
-
 
 # Ultracite Code Standards
 
@@ -339,4 +337,3 @@ Write code that is **accessible, performant, type-safe, and maintainable**. Focu
 - Use `async/await` syntax instead of promise chains for better readability
 - Handle errors appropriately in async code with try-catch blocks
 - Don't use async functions as Promise executors
- 

@@ -1,4 +1,4 @@
-import type { Bookmark } from "$lib/types/bookmark";
+import type { Bookmark } from '$lib/types/bookmark';
 
 const MAX_SUGGESTIONS = 8;
 
@@ -25,7 +25,7 @@ export function getAllUniqueTags(items: Bookmark[]): string[] {
 export function getTagSuggestions(
   allTags: string[],
   existingTags: string[],
-  query: string
+  query: string,
 ): string[] {
   const q = query.trim().toLowerCase();
   const available = allTags.filter((t) => !existingTags.includes(t));

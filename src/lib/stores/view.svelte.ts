@@ -1,11 +1,11 @@
-export type ViewMode = "grid" | "list";
-export type Category = "inbox" | "favorites" | "trash";
+export type ViewMode = 'grid' | 'list';
+export type Category = 'inbox' | 'favorites' | 'trash';
 
 class ViewStore {
-  mode = $state<ViewMode>("grid");
-  category = $state<Category>("inbox");
+  mode = $state<ViewMode>('grid');
+  category = $state<Category>('inbox');
   selectedTag = $state<string | null>(null);
-  searchQuery = $state("");
+  searchQuery = $state('');
   searchActive = $state(false);
 
   setCategory(cat: Category) {
@@ -21,7 +21,7 @@ class ViewStore {
   setSearchActive(active: boolean) {
     this.searchActive = active;
     if (!active) {
-      this.searchQuery = "";
+      this.searchQuery = '';
     }
   }
 

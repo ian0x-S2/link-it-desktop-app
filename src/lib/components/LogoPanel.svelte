@@ -14,15 +14,11 @@
     >Linkit</span
   >
 
-  <div
-    class="text-[9px] text-primary leading-tight font-bold whitespace-pre mb-2 overflow-x-auto"
-  >
+  <div class="text-[9px] text-primary leading-tight font-bold whitespace-pre mb-2 overflow-x-auto">
     {@html logo}
   </div>
 
-  <p class="text-[10px] text-muted-foreground mt-1 leading-tight">
-    Local-first link manager.
-  </p>
+  <p class="text-[10px] text-muted-foreground mt-1 leading-tight">Local-first link manager.</p>
 
   <div
     class="mt-auto pt-4 flex items-center justify-between border-t border-dashed border-border-dim text-[9px] font-bold shrink-0"

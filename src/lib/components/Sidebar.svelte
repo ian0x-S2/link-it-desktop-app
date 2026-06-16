@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { toggleMode } from "mode-watcher";
-  import { Button } from "$lib/components/ui/button";
-  import * as Dialog from "$lib/components/ui/dialog";
-  import { Input } from "$lib/components/ui/input";
-  import type { Workspace } from "$lib/types/workspace";
+  import { toggleMode } from 'mode-watcher';
+  import { Button } from '$lib/components/ui/button';
+  import * as Dialog from '$lib/components/ui/dialog';
+  import { Input } from '$lib/components/ui/input';
+  import type { Workspace } from '$lib/types/workspace';
 
   let {
     workspaces,
@@ -26,8 +26,8 @@
     onSelectWorkspace: (id: string) => void;
     onCreateWorkspace: (name: string) => Promise<void>;
     onDeleteWorkspace: (id: string) => void;
-    selectedCategory: "inbox" | "favorites" | "trash";
-    onSelectCategory: (cat: "inbox" | "favorites" | "trash") => void;
+    selectedCategory: 'inbox' | 'favorites' | 'trash';
+    onSelectCategory: (cat: 'inbox' | 'favorites' | 'trash') => void;
     bookmarkCount: number;
     favoriteCount: number;
     trashCount: number;
@@ -39,8 +39,8 @@
 
   // --- Create workspace dialog state ---
   let createDialogOpen = $state(false);
-  let newWorkspaceName = $state("");
-  let createError = $state("");
+  let newWorkspaceName = $state('');
+  let createError = $state('');
   let isCreating = $state(false);
 
   // --- Delete workspace dialog state ---
@@ -49,25 +49,24 @@
 
   async function handleCreate() {
     if (!newWorkspaceName.trim()) {
-      createError = "Name cannot be empty.";
+      createError = 'Name cannot be empty.';
       return;
     }
     isCreating = true;
-    createError = "";
+    createError = '';
     try {
       await onCreateWorkspace(newWorkspaceName.trim());
       createDialogOpen = false;
-      newWorkspaceName = "";
+      newWorkspaceName = '';
     } catch (e) {
-      createError =
-        e instanceof Error ? e.message : "Failed to create workspace.";
+      createError = e instanceof Error ? e.message : 'Failed to create workspace.';
     } finally {
       isCreating = false;
     }
   }
 
   function handleCreateKeydown(e: KeyboardEvent) {
-    if (e.key === "Enter") {
+    if (e.key === 'Enter') {
       e.preventDefault();
       handleCreate();
     }
@@ -99,19 +98,18 @@
         <!-- svelte-ignore a11y_click_events_have_key_events -->
         <!-- svelte-ignore a11y_no_static_element_interactions -->
         <div
-          class="group flex items-center justify-between cursor-pointer py-0.5 px-1.5 transition-colors {workspace.id === activeWorkspaceId
+          class="group flex items-center justify-between cursor-pointer py-0.5 px-1.5 transition-colors {workspace.id ===
+          activeWorkspaceId
             ? 'text-primary font-bold'
             : 'text-foreground hover:text-primary'}"
           onclick={() => onSelectWorkspace(workspace.id)}
         >
           <span
-            >{workspace.id === activeWorkspaceId ? "* " : "  "}
+            >{workspace.id === activeWorkspaceId ? '* ' : '  '}
             {workspace.name}</span
           >
           <div class="flex items-center gap-1">
-            <span class="text-[10px] text-muted-foreground"
-              >@{workspace.slug}</span
-            >
+            <span class="text-[10px] text-muted-foreground">@{workspace.slug}</span>
             {#if workspaces.length > 1}
               <!-- svelte-ignore a11y_click_events_have_key_events -->
               <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -121,8 +119,7 @@
                   e.stopPropagation();
                   openDeleteDialog(workspace);
                 }}
-                title="Delete workspace"
-                >[x]</span
+                title="Delete workspace">[x]</span
               >
             {/if}
           </div>
@@ -134,8 +131,8 @@
       <div
         class="text-dim-foreground hover:text-foreground cursor-pointer py-0.5 px-1.5"
         onclick={() => {
-          newWorkspaceName = "";
-          createError = "";
+          newWorkspaceName = '';
+          createError = '';
           createDialogOpen = true;
         }}
       >
@@ -145,9 +142,7 @@
   </div>
 
   <!-- CATEGORIES Box -->
-  <div
-    class="relative flex flex-col bg-box-bg border border-border flex-1 min-h-0"
-  >
+  <div class="relative flex flex-col bg-box-bg border border-border flex-1 min-h-0">
     <span
       class="absolute px-1.5 text-[10px] font-bold uppercase tracking-wider -top-1.75 left-2.5 bg-background text-primary z-10"
       >Categories</span
@@ -160,12 +155,16 @@
         <!-- svelte-ignore a11y_no_static_element_interactions -->
         <div
           onclick={() => onSelectCategory('inbox')}
-          class="group flex items-center justify-between cursor-pointer py-0.5 px-1.5 transition-colors {selectedCategory === 'inbox' ? 'bg-primary text-background font-bold' : 'text-foreground hover:bg-accent hover:text-accent-foreground'}"
+          class="group flex items-center justify-between cursor-pointer py-0.5 px-1.5 transition-colors {selectedCategory ===
+          'inbox'
+            ? 'bg-primary text-background font-bold'
+            : 'text-foreground hover:bg-accent hover:text-accent-foreground'}"
         >
           <span>1 Inbox</span>
           <span
-            class={selectedCategory === 'inbox' ? 'text-background' : 'text-muted-foreground group-hover:text-accent-foreground'}
-            >[{bookmarkCount}]</span
+            class={selectedCategory === 'inbox'
+              ? 'text-background'
+              : 'text-muted-foreground group-hover:text-accent-foreground'}>[{bookmarkCount}]</span
           >
         </div>
 
@@ -173,12 +172,16 @@
         <!-- svelte-ignore a11y_no_static_element_interactions -->
         <div
           onclick={() => onSelectCategory('favorites')}
-          class="group flex items-center justify-between cursor-pointer py-0.5 px-1.5 transition-colors {selectedCategory === 'favorites' ? 'bg-primary text-background font-bold' : 'text-foreground hover:bg-accent hover:text-accent-foreground'}"
+          class="group flex items-center justify-between cursor-pointer py-0.5 px-1.5 transition-colors {selectedCategory ===
+          'favorites'
+            ? 'bg-primary text-background font-bold'
+            : 'text-foreground hover:bg-accent hover:text-accent-foreground'}"
         >
           <span>2 Favorites</span>
           <span
-            class={selectedCategory === 'favorites' ? 'text-background' : 'text-muted-foreground group-hover:text-accent-foreground'}
-            >[{favoriteCount}]</span
+            class={selectedCategory === 'favorites'
+              ? 'text-background'
+              : 'text-muted-foreground group-hover:text-accent-foreground'}>[{favoriteCount}]</span
           >
         </div>
 
@@ -186,12 +189,16 @@
         <!-- svelte-ignore a11y_no_static_element_interactions -->
         <div
           onclick={() => onSelectCategory('trash')}
-          class="group flex items-center justify-between cursor-pointer py-0.5 px-1.5 transition-colors {selectedCategory === 'trash' ? 'bg-primary text-background font-bold' : 'text-foreground hover:bg-accent hover:text-accent-foreground'}"
+          class="group flex items-center justify-between cursor-pointer py-0.5 px-1.5 transition-colors {selectedCategory ===
+          'trash'
+            ? 'bg-primary text-background font-bold'
+            : 'text-foreground hover:bg-accent hover:text-accent-foreground'}"
         >
           <span>3 Trash</span>
           <span
-            class={selectedCategory === 'trash' ? 'text-background' : 'text-muted-foreground group-hover:text-accent-foreground'}
-            >[{trashCount}]</span
+            class={selectedCategory === 'trash'
+              ? 'text-background'
+              : 'text-muted-foreground group-hover:text-accent-foreground'}>[{trashCount}]</span
           >
         </div>
       </div>
@@ -199,9 +206,7 @@
   </div>
 
   <!-- ACTIONS Box -->
-  <div
-    class="relative p-4 flex flex-col bg-box-bg border border-border gap-2 shrink-0"
-  >
+  <div class="relative p-4 flex flex-col bg-box-bg border border-border gap-2 shrink-0">
     <span
       class="absolute px-1.5 text-[10px] font-bold uppercase tracking-wider -top-1.75 left-2.5 bg-background text-primary"
       >Actions</span
@@ -246,9 +251,7 @@
     class="rounded-none border border-border bg-box-bg font-mono text-foreground p-0 gap-0 max-w-sm shadow-xl"
   >
     <Dialog.Header class="px-4 pt-4 pb-3 border-b border-border">
-      <Dialog.Title
-        class="text-xs font-bold uppercase tracking-widest text-primary"
-      >
+      <Dialog.Title class="text-xs font-bold uppercase tracking-widest text-primary">
         // New Workspace
       </Dialog.Title>
       <Dialog.Description class="text-[10px] text-muted-foreground mt-1">
@@ -256,9 +259,7 @@
       </Dialog.Description>
     </Dialog.Header>
     <div class="px-4 py-3">
-      <div
-        class="flex items-center gap-1.5 px-2 py-1.5 border border-border bg-transparent"
-      >
+      <div class="flex items-center gap-1.5 px-2 py-1.5 border border-border bg-transparent">
         <span class="text-primary font-bold text-[10px] select-none">$</span>
         <Input
           bind:value={newWorkspaceName}
@@ -272,9 +273,7 @@
         <p class="text-[10px] text-destructive mt-1.5 px-1">{createError}</p>
       {/if}
     </div>
-    <Dialog.Footer
-      class="px-4 pb-4 flex gap-2 justify-end border-t border-border pt-3"
-    >
+    <Dialog.Footer class="px-4 pb-4 flex gap-2 justify-end border-t border-border pt-3">
       <Dialog.Close>
         {#snippet child({ props })}
           <Button
@@ -294,7 +293,7 @@
         disabled={isCreating}
         class="font-mono text-[10px] rounded-none border border-primary text-primary hover:bg-primary hover:text-primary-foreground dark:hover:bg-primary dark:hover:text-primary-foreground uppercase tracking-wider h-auto py-1 px-3 cursor-pointer disabled:opacity-50"
       >
-        {isCreating ? "[...]" : "[create]"}
+        {isCreating ? '[...]' : '[create]'}
       </Button>
     </Dialog.Footer>
   </Dialog.Content>
@@ -307,9 +306,7 @@
     class="rounded-none border border-destructive bg-box-bg font-mono text-foreground p-0 gap-0 max-w-sm shadow-xl"
   >
     <Dialog.Header class="px-4 pt-4 pb-3 border-b border-border">
-      <Dialog.Title
-        class="text-xs font-bold uppercase tracking-widest text-destructive"
-      >
+      <Dialog.Title class="text-xs font-bold uppercase tracking-widest text-destructive">
         // Delete Workspace
       </Dialog.Title>
       <Dialog.Description class="text-[10px] text-muted-foreground mt-1">

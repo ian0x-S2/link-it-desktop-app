@@ -1,7 +1,7 @@
-import { BookmarkActions } from "../../actions/bookmark";
-import { WorkspaceActions } from "../../actions/workspace";
-import { SqliteBookmarkRepository } from "../sqlite/sqlite-bookmark.repository";
-import { SqliteWorkspaceRepository } from "../sqlite/sqlite-workspace.repository";
+import { BookmarkActions } from '../../actions/bookmark';
+import { WorkspaceActions } from '../../actions/workspace';
+import { SqliteBookmarkRepository } from '../sqlite/sqlite-bookmark.repository';
+import { SqliteWorkspaceRepository } from '../sqlite/sqlite-workspace.repository';
 
 // import { MemoryBookmarkRepository } from "../mock/memory-bookmark.repository";
 

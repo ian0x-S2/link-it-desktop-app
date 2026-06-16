@@ -1,6 +1,6 @@
-import { getDatabase } from "../../db/database";
-import type { CreateWorkspaceInput, Workspace } from "../../types/workspace";
-import type { WorkspaceRepository } from "../workspace.repository";
+import { getDatabase } from '../../db/database';
+import type { CreateWorkspaceInput, Workspace } from '../../types/workspace';
+import type { WorkspaceRepository } from '../workspace.repository';
 
 interface WorkspaceRow {
   createdAt: string;
@@ -32,12 +32,12 @@ export class SqliteWorkspaceRepository implements WorkspaceRepository {
     const slug = input.name
       .toLowerCase()
       .trim()
-      .replace(/\s+/g, "-")
-      .replace(/[^a-z0-9-]/g, "");
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '');
 
     await db.execute(
-      "INSERT INTO workspaces (id, name, slug, created_at) VALUES ($1, $2, $3, $4)",
-      [id, input.name.trim(), slug, now]
+      'INSERT INTO workspaces (id, name, slug, created_at) VALUES ($1, $2, $3, $4)',
+      [id, input.name.trim(), slug, now],
     );
 
     return { id, name: input.name.trim(), slug, createdAt: now };
@@ -46,7 +46,7 @@ export class SqliteWorkspaceRepository implements WorkspaceRepository {
   async delete(id: string): Promise<void> {
     const db = await getDatabase();
     // Bookmarks in this workspace are deleted via ON DELETE CASCADE.
-    await db.execute("DELETE FROM workspaces WHERE id = $1", [id]);
+    await db.execute('DELETE FROM workspaces WHERE id = $1', [id]);
   }
 
   async rename(id: string, name: string): Promise<void> {
@@ -54,11 +54,12 @@ export class SqliteWorkspaceRepository implements WorkspaceRepository {
     const slug = name
       .toLowerCase()
       .trim()
-      .replace(/\s+/g, "-")
-      .replace(/[^a-z0-9-]/g, "");
-    await db.execute(
-      "UPDATE workspaces SET name = $1, slug = $2 WHERE id = $3",
-      [name.trim(), slug, id]
-    );
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '');
+    await db.execute('UPDATE workspaces SET name = $1, slug = $2 WHERE id = $3', [
+      name.trim(),
+      slug,
+      id,
+    ]);
   }
 }

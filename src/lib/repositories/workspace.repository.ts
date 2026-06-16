@@ -1,4 +1,4 @@
-import type { CreateWorkspaceInput, Workspace } from "../types/workspace";
+import type { CreateWorkspaceInput, Workspace } from '../types/workspace';
 
 export interface WorkspaceRepository {
   create(input: CreateWorkspaceInput): Promise<Workspace>;

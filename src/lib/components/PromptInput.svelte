@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { Input } from "$lib/components/ui/input";
-  import { Skeleton } from "$lib/components/ui/skeleton";
-  import { bookmarkActions } from "../repositories/config/repository";
+  import { Input } from '$lib/components/ui/input';
+  import { Skeleton } from '$lib/components/ui/skeleton';
+  import { bookmarkActions } from '../repositories/config/repository';
 
   let {
-    value = $bindable(""),
+    value = $bindable(''),
     onAdd,
     inputElement = $bindable(null),
   }: {
@@ -16,7 +16,7 @@
         description: string;
         imageUrl: string;
         faviconUrl: string;
-      } | null
+      } | null,
     ) => Promise<void>;
     inputElement: HTMLInputElement | null;
   } = $props();
@@ -58,8 +58,8 @@
           }
           previewData = {
             title: hostname,
-            description: "",
-            imageUrl: "",
+            description: '',
+            imageUrl: '',
             faviconUrl: `https://www.google.com/s2/favicons?domain=${hostname}&sz=32`,
           };
         } finally {
@@ -67,13 +67,13 @@
         }
       } else {
         previewData = null;
-        validationError = "Invalid URL format";
+        validationError = 'Invalid URL format';
       }
     }, 400);
   });
 
   async function handleKeydown(event: KeyboardEvent) {
-    if (event.key === "Enter") {
+    if (event.key === 'Enter') {
       const url = value.trim();
       if (!url) {
         return;
@@ -81,7 +81,7 @@
 
       const normalized = bookmarkActions.normalizeUrl(url);
       if (!bookmarkActions.validateUrl(normalized)) {
-        validationError = "Invalid URL format";
+        validationError = 'Invalid URL format';
         return;
       }
 
@@ -89,7 +89,7 @@
       const metadataToSend = previewData;
 
       // Reset local inputs first so user sees immediate feedback
-      value = "";
+      value = '';
       previewData = null;
       loading = false;
       validationError = null;
@@ -97,12 +97,11 @@
       try {
         await onAdd(normalized, metadataToSend);
       } catch (error: unknown) {
-        validationError =
-          error instanceof Error ? error.message : "Failed to add bookmark";
+        validationError = error instanceof Error ? error.message : 'Failed to add bookmark';
       }
-    } else if (event.key === "Escape") {
+    } else if (event.key === 'Escape') {
       clearTimeout(timer);
-      value = "";
+      value = '';
       previewData = null;
       loading = false;
       validationError = null;
@@ -111,9 +110,7 @@
 </script>
 
 <div class="flex flex-col mb-4 shrink-0">
-  <div
-    class="flex items-center gap-2 px-3 py-1.5 border border-border bg-transparent text-sm"
-  >
+  <div class="flex items-center gap-2 px-3 py-1.5 border border-border bg-transparent text-sm">
     <span class="text-primary font-bold select-none">$</span>
     <Input
       bind:ref={inputElement}
@@ -124,9 +121,7 @@
       onkeydown={handleKeydown}
     />
     {#if loading}
-      <span class="text-[9px] text-muted-foreground animate-pulse"
-        >[loading...]</span
-      >
+      <span class="text-[9px] text-muted-foreground animate-pulse">[loading...]</span>
     {/if}
   </div>
 
@@ -151,9 +146,7 @@
           {/if}
         </span>
         {#if !loading}
-          <span class="text-[8px] opacity-60"
-            >Press ENTER to add / ESC to cancel</span
-          >
+          <span class="text-[8px] opacity-60">Press ENTER to add / ESC to cancel</span>
         {/if}
       </div>
 
@@ -172,11 +165,7 @@
             <div
               class="size-16 border border-border bg-background shrink-0 overflow-hidden flex items-center justify-center"
             >
-              <img
-                src={previewData.imageUrl}
-                alt="preview"
-                class="w-full h-full object-cover"
-              >
+              <img src={previewData.imageUrl} alt="preview" class="w-full h-full object-cover" />
             </div>
           {:else}
             <div
@@ -194,24 +183,20 @@
                   src={previewData.faviconUrl}
                   alt=""
                   class="size-3.5 object-contain shrink-0"
-                  onerror={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                >
+                  onerror={(e) => {
+                    (e.target as HTMLImageElement).style.display = 'none';
+                  }}
+                />
               {/if}
-              <span class="truncate font-bold text-foreground"
-                >{previewData.title}</span
-              >
+              <span class="truncate font-bold text-foreground">{previewData.title}</span>
             </div>
 
             {#if previewData.description}
-              <p
-                class="text-[10px] text-muted-foreground line-clamp-2 leading-tight"
-              >
+              <p class="text-[10px] text-muted-foreground line-clamp-2 leading-tight">
                 {previewData.description}
               </p>
             {:else}
-              <p class="text-[10px] text-dim-foreground italic">
-                No description found.
-              </p>
+              <p class="text-[10px] text-dim-foreground italic">No description found.</p>
             {/if}
           </div>
         </div>

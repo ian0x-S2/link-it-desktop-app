@@ -1,7 +1,7 @@
-@import "tailwindcss";
-@import "tw-animate-css";
-@import "shadcn-svelte/tailwind.css";
-@import "@fontsource-variable/geist-mono";
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn-svelte/tailwind.css';
+@import '@fontsource-variable/geist-mono';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -73,7 +73,7 @@
   --success: oklch(0.8577 0.1092 142.7153);
 }
 
-[data-theme="catppuccin"] {
+[data-theme='catppuccin'] {
   --background: oklch(0.9578 0.0058 264.5321);
   --foreground: oklch(0.4355 0.043 279.325);
   --card: oklch(1 0 0);
@@ -104,7 +104,7 @@
   --success: oklch(0.625 0.1772 140.4448);
 }
 
-.dark[data-theme="catppuccin"] {
+.dark[data-theme='catppuccin'] {
   --background: oklch(0.2155 0.0254 284.0647);
   --foreground: oklch(0.8787 0.0426 272.2767);
   --card: oklch(0.2429 0.0304 283.911);
@@ -135,7 +135,7 @@
   --success: oklch(0.8577 0.1092 142.7153);
 }
 
-[data-theme="everforest"] {
+[data-theme='everforest'] {
   --background: oklch(0.9879 0.0163 91.5474);
   --foreground: oklch(0.5154 0.0212 232.866);
   --card: oklch(0.9879 0.0163 91.5474);
@@ -166,7 +166,7 @@
   --success: oklch(0.7466 0.1545 80.2668);
 }
 
-.dark[data-theme="everforest"] {
+.dark[data-theme='everforest'] {
   --background: oklch(0.2965 0.0134 239.0358);
   --foreground: oklch(0.8299 0.0405 86.0529);
   --card: oklch(0.2965 0.0134 239.0358);
@@ -197,7 +197,7 @@
   --success: oklch(0.8081 0.0863 83.6956);
 }
 
-[data-theme="nord"] {
+[data-theme='nord'] {
   --background: #eceff4;
   --foreground: #2e3440;
   --card: #e5e9f0;
@@ -228,7 +228,7 @@
   --success: #a3be8c;
 }
 
-.dark[data-theme="nord"] {
+.dark[data-theme='nord'] {
   --background: #2e3440;
   --foreground: #eceff4;
   --card: #3b4252;

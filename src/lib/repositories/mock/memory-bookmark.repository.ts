@@ -1,5 +1,5 @@
-import type { Bookmark } from "../../types/bookmark";
-import type { BookmarkRepository } from "../bookmark.repository";
+import type { Bookmark } from '../../types/bookmark';
+import type { BookmarkRepository } from '../bookmark.repository';
 
 const bookmarks: Bookmark[] = [];
 
@@ -9,7 +9,7 @@ export class MemoryBookmarkRepository implements BookmarkRepository {
   }
 
   async create(
-    data: Omit<Bookmark, "id" | "createdAt" | "updatedAt" | "deletedAt">
+    data: Omit<Bookmark, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>,
   ): Promise<Bookmark> {
     const now = new Date().toISOString();
     const bookmark: Bookmark = {
@@ -57,9 +57,7 @@ export class MemoryBookmarkRepository implements BookmarkRepository {
 
   async update(
     id: string,
-    data: Partial<
-      Omit<Bookmark, "id" | "createdAt" | "updatedAt" | "deletedAt">
-    >
+    data: Partial<Omit<Bookmark, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>>,
   ): Promise<void> {
     const bookmark = bookmarks.find((b) => b.id === id);
     if (bookmark) {

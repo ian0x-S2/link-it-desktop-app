@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { Bookmark } from "../types/bookmark";
-  import BookmarkCard from "./BookmarkCard.svelte";
+  import type { Bookmark } from '../types/bookmark';
+  import BookmarkCard from './BookmarkCard.svelte';
 
   let {
     bookmarks = [],
@@ -19,17 +19,8 @@
   } = $props();
 </script>
 
-<div
-  class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4"
->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4">
   {#each bookmarks as bookmark (bookmark.id)}
-    <BookmarkCard
-      {bookmark}
-      {onToggleFavorite}
-      {onDelete}
-      {onAddTag}
-      {onRemoveTag}
-      {onEdit}
-    />
+    <BookmarkCard {bookmark} {onToggleFavorite} {onDelete} {onAddTag} {onRemoveTag} {onEdit} />
   {/each}
 </div>

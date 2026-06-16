@@ -1,6 +1,6 @@
-import { bookmarkActions } from "../repositories/config/repository";
-import type { Bookmark } from "../types/bookmark";
-import { workspaceStore } from "./workspace.svelte";
+import { bookmarkActions } from '../repositories/config/repository';
+import type { Bookmark } from '../types/bookmark';
+import { workspaceStore } from './workspace.svelte';
 
 class BookmarkStore {
   items = $state<Bookmark[]>([]);
@@ -23,7 +23,7 @@ class BookmarkStore {
   }
 
   async create(
-    data: Omit<Bookmark, "id" | "createdAt" | "updatedAt" | "deletedAt">
+    data: Omit<Bookmark, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>,
   ): Promise<void> {
     const bookmark = await bookmarkActions.createBookmark(data);
     this.items.unshift(bookmark);
@@ -37,15 +37,15 @@ class BookmarkStore {
       description: string;
       imageUrl: string;
       faviconUrl: string;
-    }
+    },
   ): Promise<void> {
     if (!workspaceStore.activeId) {
-      throw new Error("No active workspace selected.");
+      throw new Error('No active workspace selected.');
     }
 
     const normalized = bookmarkActions.normalizeUrl(url);
     if (!bookmarkActions.validateUrl(normalized)) {
-      throw new Error("Invalid URL");
+      throw new Error('Invalid URL');
     }
 
     let resolvedMetadata = metadata;
@@ -105,9 +105,7 @@ class BookmarkStore {
 
   async update(
     id: string,
-    data: Partial<
-      Omit<Bookmark, "id" | "createdAt" | "updatedAt" | "deletedAt">
-    >
+    data: Partial<Omit<Bookmark, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>>,
   ): Promise<void> {
     await bookmarkActions.updateBookmark(id, data);
     const index = this.items.findIndex((b) => b.id === id);

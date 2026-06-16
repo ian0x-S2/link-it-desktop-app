@@ -1,18 +1,18 @@
 <script lang="ts">
-  import { Badge } from "$lib/components/ui/badge";
-  import { Button } from "$lib/components/ui/button";
-  import * as Card from "$lib/components/ui/card";
-  import { Input } from "$lib/components/ui/input";
-  import * as Popover from "$lib/components/ui/popover";
-  import { bookmarkStore } from "$lib/stores/bookmark.svelte";
+  import { Badge } from '$lib/components/ui/badge';
+  import { Button } from '$lib/components/ui/button';
+  import * as Card from '$lib/components/ui/card';
+  import { Input } from '$lib/components/ui/input';
+  import * as Popover from '$lib/components/ui/popover';
+  import { bookmarkStore } from '$lib/stores/bookmark.svelte';
   import {
     getAllUniqueTags,
     getTagSuggestions,
     isNewTagValue,
     normaliseTag,
-  } from "$lib/tag-popover-utils";
-  import { getFavicon } from "$lib/utils";
-  import type { Bookmark } from "../types/bookmark";
+  } from '$lib/tag-popover-utils';
+  import { getFavicon } from '$lib/utils';
+  import type { Bookmark } from '../types/bookmark';
 
   let {
     bookmark,
@@ -32,15 +32,13 @@
 
   // Tag popover state
   let addTagOpen = $state(false);
-  let newTagValue = $state("");
+  let newTagValue = $state('');
 
   // All unique tags across all bookmarks for autocomplete
   const allTags = $derived(() => getAllUniqueTags(bookmarkStore.items));
 
   // Filter suggestions based on current input (excludes tags already on this bookmark)
-  const tagSuggestions = $derived(() =>
-    getTagSuggestions(allTags(), bookmark.tags, newTagValue)
-  );
+  const tagSuggestions = $derived(() => getTagSuggestions(allTags(), bookmark.tags, newTagValue));
 
   // Whether the typed value is a brand-new tag not in the global list
   const isNewTag = $derived(() => isNewTagValue(allTags(), newTagValue));
@@ -50,19 +48,19 @@
     if (clean && !bookmark.tags.includes(clean)) {
       onAddTag(bookmark.id, clean);
     }
-    newTagValue = "";
+    newTagValue = '';
     addTagOpen = false;
   }
 
   function handleTagKeydown(e: KeyboardEvent) {
-    if (e.key === "Enter") {
+    if (e.key === 'Enter') {
       e.preventDefault();
       const q = newTagValue.trim().toLowerCase();
       if (q) {
         submitTag(q);
       }
-    } else if (e.key === "Escape") {
-      newTagValue = "";
+    } else if (e.key === 'Escape') {
+      newTagValue = '';
       addTagOpen = false;
     }
   }
@@ -75,16 +73,12 @@
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       return `${diffDays}d`;
     } catch (e) {
-      return "1d";
+      return '1d';
     }
   }
 
   const displayUrl = $derived(
-    bookmark.url
-      .replace("https://", "")
-      .replace("http://", "")
-      .replace("www.", "")
-      .split("/")[0]
+    bookmark.url.replace('https://', '').replace('http://', '').replace('www.', '').split('/')[0],
   );
 </script>
 
@@ -92,9 +86,7 @@
   class="bg-box-bg border border-border flex flex-col hover:border-border-hover transition-colors min-w-0 py-0 gap-0 shadow-none ring-0 rounded-none"
 >
   <!-- Card Header -->
-  <Card.Header
-    class="p-0 gap-0 min-h-0 @container/card-header block rounded-none border-none"
-  >
+  <Card.Header class="p-0 gap-0 min-h-0 @container/card-header block rounded-none border-none">
     <div
       class="flex items-center justify-between px-2 py-1 border-b border-border text-[10px] text-muted-foreground select-none shrink-0 w-full"
     >
@@ -105,9 +97,9 @@
             alt=""
             class="size-3.5 object-contain shrink-0"
             onerror={(e) => {
-              (e.target as HTMLImageElement).style.display = "none";
+              (e.target as HTMLImageElement).style.display = 'none';
             }}
-          >
+          />
         {:else}
           <span class="size-3.5 block shrink-0 bg-primary/20 rounded-sm"></span>
         {/if}
@@ -122,20 +114,14 @@
     <div
       class="aspect-video w-full overflow-hidden border-b border-border bg-background flex items-center justify-center shrink-0"
     >
-      <img
-        src={bookmark.imageUrl}
-        alt={bookmark.title}
-        class="w-full h-full object-cover"
-      >
+      <img src={bookmark.imageUrl} alt={bookmark.title} class="w-full h-full object-cover" />
     </div>
   {:else}
     <div
       class="aspect-video w-full border-b border-border bg-background flex flex-col items-center justify-center text-[10px] text-dim-foreground font-mono select-none shrink-0 p-2 text-center"
     >
       <span>[ NO PREVIEW ]</span>
-      <span class="text-[8px] opacity-40 truncate w-full mt-1"
-        >{bookmark.url}</span
-      >
+      <span class="text-[8px] opacity-40 truncate w-full mt-1">{bookmark.url}</span>
     </div>
   {/if}
 
@@ -153,9 +139,7 @@
         </a>
       </h3>
       {#if bookmark.description}
-        <p
-          class="text-[10px] text-muted-foreground line-clamp-2 mt-1 leading-tight"
-        >
+        <p class="text-[10px] text-muted-foreground line-clamp-2 mt-1 leading-tight">
           {bookmark.description}
         </p>
       {/if}
@@ -174,8 +158,7 @@
           <span
             onclick={() => onRemoveTag(bookmark.id, tag)}
             class="text-destructive hover:text-red-400 cursor-pointer font-bold text-[8px] ml-0.5"
-            title="Remove tag"
-            >x</span
+            title="Remove tag">x</span
           >
         </Badge>
       {/each}
@@ -200,12 +183,8 @@
           sideOffset={4}
         >
           <!-- Input -->
-          <div
-            class="flex items-center gap-1 px-2 py-1.5 border-b border-border"
-          >
-            <span class="text-primary font-bold text-[10px] select-none"
-              >#</span
-            >
+          <div class="flex items-center gap-1 px-2 py-1.5 border-b border-border">
+            <span class="text-primary font-bold text-[10px] select-none">#</span>
             <Input
               bind:value={newTagValue}
               onkeydown={handleTagKeydown}
@@ -237,9 +216,7 @@
               </div>
             {/each}
             {#if tagSuggestions().length === 0 && !isNewTag()}
-              <div
-                class="px-2 py-1 text-[10px] text-dim-foreground italic select-none"
-              >
+              <div class="px-2 py-1 text-[10px] text-dim-foreground italic select-none">
                 No tags yet
               </div>
             {/if}

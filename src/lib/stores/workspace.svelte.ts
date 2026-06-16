@@ -1,5 +1,5 @@
-import { workspaceActions } from "../repositories/config/repository";
-import type { Workspace } from "../types/workspace";
+import { workspaceActions } from '../repositories/config/repository';
+import type { Workspace } from '../types/workspace';
 
 class WorkspaceStore {
   items = $state<Workspace[]>([]);

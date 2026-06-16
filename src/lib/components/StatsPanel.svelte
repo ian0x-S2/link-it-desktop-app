@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { AreaChart, BarChart, Tooltip } from "layerchart";
-  import { Button } from "$lib/components/ui/button";
-  import * as Chart from "$lib/components/ui/chart/index.js";
-  import type { Bookmark } from "../types/bookmark";
+  import { AreaChart, BarChart, Tooltip } from 'layerchart';
+  import { Button } from '$lib/components/ui/button';
+  import * as Chart from '$lib/components/ui/chart/index.js';
+  import type { Bookmark } from '../types/bookmark';
 
   let { bookmarks = [] }: { bookmarks: Bookmark[] } = $props();
 
-  let chartType = $state<"bar" | "line">("bar");
+  let chartType = $state<'bar' | 'line'>('bar');
 
   // Generate last 7 days chronologically (oldest to newest)
   const last7Days = $derived(() => {
@@ -14,10 +14,10 @@
     const now = new Date();
     for (let i = 6; i >= 0; i--) {
       const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
-      const label = d.toLocaleDateString("en-US", { weekday: "short" });
-      const fullDate = d.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
+      const label = d.toLocaleDateString('en-US', { weekday: 'short' });
+      const fullDate = d.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
       });
 
       const count = bookmarks.filter((b) => {
@@ -38,16 +38,16 @@
 
   const config = {
     count: {
-      label: "added",
-      color: "var(--primary)",
+      label: 'added',
+      color: 'var(--primary)',
     },
   } satisfies Chart.ChartConfig;
 
   const series = [
     {
-      key: "count",
-      label: "added",
-      color: "var(--color-count)",
+      key: 'count',
+      label: 'added',
+      color: 'var(--color-count)',
     },
   ];
 
@@ -73,16 +73,22 @@
       <Button
         variant="ghost"
         size="xs"
-        onclick={() => chartType = "bar"}
-        class="cursor-pointer transition-colors hover:text-foreground h-auto p-0 font-mono text-[9px] uppercase tracking-wider select-none bg-transparent hover:bg-transparent {chartType === 'bar' ? 'text-primary font-bold' : 'text-muted-foreground'}"
+        onclick={() => (chartType = 'bar')}
+        class="cursor-pointer transition-colors hover:text-foreground h-auto p-0 font-mono text-[9px] uppercase tracking-wider select-none bg-transparent hover:bg-transparent {chartType ===
+        'bar'
+          ? 'text-primary font-bold'
+          : 'text-muted-foreground'}"
       >
         [bar]
       </Button>
       <Button
         variant="ghost"
         size="xs"
-        onclick={() => chartType = "line"}
-        class="cursor-pointer transition-colors hover:text-foreground h-auto p-0 font-mono text-[9px] uppercase tracking-wider select-none bg-transparent hover:bg-transparent {chartType === 'line' ? 'text-primary font-bold' : 'text-muted-foreground'}"
+        onclick={() => (chartType = 'line')}
+        class="cursor-pointer transition-colors hover:text-foreground h-auto p-0 font-mono text-[9px] uppercase tracking-wider select-none bg-transparent hover:bg-transparent {chartType ===
+        'line'
+          ? 'text-primary font-bold'
+          : 'text-muted-foreground'}"
       >
         [line]
       </Button>
@@ -92,15 +98,15 @@
   <!-- Chart Container -->
   <div class="relative flex-1 w-full min-h-0 flex items-center justify-center">
     <Chart.Container {config} class="w-full h-full aspect-auto">
-      {#if chartType === "bar"}
+      {#if chartType === 'bar'}
         <BarChart
           data={chartData}
           x="label"
           y="count"
           {series}
           props={{
-            grid: { y: { style: "stroke-dasharray: 2 2; stroke: var(--border-dim);" } },
-            yAxis: { ticks: 3 }
+            grid: { y: { style: 'stroke-dasharray: 2 2; stroke: var(--border-dim);' } },
+            yAxis: { ticks: 3 },
           }}
         >
           {#snippet tooltip()}
@@ -109,9 +115,7 @@
                 <div
                   class="border border-border bg-card px-2 py-1 text-[8px] font-mono text-foreground flex flex-col"
                 >
-                  <span class="font-bold text-muted-foreground"
-                    >{data.fullDate}</span
-                  >
+                  <span class="font-bold text-muted-foreground">{data.fullDate}</span>
                   <span class="text-primary">{data.count} added</span>
                 </div>
               {/snippet}
@@ -125,8 +129,8 @@
           y="count"
           {series}
           props={{
-            grid: { y: { style: "stroke-dasharray: 2 2; stroke: var(--border-dim);" } },
-            yAxis: { ticks: 3 }
+            grid: { y: { style: 'stroke-dasharray: 2 2; stroke: var(--border-dim);' } },
+            yAxis: { ticks: 3 },
           }}
         >
           {#snippet tooltip()}
@@ -135,9 +139,7 @@
                 <div
                   class="border border-border bg-card px-2 py-1 text-[8px] font-mono text-foreground flex flex-col"
                 >
-                  <span class="font-bold text-muted-foreground"
-                    >{data.fullDate}</span
-                  >
+                  <span class="font-bold text-muted-foreground">{data.fullDate}</span>
                   <span class="text-primary">{data.count} added</span>
                 </div>
               {/snippet}

@@ -1,17 +1,17 @@
-import { bookmarkStore } from "$lib/stores/bookmark.svelte";
-import { viewStore } from "$lib/stores/view.svelte";
+import { bookmarkStore } from '$lib/stores/bookmark.svelte';
+import { viewStore } from '$lib/stores/view.svelte';
 
 class FilteredBookmarksStore {
   get items() {
     // Trash view: only soft-deleted items
-    if (viewStore.category === "trash") {
+    if (viewStore.category === 'trash') {
       return bookmarkStore.trashedItems;
     }
 
     // All other views: only active (non-deleted) items
     let items = bookmarkStore.activeItems;
 
-    if (viewStore.category === "favorites") {
+    if (viewStore.category === 'favorites') {
       items = items.filter((b) => b.isFavorite);
     }
 
@@ -25,7 +25,7 @@ class FilteredBookmarksStore {
         (b) =>
           b.title.toLowerCase().includes(q) ||
           b.url.toLowerCase().includes(q) ||
-          b.tags.some((t) => t.toLowerCase().includes(q))
+          b.tags.some((t) => t.toLowerCase().includes(q)),
       );
     }
 

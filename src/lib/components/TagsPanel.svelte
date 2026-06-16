@@ -1,9 +1,9 @@
 <script lang="ts">
-  import * as AlertDialog from "$lib/components/ui/alert-dialog";
-  import { Button } from "$lib/components/ui/button";
-  import * as Dialog from "$lib/components/ui/dialog";
-  import { Input } from "$lib/components/ui/input";
-  import type { Bookmark } from "../types/bookmark";
+  import * as AlertDialog from '$lib/components/ui/alert-dialog';
+  import { Button } from '$lib/components/ui/button';
+  import * as Dialog from '$lib/components/ui/dialog';
+  import { Input } from '$lib/components/ui/input';
+  import type { Bookmark } from '../types/bookmark';
 
   let {
     bookmarks = [],
@@ -17,12 +17,12 @@
     onDeleteTag: (tag: string) => void;
   } = $props();
 
-  let tagSearch = $state("");
+  let tagSearch = $state('');
 
   // Rename dialog state
   let renameDialogOpen = $state(false);
   let tagToRename = $state<string | null>(null);
-  let newTagNameValue = $state("");
+  let newTagNameValue = $state('');
 
   // Delete alert dialog state
   let deleteDialogOpen = $state(false);
@@ -69,7 +69,7 @@
     }
     renameDialogOpen = false;
     tagToRename = null;
-    newTagNameValue = "";
+    newTagNameValue = '';
   }
 
   function handleDelete(tag: string) {
@@ -86,7 +86,7 @@
   }
 
   function handleRenameKeydown(e: KeyboardEvent) {
-    if (e.key === "Enter") {
+    if (e.key === 'Enter') {
       e.preventDefault();
       confirmRename();
     }
@@ -116,7 +116,7 @@
       <Button
         variant="ghost"
         size="xs"
-        onclick={() => tagSearch = ""}
+        onclick={() => (tagSearch = '')}
         class="text-destructive hover:text-red-400 font-bold font-mono cursor-pointer bg-transparent hover:bg-transparent border-none p-0 h-auto w-auto min-w-0"
         title="Clear filter"
       >
@@ -131,19 +131,20 @@
   >
     {#each filteredTags() as tag (tag.name)}
       <div
-        class="flex items-center justify-between text-xs py-0.5 px-1.5 group border border-transparent transition-colors {selectedTag === tag.name ? 'bg-primary text-background font-bold' : 'hover:bg-accent/40'}"
+        class="flex items-center justify-between text-xs py-0.5 px-1.5 group border border-transparent transition-colors {selectedTag ===
+        tag.name
+          ? 'bg-primary text-background font-bold'
+          : 'hover:bg-accent/40'}"
       >
         <!-- Click tag to filter -->
         <!-- svelte-ignore a11y_click_events_have_key_events -->
         <!-- svelte-ignore a11y_no_static_element_interactions -->
         <div
-          onclick={() => selectedTag = selectedTag === tag.name ? null : tag.name}
+          onclick={() => (selectedTag = selectedTag === tag.name ? null : tag.name)}
           class="flex-1 truncate cursor-pointer py-0.5"
         >
           <span>* {tag.name}</span>
-          <span
-            class="text-[9px] opacity-70 ml-1"
-            class:text-background={selectedTag === tag.name}
+          <span class="text-[9px] opacity-70 ml-1" class:text-background={selectedTag === tag.name}
             >({tag.count})</span
           >
         </div>
@@ -174,7 +175,7 @@
       </div>
     {:else}
       <div class="text-[10px] text-dim-foreground italic py-1">
-        {tagSearch ? "✗ No matching tags" : "> No tags found"}
+        {tagSearch ? '✗ No matching tags' : '> No tags found'}
       </div>
     {/each}
   </div>
@@ -187,9 +188,7 @@
     class="rounded-none border border-border bg-box-bg font-mono text-foreground p-0 gap-0 max-w-sm shadow-xl"
   >
     <Dialog.Header class="px-4 pt-4 pb-3 border-b border-border">
-      <Dialog.Title
-        class="text-xs font-bold uppercase tracking-widest text-primary"
-      >
+      <Dialog.Title class="text-xs font-bold uppercase tracking-widest text-primary">
         // Rename Tag
       </Dialog.Title>
       <Dialog.Description class="text-[10px] text-muted-foreground mt-1">
@@ -199,9 +198,7 @@
       </Dialog.Description>
     </Dialog.Header>
     <div class="px-4 py-3">
-      <div
-        class="flex items-center gap-1.5 px-2 py-1.5 border border-border bg-transparent"
-      >
+      <div class="flex items-center gap-1.5 px-2 py-1.5 border border-border bg-transparent">
         <span class="text-primary font-bold text-[10px] select-none">*</span>
         <Input
           id="rename-tag-input"
@@ -213,9 +210,7 @@
         />
       </div>
     </div>
-    <Dialog.Footer
-      class="px-4 pb-4 flex gap-2 justify-end border-t border-border pt-3"
-    >
+    <Dialog.Footer class="px-4 pb-4 flex gap-2 justify-end border-t border-border pt-3">
       <Dialog.Close>
         {#snippet child({ props })}
           <Button
@@ -246,9 +241,7 @@
     class="rounded-none border border-destructive/50 bg-box-bg font-mono text-foreground p-0 gap-0 max-w-sm shadow-xl"
   >
     <AlertDialog.Header class="px-4 pt-4 pb-3 border-b border-border">
-      <AlertDialog.Title
-        class="text-xs font-bold uppercase tracking-widest text-destructive"
-      >
+      <AlertDialog.Title class="text-xs font-bold uppercase tracking-widest text-destructive">
         // Delete Tag
       </AlertDialog.Title>
       <AlertDialog.Description class="text-[10px] text-muted-foreground mt-1">
@@ -257,9 +250,7 @@
         from all bookmarks globally. This action cannot be undone.
       </AlertDialog.Description>
     </AlertDialog.Header>
-    <AlertDialog.Footer
-      class="px-4 pb-4 flex gap-2 justify-end border-t border-border pt-3"
-    >
+    <AlertDialog.Footer class="px-4 pb-4 flex gap-2 justify-end border-t border-border pt-3">
       <AlertDialog.Cancel>
         {#snippet child({ props })}
           <Button

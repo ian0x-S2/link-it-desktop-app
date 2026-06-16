@@ -1,10 +1,10 @@
-import Database from "@tauri-apps/plugin-sql";
+import Database from '@tauri-apps/plugin-sql';
 
 let db: Database | null = null;
 
 export async function getDatabase(): Promise<Database> {
   if (!db) {
-    const connection = await Database.load("sqlite:link-it.db");
+    const connection = await Database.load('sqlite:link-it.db');
 
     await initDatabase(connection);
 
@@ -14,7 +14,7 @@ export async function getDatabase(): Promise<Database> {
 }
 
 async function initDatabase(database: Database): Promise<void> {
-  await database.execute("PRAGMA foreign_keys = ON");
+  await database.execute('PRAGMA foreign_keys = ON');
 
   await database.execute(`
     CREATE TABLE IF NOT EXISTS workspaces (
@@ -53,47 +53,43 @@ async function initDatabase(database: Database): Promise<void> {
 
   // Safe migrations for existing databases.
   try {
-    await database.execute("ALTER TABLE bookmarks ADD COLUMN deleted_at TEXT");
+    await database.execute('ALTER TABLE bookmarks ADD COLUMN deleted_at TEXT');
   } catch {
     // Column already exists — safe to ignore.
   }
 
   try {
-    await database.execute(
-      "ALTER TABLE bookmarks ADD COLUMN workspace_id TEXT"
-    );
+    await database.execute('ALTER TABLE bookmarks ADD COLUMN workspace_id TEXT');
   } catch {
     // Column already exists — safe to ignore.
   }
 
   // Ensure there is always at least one workspace (the default).
   const existingWorkspaces = await database.select<{ count: number }[]>(
-    "SELECT COUNT(*) as count FROM workspaces"
+    'SELECT COUNT(*) as count FROM workspaces',
   );
 
   if (existingWorkspaces[0].count === 0) {
     const defaultId = crypto.randomUUID();
     const now = new Date().toISOString();
     await database.execute(
-      "INSERT INTO workspaces (id, name, slug, created_at) VALUES ($1, $2, $3, $4)",
-      [defaultId, "My Workspace", "my-workspace", now]
+      'INSERT INTO workspaces (id, name, slug, created_at) VALUES ($1, $2, $3, $4)',
+      [defaultId, 'My Workspace', 'my-workspace', now],
     );
 
     // Associate any orphan bookmarks (without workspace_id) to the default workspace.
-    await database.execute(
-      "UPDATE bookmarks SET workspace_id = $1 WHERE workspace_id IS NULL",
-      [defaultId]
-    );
+    await database.execute('UPDATE bookmarks SET workspace_id = $1 WHERE workspace_id IS NULL', [
+      defaultId,
+    ]);
   } else {
     // Even if workspaces exist, migrate any remaining orphan bookmarks.
     const firstWorkspace = await database.select<{ id: string }[]>(
-      "SELECT id FROM workspaces ORDER BY created_at ASC LIMIT 1"
+      'SELECT id FROM workspaces ORDER BY created_at ASC LIMIT 1',
     );
     if (firstWorkspace.length > 0) {
-      await database.execute(
-        "UPDATE bookmarks SET workspace_id = $1 WHERE workspace_id IS NULL",
-        [firstWorkspace[0].id]
-      );
+      await database.execute('UPDATE bookmarks SET workspace_id = $1 WHERE workspace_id IS NULL', [
+        firstWorkspace[0].id,
+      ]);
     }
   }
 }

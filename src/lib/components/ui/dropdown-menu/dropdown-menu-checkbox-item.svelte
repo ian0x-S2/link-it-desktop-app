@@ -1,9 +1,9 @@
 <script lang="ts">
-  import CheckIcon from "@lucide/svelte/icons/check";
-  import MinusIcon from "@lucide/svelte/icons/minus";
-  import { DropdownMenu as DropdownMenuPrimitive } from "bits-ui";
-  import type { Snippet } from "svelte";
-  import { cn, type WithoutChildrenOrChild } from "$lib/utils.js";
+  import CheckIcon from '@lucide/svelte/icons/check';
+  import MinusIcon from '@lucide/svelte/icons/minus';
+  import { DropdownMenu as DropdownMenuPrimitive } from 'bits-ui';
+  import type { Snippet } from 'svelte';
+  import { cn, type WithoutChildrenOrChild } from '$lib/utils.js';
 
   let {
     ref = $bindable(null),
@@ -23,9 +23,9 @@
   bind:indeterminate
   data-slot="dropdown-menu-checkbox-item"
   class={cn(
-		"focus:bg-accent focus:text-accent-foreground focus:**:text-accent-foreground gap-2.5 rounded-none py-2 pr-8 pl-3 text-xs font-medium tracking-wider uppercase data-inset:pl-9.5 [&_svg:not([class*='size-'])]:size-3.5 relative flex cursor-default items-center outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-		className
-	)}
+    "focus:bg-accent focus:text-accent-foreground focus:**:text-accent-foreground gap-2.5 rounded-none py-2 pr-8 pl-3 text-xs font-medium tracking-wider uppercase data-inset:pl-9.5 [&_svg:not([class*='size-'])]:size-3.5 relative flex cursor-default items-center outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+    className,
+  )}
   {...restProps}
 >
   {#snippet children({ checked, indeterminate })}

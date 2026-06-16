@@ -1,7 +1,7 @@
-import { invoke } from "@tauri-apps/api/core";
-import type { BookmarkRepository } from "../repositories/bookmark.repository";
-import type { Bookmark } from "../types/bookmark";
-import { normalizeUrl, validateUrl } from "../validators/bookmark";
+import { invoke } from '@tauri-apps/api/core';
+import type { BookmarkRepository } from '../repositories/bookmark.repository';
+import type { Bookmark } from '../types/bookmark';
+import { normalizeUrl, validateUrl } from '../validators/bookmark';
 
 export class BookmarkActions {
   private readonly repository: BookmarkRepository;
@@ -26,7 +26,7 @@ export class BookmarkActions {
   }> {
     const normalized = this.normalizeUrl(url);
     if (!this.validateUrl(normalized)) {
-      throw new Error("Invalid URL");
+      throw new Error('Invalid URL');
     }
 
     try {
@@ -35,7 +35,7 @@ export class BookmarkActions {
         description: string | null;
         image_url: string | null;
         favicon_url: string | null;
-      }>("fetch_metadata", { url: normalized });
+      }>('fetch_metadata', { url: normalized });
 
       let hostname = normalized;
       try {
@@ -46,11 +46,10 @@ export class BookmarkActions {
 
       return {
         title: metadata.title || hostname,
-        description: metadata.description || "",
-        imageUrl: metadata.image_url || "",
+        description: metadata.description || '',
+        imageUrl: metadata.image_url || '',
         faviconUrl:
-          metadata.favicon_url ||
-          `https://www.google.com/s2/favicons?domain=${hostname}&sz=32`,
+          metadata.favicon_url || `https://www.google.com/s2/favicons?domain=${hostname}&sz=32`,
       };
     } catch {
       let hostname = normalized;
@@ -62,8 +61,8 @@ export class BookmarkActions {
 
       return {
         title: hostname,
-        description: "",
-        imageUrl: "",
+        description: '',
+        imageUrl: '',
         faviconUrl: `https://www.google.com/s2/favicons?domain=${hostname}&sz=32`,
       };
     }
@@ -74,7 +73,7 @@ export class BookmarkActions {
   }
 
   async createBookmark(
-    data: Omit<Bookmark, "id" | "createdAt" | "updatedAt" | "deletedAt">
+    data: Omit<Bookmark, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>,
   ): Promise<Bookmark> {
     return await this.repository.create({ ...data, isFavorite: false });
   }
@@ -97,9 +96,7 @@ export class BookmarkActions {
 
   async updateBookmark(
     id: string,
-    data: Partial<
-      Omit<Bookmark, "id" | "createdAt" | "updatedAt" | "deletedAt">
-    >
+    data: Partial<Omit<Bookmark, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>>,
   ): Promise<void> {
     return await this.repository.update(id, data);
   }

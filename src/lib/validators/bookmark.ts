@@ -1,7 +1,7 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 // Zod schema to validate a URL.
-export const urlSchema = z.url({ message: "Invalid URL format" });
+export const urlSchema = z.url({ message: 'Invalid URL format' });
 
 /**
  * Normalizes a URL: if it doesn't parse as a valid URL, prefixes with https://.
@@ -23,8 +23,5 @@ export function normalizeUrl(url: string): string {
  */
 export function validateUrl(url: string): boolean {
   const trimmed = url.trim();
-  return (
-    urlSchema.safeParse(trimmed).success ||
-    urlSchema.safeParse(`https://${trimmed}`).success
-  );
+  return urlSchema.safeParse(trimmed).success || urlSchema.safeParse(`https://${trimmed}`).success;
 }
