@@ -292,7 +292,7 @@
         size="xs"
         onclick={handleCreate}
         disabled={isCreating}
-        class="font-mono text-[10px] rounded-none border border-primary text-primary hover:bg-primary hover:text-background uppercase tracking-wider h-auto py-1 px-3 cursor-pointer disabled:opacity-50"
+        class="font-mono text-[10px] rounded-none border border-primary text-primary hover:bg-primary hover:text-primary-foreground dark:hover:bg-primary dark:hover:text-primary-foreground uppercase tracking-wider h-auto py-1 px-3 cursor-pointer disabled:opacity-50"
       >
         {isCreating ? "[...]" : "[create]"}
       </Button>
@@ -335,7 +335,7 @@
         variant="outline"
         size="xs"
         onclick={confirmDelete}
-        class="font-mono text-[10px] rounded-none border border-destructive text-destructive hover:bg-destructive hover:text-background uppercase tracking-wider h-auto py-1 px-3 cursor-pointer"
+        class="font-mono text-[10px] rounded-none border border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground dark:hover:bg-destructive dark:hover:text-destructive-foreground uppercase tracking-wider h-auto py-1 px-3 cursor-pointer"
       >
         [delete]
       </Button>

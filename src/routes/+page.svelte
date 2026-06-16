@@ -323,7 +323,7 @@
         variant="outline"
         size="xs"
         onclick={confirmEditTitle}
-        class="font-mono text-[10px] rounded-none border border-primary text-primary hover:bg-primary hover:text-background uppercase tracking-wider h-auto py-1 px-3 cursor-pointer"
+        class="font-mono text-[10px] rounded-none border border-primary text-primary hover:bg-primary hover:text-primary-foreground dark:hover:bg-primary dark:hover:text-primary-foreground uppercase tracking-wider h-auto py-1 px-3 cursor-pointer"
       >
         [save]
       </Button>
