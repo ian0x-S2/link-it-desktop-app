@@ -516,7 +516,7 @@
         </div>
 
         <!-- Description Textarea -->
-        <div class="flex flex-col gap-1 flex-1 min-h-[140px]">
+        <div class="flex flex-col gap-1 flex-1 min-h-35">
           <label
             for="edit-description-input"
             class="text-[9px] uppercase font-bold text-muted-foreground tracking-wider"

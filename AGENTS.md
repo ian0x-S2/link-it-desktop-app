@@ -296,18 +296,6 @@ When generating code for this project:
 
 When in doubt, choose the simpler solution.
 
-# Ultracite Code Standards
-
-This project uses **Ultracite**, a zero-config preset that enforces strict code quality standards through automated formatting and linting.
-
-## Quick Reference
-
-- **Format code**: `npm exec -- ultracite fix`
-- **Check for issues**: `npm exec -- ultracite check`
-- **Diagnose setup**: `npm exec -- ultracite doctor`
-
-Biome (the underlying engine) provides robust linting and formatting. Most issues are automatically fixable.
-
 ---
 
 ## Core Principles
