@@ -1,9 +1,9 @@
 <script lang="ts">
   const logo = ` _     _       _    ___ _   
-                    | |   (_)_ __ | | _|_ _| |_ 
-                    | |   | | '_ \\| |/ /| || __|
-                    | |___| | | | |   &lt; | || |_ 
-                    |_____|_|_| |_|_|\\_\\___|\\___|`;
+| |   (_)_ __ | | _|_ _| |_ 
+| |   | | '_ \\| |/ /| || __|
+| |___| | | | |   < | || |_ 
+|_____|_|_| |_|_|\\_\\___|\\___|`;
 </script>
 
 <div
@@ -15,7 +15,7 @@
   >
 
   <div class="text-[9px] text-primary leading-tight font-bold whitespace-pre mb-2 overflow-x-auto">
-    {@html logo}
+    {logo}
   </div>
 
   <p class="text-[10px] text-muted-foreground mt-1 leading-tight">Local-first link manager.</p>
