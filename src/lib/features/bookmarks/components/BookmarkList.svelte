@@ -78,13 +78,9 @@
 </script>
 
 <div class="flex flex-col gap-3">
-  {#each bookmarks as bookmark, i (bookmark.id)}
+  {#each bookmarks as bookmark (bookmark.id)}
     <div
-      class="p-3 border border-border-dim flex flex-col gap-2 transition-all duration-150 ease-in-out hover:border-border-hover hover:bg-box-bg/30 {i %
-        2 ===
-      1
-        ? 'bg-entry-alt-bg/50'
-        : 'bg-entry-bg/40'}"
+      class="p-3 border border-border-dim flex flex-col gap-2 transition-all duration-150 ease-in-out hover:border-border-hover hover:bg-accent/20 bg-background"
     >
       <div class="flex items-center justify-between text-xs">
         <div class="flex items-center gap-2">
