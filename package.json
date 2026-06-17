@@ -9,6 +9,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@eslint/compat": "^2.1.0",
     "@eslint/js": "^10.0.1",
     "@fontsource-variable/geist": "^5.2.9",
     "@fontsource-variable/geist-mono": "^5.2.8",

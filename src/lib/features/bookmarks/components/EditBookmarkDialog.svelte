@@ -91,6 +91,7 @@
       imageUrl: editImageUrlValue,
       tags: editTagsList,
     });
+    open = false;
   }
 
   function handleEditKeydown(e: KeyboardEvent) {
