@@ -99,7 +99,7 @@
 </script>
 
 <div
-  class="flex h-full flex-col lg:overflow-hidden bg-background text-foreground font-mono p-4 gap-4 overflow-y-auto lg:overflow-y-hidden"
+  class="flex h-full flex-col lg:overflow-hidden bg-background text-foreground font-mono p-2.5 gap-4 overflow-y-auto lg:overflow-y-hidden"
 >
   <!-- 3-Column Layout -->
   <div class="flex flex-1 overflow-visible lg:overflow-hidden gap-4 min-h-0 flex-col lg:flex-row">
@@ -134,7 +134,7 @@
       searchActive={viewStore.searchActive}
       bind:searchQuery={viewStore.searchQuery}
       selectedTag={viewStore.selectedTag}
-      bind:promptInput={promptInput}
+      bind:promptInput
       onModeChange={(m) => viewStore.setMode(m)}
       onSearchToggle={(active) => {
         viewStore.setSearchActive(active);
