@@ -80,8 +80,13 @@
 <div class="flex flex-col gap-3">
   {#each bookmarks as bookmark (bookmark.id)}
     <div
-      class="p-3 border border-border-dim flex flex-col gap-2 transition-all duration-150 ease-in-out hover:border-border-hover hover:bg-accent/20 bg-background"
+      class="group relative p-3 flex flex-col gap-2 transition-all duration-150 ease-in-out bg-background border border-transparent"
     >
+      <!-- Corner brackets on hover -->
+      <span class="absolute top-0 left-0 size-2 border-t border-l border-primary opacity-0 group-hover:opacity-100 transition-opacity duration-150"></span>
+      <span class="absolute top-0 right-0 size-2 border-t border-r border-primary opacity-0 group-hover:opacity-100 transition-opacity duration-150"></span>
+      <span class="absolute bottom-0 left-0 size-2 border-b border-l border-primary opacity-0 group-hover:opacity-100 transition-opacity duration-150"></span>
+      <span class="absolute bottom-0 right-0 size-2 border-b border-r border-primary opacity-0 group-hover:opacity-100 transition-opacity duration-150"></span>
       <div class="flex items-center justify-between text-xs">
         <div class="flex items-center gap-2">
           <span class="text-primary font-bold flex items-center gap-1 select-none">

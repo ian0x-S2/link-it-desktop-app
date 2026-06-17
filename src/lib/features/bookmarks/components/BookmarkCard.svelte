@@ -83,8 +83,13 @@
 </script>
 
 <Card.Root
-  class="bg-box-bg border border-border flex flex-col hover:border-border-hover transition-colors min-w-0 py-0 gap-0 shadow-none ring-0 rounded-none"
+  class="group relative bg-background border border-transparent flex flex-col min-w-0 py-0 gap-0 shadow-none ring-0 rounded-none"
 >
+  <!-- Corner brackets on hover -->
+  <span class="absolute top-0 left-0 size-2 border-t border-l border-primary opacity-0 group-hover:opacity-100 transition-opacity duration-150"></span>
+  <span class="absolute top-0 right-0 size-2 border-t border-r border-primary opacity-0 group-hover:opacity-100 transition-opacity duration-150"></span>
+  <span class="absolute bottom-0 left-0 size-2 border-b border-l border-primary opacity-0 group-hover:opacity-100 transition-opacity duration-150"></span>
+  <span class="absolute bottom-0 right-0 size-2 border-b border-r border-primary opacity-0 group-hover:opacity-100 transition-opacity duration-150"></span>
   <!-- Card Header -->
   <Card.Header class="p-0 gap-0 min-h-0 @container/card-header block rounded-none border-none">
     <div
