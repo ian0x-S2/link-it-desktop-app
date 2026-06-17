@@ -1,5 +1,5 @@
 import type { WorkspaceRepository } from '../repositories/workspace.repository';
-import type { CreateWorkspaceInput, Workspace } from '../types/workspace';
+import type { CreateWorkspaceInput, Workspace, WorkspaceStats } from '../types/workspace';
 
 export class WorkspaceActions {
   private readonly repository: WorkspaceRepository;
@@ -30,5 +30,9 @@ export class WorkspaceActions {
       throw new Error('Workspace name cannot be empty.');
     }
     return await this.repository.rename(id, trimmed);
+  }
+
+  async getWorkspaceStats(): Promise<WorkspaceStats[]> {
+    return await this.repository.getStats();
   }
 }

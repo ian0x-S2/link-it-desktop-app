@@ -9,6 +9,7 @@
   import Sidebar from '$lib/components/Sidebar.svelte';
   import StatsPanel from '$lib/components/StatsPanel.svelte';
   import TagsPanel from '$lib/components/TagsPanel.svelte';
+  import SettingsView from '$lib/components/SettingsView.svelte';
   import { Button } from '$lib/components/ui/button';
   import * as Dialog from '$lib/components/ui/dialog';
   import { Input } from '$lib/components/ui/input';
@@ -191,6 +192,13 @@
       bookmarkStore.load();
     }
   });
+
+  // Load stats when settings view is active
+  $effect(() => {
+    if (viewStore.category === 'settings') {
+      workspaceStore.loadStats();
+    }
+  });
 </script>
 
 <div
@@ -228,41 +236,45 @@
         <div
           class="flex items-center justify-between px-4 py-1.5 border-b border-border bg-box-bg text-xs text-muted-foreground shrink-0 select-none"
         >
-          <span class="font-bold uppercase tracking-widest text-foreground">Links</span>
-          <div class="flex items-center gap-1.5">
-            <!-- svelte-ignore a11y_click_events_have_key_events -->
-            <!-- svelte-ignore a11y_no_static_element_interactions -->
-            <span
-              onclick={() => viewStore.setMode('list')}
-              class="px-1.5 py-0.5 cursor-pointer transition-colors uppercase tracking-wider text-[10px] {viewStore.mode ===
-              'list'
-                ? 'bg-primary text-background font-bold'
-                : 'hover:text-foreground'}">[l]ist</span
-            >
-            <!-- svelte-ignore a11y_click_events_have_key_events -->
-            <!-- svelte-ignore a11y_no_static_element_interactions -->
-            <span
-              onclick={() => viewStore.setMode('grid')}
-              class="px-1.5 py-0.5 cursor-pointer transition-colors uppercase tracking-wider text-[10px] {viewStore.mode ===
-              'grid'
-                ? 'bg-primary text-background font-bold'
-                : 'hover:text-foreground'}">[g]rid</span
-            >
-            <!-- svelte-ignore a11y_click_events_have_key_events -->
-            <!-- svelte-ignore a11y_no_static_element_interactions -->
-            <span
-              onclick={() => {
-                const nextActive = !viewStore.searchActive;
-                viewStore.setSearchActive(nextActive);
-                if (nextActive) {
-                  setTimeout(() => promptInput?.focus(), 50);
-                }
-              }}
-              class="px-1.5 py-0.5 cursor-pointer transition-colors uppercase tracking-wider text-[10px] {viewStore.searchActive
-                ? 'bg-primary text-background font-bold'
-                : 'hover:text-foreground'}">[s]earch</span
-            >
-          </div>
+          <span class="font-bold uppercase tracking-widest text-foreground">
+            {viewStore.category === 'settings' ? 'Settings' : 'Links'}
+          </span>
+          {#if viewStore.category !== 'settings'}
+            <div class="flex items-center gap-1.5">
+              <!-- svelte-ignore a11y_click_events_have_key_events -->
+              <!-- svelte-ignore a11y_no_static_element_interactions -->
+              <span
+                onclick={() => viewStore.setMode('list')}
+                class="px-1.5 py-0.5 cursor-pointer transition-colors uppercase tracking-wider text-[10px] {viewStore.mode ===
+                'list'
+                  ? 'bg-primary text-background font-bold'
+                  : 'hover:text-foreground'}">[l]ist</span
+              >
+              <!-- svelte-ignore a11y_click_events_have_key_events -->
+              <!-- svelte-ignore a11y_no_static_element_interactions -->
+              <span
+                onclick={() => viewStore.setMode('grid')}
+                class="px-1.5 py-0.5 cursor-pointer transition-colors uppercase tracking-wider text-[10px] {viewStore.mode ===
+                'grid'
+                  ? 'bg-primary text-background font-bold'
+                  : 'hover:text-foreground'}">[g]rid</span
+              >
+              <!-- svelte-ignore a11y_click_events_have_key_events -->
+              <!-- svelte-ignore a11y_no_static_element_interactions -->
+              <span
+                onclick={() => {
+                  const nextActive = !viewStore.searchActive;
+                  viewStore.setSearchActive(nextActive);
+                  if (nextActive) {
+                    setTimeout(() => promptInput?.focus(), 50);
+                  }
+                }}
+                class="px-1.5 py-0.5 cursor-pointer transition-colors uppercase tracking-wider text-[10px] {viewStore.searchActive
+                  ? 'bg-primary text-background font-bold'
+                  : 'hover:text-foreground'}">[s]earch</span
+              >
+            </div>
+          {/if}
         </div>
 
         <!-- Tag Filter Indicator Badge if a tag is active -->
@@ -286,36 +298,40 @@
         {/if}
 
         <!-- Input Container (prevents layout shift) -->
-        <div class="px-4 pt-4 shrink-0">
-          {#if viewStore.searchActive}
-            <div class="flex flex-col mb-4 shrink-0">
-              <div
-                class="flex items-center gap-2 px-3 py-1.5 border border-border bg-transparent text-sm"
-              >
-                <span class="text-primary font-bold select-none">?</span>
-                <Input
-                  bind:ref={promptInput}
-                  bind:value={viewStore.searchQuery}
-                  type="text"
-                  placeholder="Search links..."
-                  class="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-muted-foreground font-mono text-xs h-auto py-0 focus-visible:border-none focus-visible:ring-0 focus-visible:ring-offset-0"
-                />
+        {#if viewStore.category !== 'settings'}
+          <div class="px-4 pt-4 shrink-0">
+            {#if viewStore.searchActive}
+              <div class="flex flex-col mb-4 shrink-0">
+                <div
+                  class="flex items-center gap-2 px-3 py-1.5 border border-border bg-transparent text-sm"
+                >
+                  <span class="text-primary font-bold select-none">?</span>
+                  <Input
+                    bind:ref={promptInput}
+                    bind:value={viewStore.searchQuery}
+                    type="text"
+                    placeholder="Search links..."
+                    class="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-muted-foreground font-mono text-xs h-auto py-0 focus-visible:border-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                  />
+                </div>
               </div>
-            </div>
-          {:else}
-            <PromptInput
-              bind:value={promptValue}
-              bind:inputElement={promptInput}
-              onAdd={handleAddLink}
-            />
-          {/if}
-        </div>
+            {:else}
+              <PromptInput
+                bind:value={promptValue}
+                bind:inputElement={promptInput}
+                onAdd={handleAddLink}
+              />
+            {/if}
+          </div>
+        {/if}
 
         <!-- Bookmark content area -->
         <div
           class="flex-1 overflow-y-auto p-4 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-box-bg [&::-webkit-scrollbar-thumb]:bg-border hover:[&::-webkit-scrollbar-thumb]:bg-primary min-h-0"
         >
-          {#if filteredBookmarksStore.items.length > 0}
+          {#if viewStore.category === 'settings'}
+            <SettingsView stats={workspaceStore.stats} onCloseSettings={() => viewStore.setCategory('inbox')} />
+          {:else if filteredBookmarksStore.items.length > 0}
             {#if viewStore.mode === 'list'}
               <BookmarkList
                 bookmarks={filteredBookmarksStore.items}
@@ -356,12 +372,14 @@
         </div>
 
         <!-- Bottom count indicator -->
-        <div
-          class="flex items-center justify-end px-4 py-1 border-t border-border bg-box-bg text-[10px] text-muted-foreground select-none shrink-0 font-bold"
-        >
-          {filteredBookmarksStore.items.length}
-          item{filteredBookmarksStore.items.length === 1 ? '' : 's'}
-        </div>
+        {#if viewStore.category !== 'settings'}
+          <div
+            class="flex items-center justify-end px-4 py-1 border-t border-border bg-box-bg text-[10px] text-muted-foreground select-none shrink-0 font-bold"
+          >
+            {filteredBookmarksStore.items.length}
+            item{filteredBookmarksStore.items.length === 1 ? '' : 's'}
+          </div>
+        {/if}
       </div>
     </div>
 

@@ -8,3 +8,10 @@ export type Workspace = {
 export type CreateWorkspaceInput = {
   name: string;
 };
+
+export type WorkspaceStats = Workspace & {
+  activeCount: number;
+  favoriteCount: number;
+  trashCount: number;
+};
+

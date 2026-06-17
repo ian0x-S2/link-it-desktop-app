@@ -1,9 +1,10 @@
 import { workspaceActions } from '../repositories/config/repository';
-import type { Workspace } from '../types/workspace';
+import type { Workspace, WorkspaceStats } from '../types/workspace';
 
 class WorkspaceStore {
   items = $state<Workspace[]>([]);
   activeId = $state<string | null>(null);
+  stats = $state<WorkspaceStats[]>([]);
 
   get active(): Workspace | null {
     return this.items.find((w) => w.id === this.activeId) ?? null;
@@ -39,6 +40,10 @@ class WorkspaceStore {
     if (this.activeId === id) {
       this.activeId = this.items[0]?.id ?? null;
     }
+  }
+
+  async loadStats(): Promise<void> {
+    this.stats = await workspaceActions.getWorkspaceStats();
   }
 }
 

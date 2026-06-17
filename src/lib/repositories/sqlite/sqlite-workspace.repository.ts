@@ -1,5 +1,5 @@
 import { getDatabase } from '../../db/database';
-import type { CreateWorkspaceInput, Workspace } from '../../types/workspace';
+import type { CreateWorkspaceInput, Workspace, WorkspaceStats } from '../../types/workspace';
 import type { WorkspaceRepository } from '../workspace.repository';
 
 interface WorkspaceRow {
@@ -61,5 +61,41 @@ export class SqliteWorkspaceRepository implements WorkspaceRepository {
       slug,
       id,
     ]);
+  }
+
+  async getStats(): Promise<WorkspaceStats[]> {
+    const db = await getDatabase();
+    const rows = await db.select<Array<{
+      id: string;
+      name: string;
+      slug: string;
+      createdAt: string;
+      activeCount: number;
+      favoriteCount: number;
+      trashCount: number;
+    }>>(`
+      SELECT 
+        w.id, 
+        w.name, 
+        w.slug, 
+        w.created_at as createdAt,
+        COUNT(CASE WHEN b.deleted_at IS NULL THEN b.id END) as activeCount,
+        COUNT(CASE WHEN b.is_favorite = 1 AND b.deleted_at IS NULL THEN b.id END) as favoriteCount,
+        COUNT(CASE WHEN b.deleted_at IS NOT NULL THEN b.id END) as trashCount
+      FROM workspaces w
+      LEFT JOIN bookmarks b ON b.workspace_id = w.id
+      GROUP BY w.id, w.name, w.slug, w.created_at
+      ORDER BY w.created_at ASC
+    `);
+
+    return rows.map((r) => ({
+      id: r.id,
+      name: r.name,
+      slug: r.slug,
+      createdAt: r.createdAt,
+      activeCount: r.activeCount,
+      favoriteCount: r.favoriteCount,
+      trashCount: r.trashCount,
+    }));
   }
 }

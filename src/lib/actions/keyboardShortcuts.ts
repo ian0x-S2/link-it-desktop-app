@@ -25,6 +25,7 @@ export function setupKeyboardShortcuts(promptInput: () => HTMLInputElement | nul
         themeStore.change(THEMES[next]);
       },
       m: () => toggleMode(),
+      ',': () => viewStore.setCategory('settings'),
       Escape: () => {
         (document.activeElement as HTMLElement)?.blur?.();
         if (viewStore.searchActive) {

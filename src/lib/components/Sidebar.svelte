@@ -26,8 +26,8 @@
     onSelectWorkspace: (id: string) => void;
     onCreateWorkspace: (name: string) => Promise<void>;
     onDeleteWorkspace: (id: string) => void;
-    selectedCategory: 'inbox' | 'favorites' | 'trash';
-    onSelectCategory: (cat: 'inbox' | 'favorites' | 'trash') => void;
+    selectedCategory: 'inbox' | 'favorites' | 'trash' | 'settings';
+    onSelectCategory: (cat: 'inbox' | 'favorites' | 'trash' | 'settings') => void;
     bookmarkCount: number;
     favoriteCount: number;
     trashCount: number;
@@ -239,7 +239,16 @@
     <div class="space-y-0.5 text-[10px] text-muted-foreground mt-1 select-none">
       <div>e Export Links</div>
       <div>i Import Links</div>
-      <div>, Settings</div>
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
+      <div
+        onclick={() => onSelectCategory('settings')}
+        class="cursor-pointer transition-colors hover:text-primary {selectedCategory === 'settings'
+          ? 'text-primary font-bold'
+          : ''}"
+      >
+        , Settings
+      </div>
     </div>
   </div>
 </aside>

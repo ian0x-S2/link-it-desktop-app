@@ -1,5 +1,5 @@
 export type ViewMode = 'grid' | 'list';
-export type Category = 'inbox' | 'favorites' | 'trash';
+export type Category = 'inbox' | 'favorites' | 'trash' | 'settings';
 
 class ViewStore {
   mode = $state<ViewMode>('grid');
