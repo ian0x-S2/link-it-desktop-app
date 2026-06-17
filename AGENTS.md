@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-link-it is a local-first desktop bookmark manager with TUI asthetics built with:
+link-it is a local-first desktop personal knowledge manager with TUI aesthetics built with:
 
 - Tauri v2
 - SvelteKit 2
@@ -10,7 +10,9 @@ link-it is a local-first desktop bookmark manager with TUI asthetics built with:
 - TypeScript
 - SQLite
 - @tauri-apps/plugin-sql
-- tailwind css
+- Tailwind CSS
+- CodeMirror 6 (editor de notas markdown)
+- Shadcn-svelte
 
 The application runs entirely on the client machine and does not use an HTTP backend.
 
@@ -34,7 +36,8 @@ SQLite
 
 The goal is to keep responsibilities isolated while avoiding unnecessary complexity.
 
-Do not introduce Clean Architecture, CQRS, DDD, ORMs, or additional abstraction layers unless explicitly requested.
+Do not introduce Clean Architecture, CQRS, DDD, ORMs, or additional abstraction layers
+unless explicitly requested.
 
 ---
 
@@ -60,13 +63,84 @@ features/
     stores/
     validators/
 
+  notes/
+    types/
+    repositories/
+    actions/
+    stores/
+    validators/
+    editor/          ← extensões e widgets do CodeMirror
+
 shared/
   components/
   constants/
   types/
 ```
 
+Bookmarks and Notes are independent features. Do not couple them unless explicitly requested.
 New functionality should be added inside a feature folder instead of creating global folders.
+
+---
+
+# Editor Architecture (Notes)
+
+Notes use CodeMirror 6 as the editor engine.
+
+## Core Principles
+
+- CodeMirror manages its own DOM. Mount it via Svelte `use:action`, never inside reactive blocks.
+- Editor state is CodeMirror's responsibility. Do not mirror it in Svelte `$state` unnecessarily.
+- Persist only on explicit save or debounced autosave — never on every keystroke.
+
+## Svelte Integration
+
+```ts
+function editor(node: HTMLElement, content: string) {
+  const view = new EditorView({
+    extensions: [basicSetup, markdown()],
+    parent: node,
+  });
+  return {
+    destroy: () => view.destroy(),
+  };
+}
+```
+
+## Svelte Components inside the Editor
+
+Use CodeMirror `WidgetDecoration` to mount Svelte components inside the editor.
+Use `mount` and `unmount` from Svelte 5 for lifecycle management.
+
+```ts
+import { mount, unmount } from 'svelte'
+
+class MyWidget extends WidgetType {
+  toDOM() {
+    const el = document.createElement('span')
+    mount(MyComponent, { target: el, props: { ... } })
+    return el
+  }
+  destroy(el: HTMLElement) {
+    unmount(el)
+  }
+}
+```
+
+Widgets are read-only from the editor's perspective.
+Do not use widgets for content the user needs to edit as text.
+
+## Extensions Organization
+
+Place CodeMirror extensions inside `features/notes/editor/`:
+
+```text
+editor/
+  index.ts          ← composição final das extensões
+  markdown.ts       ← lang-markdown + highlight
+  decorations.ts    ← widgets e decorações inline
+  theme.ts          ← tema TUI
+  keymaps.ts        ← atalhos customizados
+```
 
 ---
 
@@ -81,6 +155,7 @@ Allowed:
 - Rendering
 - Event handling
 - Calling stores
+- Mounting CodeMirror via `use:action`
 
 Not allowed:
 
@@ -88,6 +163,7 @@ Not allowed:
 - Business rules
 - Data validation
 - Direct database access
+- CodeMirror extension logic (belongs in `editor/`)
 
 ---
 
@@ -101,12 +177,14 @@ Allowed:
 - Loading state
 - Error state
 - Optimistic updates
+- Note metadata (title, updatedAt) — not the editor content itself
 
 Not allowed:
 
 - SQL
 - Database access
 - Complex business rules
+- Mirroring CodeMirror internal state
 
 Stores communicate only with Actions.
 
@@ -116,15 +194,18 @@ Stores communicate only with Actions.
 
 Actions contain all business logic.
 
-Examples:
+Bookmark examples:
 
 - URL validation
 - Duplicate detection
 - Tag normalization
-- Sorting rules
-- Domain-specific behavior
 
-Services orchestrate repositories and return application data.
+Note examples:
+
+- Title extraction from first heading
+- Word count
+- Autosave debounce logic
+- Markdown sanitization on import/export
 
 All business rules belong here.
 
@@ -151,35 +232,26 @@ Repositories should remain thin.
 
 ---
 
-# Dependency Injection
-
-Use simple factory-based dependency injection.
-
-Preferred:
-
-```ts
-createBookmarkStore(action);
-```
-
-Avoid hidden dependencies.
-
-Do not instantiate repositories directly inside stores or components.
-
----
-
 # SQLite
 
 Use raw SQL.
 
-Do not introduce:
+Do not introduce any ORM.
 
-- Prisma
-- Drizzle
-- TypeORM
-- Sequelize
-- Any ORM
+Notes schema should separate metadata from content:
 
-Repository implementations should use @tauri-apps/plugin-sql directly.
+```sql
+CREATE TABLE notes (
+  id        TEXT PRIMARY KEY,
+  title     TEXT NOT NULL DEFAULT '',
+  content   TEXT NOT NULL DEFAULT '',
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL
+);
+```
+
+Avoid storing derived data (word count, headings) in the database.
+Compute them in actions when needed.
 
 ---
 
@@ -187,12 +259,11 @@ Repository implementations should use @tauri-apps/plugin-sql directly.
 
 Use Zod for all external input validation.
 
-Examples:
+Note-specific examples:
 
-- Form submissions
-- Import operations
-- User-provided URLs
-- Future settings screens
+- Import from `.md` files
+- Title length limits
+- Content size limits
 
 Validation should occur before business logic execution.
 
@@ -200,42 +271,36 @@ Validation should occur before business logic execution.
 
 # TypeScript Guidelines
 
-Prefer explicit types.
+Prefer explicit types. Separate input/output types per feature.
 
-Separate:
+Notes example:
 
 ```text
-Bookmark
-CreateBookmarkInput
-UpdateBookmarkInput
-BookmarkWithTags
+Note
+CreateNoteInput
+UpdateNoteInput
+NoteMetadata       ← id, title, updatedAt (sem content, para listagens)
 ```
 
-Avoid using a single type for all operations.
-
-Avoid `any`.
+Avoid `any`. Prefer `unknown` with narrowing.
 
 ---
 
 # Components
 
-Avoid large page components.
+Avoid large page components. Split UI into focused components.
 
-As features grow, split UI into focused components.
-
-Example:
+Notes example:
 
 ```text
-components/
-
-BookmarkForm.svelte
-BookmarkList.svelte
-BookmarkItem.svelte
-SearchBar.svelte
-TagList.svelte
+NoteList.svelte
+NoteItem.svelte
+NoteEditor.svelte    ← só monta o CodeMirror via use:action
+NoteToolbar.svelte
 ```
 
-Components should be small and composable.
+`NoteEditor.svelte` should only be responsible for mounting and destroying the editor.
+Extension logic lives in `features/notes/editor/`, not in the component.
 
 ---
 
@@ -244,10 +309,11 @@ Components should be small and composable.
 Never silently ignore errors.
 
 Actions should throw meaningful domain errors.
-
 Stores should convert errors into UI state.
-
 Repositories should only surface persistence errors.
+
+Editor errors (e.g. failed to load content) should be caught at the store level
+and surfaced as UI state, never swallowed silently.
 
 ---
 
@@ -255,13 +321,11 @@ Repositories should only surface persistence errors.
 
 Prefer simplicity over premature optimization.
 
-Optimize only when there is measurable evidence.
+Editor-specific rules:
 
-Avoid:
-
-- Complex caching layers
-- Unnecessary memoization
-- Over-engineering
+- Debounce autosave (suggested: 1000ms)
+- Do not read `view.state.doc.toString()` on every keystroke
+- For large documents, prefer line-based operations over full document reads
 
 ---
 
@@ -269,13 +333,11 @@ Avoid:
 
 Business logic should be testable without SQLite.
 
-Use repository interfaces to enable:
-
-- Memory repositories
-- Mock repositories
-- Future test doubles
-
+Use repository interfaces to enable mock repositories.
 Actions should be the primary testing target.
+
+Editor extensions can be tested with CodeMirror's own test utilities
+(`@codemirror/state` allows creating headless editor states).
 
 ---
 
@@ -284,7 +346,7 @@ Actions should be the primary testing target.
 When generating code for this project:
 
 1. Follow the existing layered architecture.
-2. Respect feature boundaries.
+2. Respect feature boundaries — bookmarks and notes are independent.
 3. Keep repositories focused on persistence.
 4. Keep business rules inside actions.
 5. Keep stores focused on state management.
@@ -292,36 +354,7 @@ When generating code for this project:
 7. Prefer composition over inheritance.
 8. Use raw SQL.
 9. Use Svelte 5 runes.
-10. Avoid introducing new architectural patterns without justification.
+10. Use `mount`/`unmount` from Svelte 5 for widgets inside the editor.
+    11s. Avoid introducing new architectural patterns without justification.
 
 When in doubt, choose the simpler solution.
-
----
-
-## Core Principles
-
-Write code that is **accessible, performant, type-safe, and maintainable**. Focus on clarity and explicit intent over brevity.
-
-### Type Safety & Explicitness
-
-- Use explicit types for function parameters and return values when they enhance clarity
-- Prefer `unknown` over `any` when the type is genuinely unknown
-- Use const assertions (`as const`) for immutable values and literal types
-- Leverage TypeScript's type narrowing instead of type assertions
-- Use meaningful variable names instead of magic numbers - extract constants with descriptive names
-
-### Modern JavaScript/TypeScript
-
-- Use arrow functions for callbacks and short functions
-- Prefer `for...of` loops over `.forEach()` and indexed `for` loops
-- Use optional chaining (`?.`) and nullish coalescing (`??`) for safer property access
-- Prefer template literals over string concatenation
-- Use destructuring for object and array assignments
-- Use `const` by default, `let` only when reassignment is needed, never `var`
-
-### Async & Promises
-
-- Always `await` promises in async functions - don't forget to use the return value
-- Use `async/await` syntax instead of promise chains for better readability
-- Handle errors appropriately in async code with try-catch blocks
-- Don't use async functions as Promise executors
