@@ -2,7 +2,7 @@
   import { getChartContext, Tooltip as TooltipPrimitive } from 'layerchart';
   import type { Snippet } from 'svelte';
   import type { HTMLAttributes } from 'svelte/elements';
-  import { cn, type WithElementRef, type WithoutChildren } from '$lib/utils.js';
+  import { cn, type WithElementRef, type WithoutChildren } from '$lib/utils/utils.js';
   import { getPayloadConfigFromPayload, type TooltipPayload, useChart } from './chart-utils.js';
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

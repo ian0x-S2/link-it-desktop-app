@@ -10,8 +10,8 @@
     getTagSuggestions,
     isNewTagValue,
     normaliseTag,
-  } from '$lib/tag-popover-utils';
-  import { getFavicon } from '$lib/utils';
+  } from '$lib/utils/tag-popover-utils';
+  import { getFavicon } from '$lib/utils/utils';
   import type { Bookmark } from '../types/bookmark';
 
   let {
