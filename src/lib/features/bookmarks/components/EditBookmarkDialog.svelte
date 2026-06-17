@@ -1,16 +1,16 @@
 <script lang="ts">
-  import { Button } from '$lib/components/ui/button';
-  import * as Dialog from '$lib/components/ui/dialog';
-  import { Input } from '$lib/components/ui/input';
-  import { Badge } from '$lib/components/ui/badge';
-  import * as Popover from '$lib/components/ui/popover';
+  import { Button } from '$lib/shared/components/ui/button';
+  import * as Dialog from '$lib/shared/components/ui/dialog';
+  import { Input } from '$lib/shared/components/ui/input';
+  import { Badge } from '$lib/shared/components/ui/badge';
+  import * as Popover from '$lib/shared/components/ui/popover';
   import {
     getAllUniqueTags,
     getTagSuggestions,
     isNewTagValue,
     normaliseTag,
-  } from '$lib/utils/tag-popover-utils';
-  import type { Bookmark } from '$lib/types/bookmark';
+  } from '$lib/features/bookmarks/utils/tag-popover-utils';
+  import type { Bookmark } from '../types/bookmark';
 
   interface Props {
     open: boolean;

@@ -1,6 +1,6 @@
 import { toggleMode } from 'mode-watcher';
-import { THEMES, themeStore } from '$lib/stores/theme.svelte';
-import { viewStore } from '$lib/stores/view.svelte';
+import { THEMES, themeStore } from '$lib/shared/stores/theme.svelte';
+import { viewStore } from '$lib/shared/stores/view.svelte';
 
 export function setupKeyboardShortcuts(promptInput: () => HTMLInputElement | null) {
   function handleKeydown(event: KeyboardEvent) {

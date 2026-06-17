@@ -1,13 +1,13 @@
 <script lang="ts">
   import { untrack } from 'svelte';
   import { setupKeyboardShortcuts } from '$lib/actions/keyboardShortcuts';
-  import Sidebar from '$lib/components/Sidebar.svelte';
-  import FooterBar from '$lib/components/FooterBar.svelte';
-  import { filteredBookmarksStore } from '$lib/derived/filteredBookmarks.svelte';
-  import { bookmarkStore } from '$lib/stores/bookmark.svelte';
-  import { THEMES, themeStore } from '$lib/stores/theme.svelte';
-  import { viewStore } from '$lib/stores/view.svelte';
-  import { workspaceStore } from '$lib/stores/workspace.svelte';
+  import Sidebar from '$lib/shared/components/Sidebar.svelte';
+  import FooterBar from '$lib/shared/components/FooterBar.svelte';
+  import { filteredBookmarksStore } from '$lib/features/bookmarks/stores/filteredBookmarks.svelte';
+  import { bookmarkStore } from '$lib/features/bookmarks/stores/bookmark.svelte';
+  import { THEMES, themeStore } from '$lib/shared/stores/theme.svelte';
+  import { viewStore } from '$lib/shared/stores/view.svelte';
+  import { workspaceStore } from '$lib/features/workspaces/stores/workspace.svelte';
 
   // Extracted components
   import EditBookmarkDialog from '$lib/features/bookmarks/components/EditBookmarkDialog.svelte';

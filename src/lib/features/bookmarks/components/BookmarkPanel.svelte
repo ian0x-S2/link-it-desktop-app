@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { Button } from '$lib/components/ui/button';
-  import { Input } from '$lib/components/ui/input';
-  import BookmarkGrid from '$lib/components/BookmarkGrid.svelte';
-  import BookmarkList from '$lib/components/BookmarkList.svelte';
-  import PromptInput from '$lib/components/PromptInput.svelte';
-  import SettingsView from '$lib/components/SettingsView.svelte';
-  import type { Bookmark } from '$lib/types/bookmark';
+  import { Button } from '$lib/shared/components/ui/button';
+  import { Input } from '$lib/shared/components/ui/input';
+  import BookmarkGrid from './BookmarkGrid.svelte';
+  import BookmarkList from './BookmarkList.svelte';
+  import PromptInput from './PromptInput.svelte';
+  import SettingsView from '$lib/features/workspaces/components/SettingsView.svelte';
+  import type { Bookmark } from '../types/bookmark';
 
   interface Props {
     bookmarks: Bookmark[];

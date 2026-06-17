@@ -1,8 +1,8 @@
 <script lang="ts">
-  import StatsPanel from '$lib/components/StatsPanel.svelte';
-  import TagsPanel from '$lib/components/TagsPanel.svelte';
-  import LogoPanel from '$lib/components/LogoPanel.svelte';
-  import type { Bookmark } from '$lib/types/bookmark';
+  import StatsPanel from './StatsPanel.svelte';
+  import TagsPanel from './TagsPanel.svelte';
+  import LogoPanel from '$lib/shared/components/LogoPanel.svelte';
+  import type { Bookmark } from '../types/bookmark';
 
   interface Props {
     bookmarks: Bookmark[];
