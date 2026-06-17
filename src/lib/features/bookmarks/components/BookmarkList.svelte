@@ -107,7 +107,7 @@
           <span class="font-bold text-sm text-foreground">{bookmark.title}</span>
         </div>
         <span
-          class="text-[10px] uppercase tracking-wide text-dim-foreground"
+          class="text-tui-xs uppercase tracking-tui-wide text-dim-foreground"
           class:text-primary={bookmark.isFavorite}
         >
           {bookmark.isFavorite ? '★ FAVORITE' : '☆ STANDARD'}
@@ -126,10 +126,10 @@
 
         {#if bookmark.tags.length || true}
           <div class="flex flex-wrap gap-1 mt-1 items-center">
-            {#each bookmark.tags as tag}
+            {#each bookmark.tags as tag (tag)}
               <Badge
                 variant="outline"
-                class="text-[10px] px-0.5 text-muted-foreground before:content-['\['] before:text-border after:content-['\]'] after:text-border flex items-center font-mono border-none"
+                class="text-tui-xs px-0.5 text-muted-foreground before:content-['\['] before:text-border after:content-['\]'] after:text-border flex items-center font-mono border-none"
               >
                 #{tag}
                 <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -156,7 +156,7 @@
                     {...props}
                     variant="ghost"
                     size="xs"
-                    class="text-[10px] text-dim-foreground hover:text-primary transition-colors select-none font-bold h-auto p-0 bg-transparent hover:bg-transparent font-mono"
+                    class="text-tui-xs text-dim-foreground hover:text-primary transition-colors select-none font-bold h-auto p-0 bg-transparent hover:bg-transparent font-mono"
                   >
                     + add tag
                   </Button>
@@ -169,13 +169,13 @@
               >
                 <!-- Input -->
                 <div class="flex items-center gap-1 px-2 py-1.5 border-b border-border">
-                  <span class="text-primary font-bold text-[10px] select-none">#</span>
+                  <span class="text-primary font-bold text-tui-xs select-none">#</span>
                   <Input
                     bind:value={tagInputValue}
                     onkeydown={(e) => handleTagKeydown(e, bookmark.id)}
                     placeholder="tag name..."
                     autofocus
-                    class="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-dim-foreground font-mono text-[10px] h-auto py-0 focus-visible:border-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                    class="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-dim-foreground font-mono text-tui-xs h-auto py-0 focus-visible:border-none focus-visible:ring-0 focus-visible:ring-offset-0"
                   />
                 </div>
                 <!-- Suggestions -->
@@ -185,23 +185,23 @@
                     <!-- svelte-ignore a11y_no_static_element_interactions -->
                     <div
                       onclick={() => submitTag(bookmark.id, tagInputValue)}
-                      class="px-2 py-1 text-[10px] text-primary cursor-pointer hover:bg-accent/30 select-none"
+                      class="px-2 py-1 text-tui-xs text-primary cursor-pointer hover:bg-accent/30 select-none"
                     >
                       [Create: "{tagInputValue.trim().toLowerCase()}"]
                     </div>
                   {/if}
-                  {#each getTagSuggestionsForBookmark(bookmark) as suggestion}
+                  {#each getTagSuggestionsForBookmark(bookmark) as suggestion (suggestion)}
                     <!-- svelte-ignore a11y_click_events_have_key_events -->
                     <!-- svelte-ignore a11y_no_static_element_interactions -->
                     <div
                       onclick={() => submitTag(bookmark.id, suggestion)}
-                      class="px-2 py-1 text-[10px] text-muted-foreground cursor-pointer hover:bg-accent/30 hover:text-foreground select-none"
+                      class="px-2 py-1 text-tui-xs text-muted-foreground cursor-pointer hover:bg-accent/30 hover:text-foreground select-none"
                     >
                       * {suggestion}
                     </div>
                   {/each}
                   {#if getTagSuggestionsForBookmark(bookmark).length === 0 && !isNewTagForBookmark(bookmark)}
-                    <div class="px-2 py-1 text-[10px] text-dim-foreground italic select-none">
+                    <div class="px-2 py-1 text-tui-xs text-dim-foreground italic select-none">
                       No tags yet
                     </div>
                   {/if}

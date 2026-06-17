@@ -24,7 +24,7 @@
         try {
           const cb = new Date(b.createdAt);
           return cb.toDateString() === d.toDateString();
-        } catch (e) {
+        } catch {
           return false;
         }
       }).length;
@@ -60,13 +60,13 @@
   class="relative p-4 flex flex-col bg-box-bg border border-border lg:flex-[2.5] min-h-45 lg:min-h-0 select-none font-mono"
 >
   <span
-    class="absolute px-1.5 text-[10px] font-bold uppercase tracking-wider -top-1.75 left-2.5 bg-background text-primary"
+    class="absolute px-1.5 text-tui-xs font-bold uppercase tracking-tui-wide -top-1.75 left-2.5 bg-background text-primary"
     >Statistics</span
   >
 
   <!-- Title & Chart Toggle -->
   <div
-    class="flex items-center justify-between text-[9px] font-bold uppercase text-dim-foreground tracking-wider border-b border-dashed border-border-dim pb-1 mb-2 shrink-0"
+    class="flex items-center justify-between text-tui-2xs font-bold uppercase text-dim-foreground tracking-tui-wide border-b border-dashed border-border-dim pb-1 mb-2 shrink-0"
   >
     <span>7-Day Activity</span>
     <div class="flex items-center gap-1.5">
@@ -74,7 +74,7 @@
         variant="ghost"
         size="xs"
         onclick={() => (chartType = 'bar')}
-        class="cursor-pointer transition-colors hover:text-foreground h-auto p-0 font-mono text-[9px] uppercase tracking-wider select-none bg-transparent hover:bg-transparent {chartType ===
+        class="cursor-pointer transition-colors hover:text-foreground h-auto p-0 font-mono text-tui-2xs uppercase tracking-tui-wide select-none bg-transparent hover:bg-transparent {chartType ===
         'bar'
           ? 'text-primary font-bold'
           : 'text-muted-foreground'}"
@@ -85,7 +85,7 @@
         variant="ghost"
         size="xs"
         onclick={() => (chartType = 'line')}
-        class="cursor-pointer transition-colors hover:text-foreground h-auto p-0 font-mono text-[9px] uppercase tracking-wider select-none bg-transparent hover:bg-transparent {chartType ===
+        class="cursor-pointer transition-colors hover:text-foreground h-auto p-0 font-mono text-tui-2xs uppercase tracking-tui-wide select-none bg-transparent hover:bg-transparent {chartType ===
         'line'
           ? 'text-primary font-bold'
           : 'text-muted-foreground'}"
@@ -152,7 +152,7 @@
 
   <!-- Bottom quick summary stats -->
   <div
-    class="mt-2 pt-2 border-t border-dashed border-border-dim flex items-center justify-between text-[9px] shrink-0 text-dim-foreground"
+    class="mt-2 pt-2 border-t border-dashed border-border-dim flex items-center justify-between text-tui-2xs shrink-0 text-dim-foreground"
   >
     <div class="flex items-center gap-1">
       <span>Total:</span>

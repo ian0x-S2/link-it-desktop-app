@@ -70,7 +70,7 @@
           <!-- svelte-ignore a11y_no_static_element_interactions -->
           <span
             onclick={() => onModeChange('list')}
-            class="px-1.5 py-0.5 cursor-pointer transition-colors uppercase tracking-wider text-[10px] {mode ===
+            class="px-1.5 py-0.5 cursor-pointer transition-colors uppercase tracking-tui-wide text-tui-xs {mode ===
             'list'
               ? 'bg-primary text-background font-bold'
               : 'hover:text-foreground'}"
@@ -81,7 +81,7 @@
           <!-- svelte-ignore a11y_no_static_element_interactions -->
           <span
             onclick={() => onModeChange('grid')}
-            class="px-1.5 py-0.5 cursor-pointer transition-colors uppercase tracking-wider text-[10px] {mode ===
+            class="px-1.5 py-0.5 cursor-pointer transition-colors uppercase tracking-tui-wide text-tui-xs {mode ===
             'grid'
               ? 'bg-primary text-background font-bold'
               : 'hover:text-foreground'}"
@@ -98,7 +98,7 @@
                 setTimeout(() => promptInput?.focus(), 50);
               }
             }}
-            class="px-1.5 py-0.5 cursor-pointer transition-colors uppercase tracking-wider text-[10px] {searchActive
+            class="px-1.5 py-0.5 cursor-pointer transition-colors uppercase tracking-tui-wide text-tui-xs {searchActive
               ? 'bg-primary text-background font-bold'
               : 'hover:text-foreground'}"
           >
@@ -111,7 +111,7 @@
     <!-- Tag Filter Indicator Badge if a tag is active -->
     {#if selectedTag}
       <div
-        class="flex items-center justify-between px-4 py-1 border-b border-border bg-accent/25 text-[10px] text-primary shrink-0 select-none font-bold"
+        class="flex items-center justify-between px-4 py-1 border-b border-border bg-accent/25 text-tui-xs text-primary shrink-0 select-none font-bold"
       >
         <div class="flex items-center gap-1">
           <span>FILTERED BY:</span>
@@ -121,7 +121,7 @@
           variant="ghost"
           size="xs"
           onclick={onClearTag}
-          class="text-destructive hover:text-red-400 font-bold tracking-wider cursor-pointer bg-transparent hover:bg-transparent border-none p-0 h-auto font-mono text-[10px]"
+          class="text-destructive hover:text-red-400 font-bold tracking-tui-wide cursor-pointer bg-transparent hover:bg-transparent border-none p-0 h-auto font-mono text-tui-xs"
         >
           [x] CLEAR
         </Button>
@@ -188,7 +188,7 @@
           class="flex flex-col items-center justify-center h-full text-center select-none gap-2 py-8"
         >
           <p class="text-xs uppercase tracking-wider text-destructive">✗ No records found</p>
-          <p class="text-[10px] text-dim-foreground">
+          <p class="text-tui-xs text-dim-foreground">
             {searchActive
               ? '> Refine your search query'
               : '> Press [a] or click $ to add a link'}
@@ -200,7 +200,7 @@
     <!-- Bottom count indicator -->
     {#if category !== 'settings'}
       <div
-        class="flex items-center justify-end px-4 py-1 border-t border-border bg-box-bg text-[10px] text-muted-foreground select-none shrink-0 font-bold"
+        class="flex items-center justify-end px-4 py-1 border-t border-border bg-box-bg text-tui-xs text-muted-foreground select-none shrink-0 font-bold"
       >
         {bookmarks.length}
         item{bookmarks.length === 1 ? '' : 's'}

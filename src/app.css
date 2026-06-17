@@ -300,6 +300,12 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  --text-tui-2xs: 9px;
+  --text-tui-xs: 10px;
+  --text-tui-sm: 11px;
+  --tracking-tui: 0.1em;
+  --tracking-tui-wide: 0.15em;
 }
 
 @layer base {

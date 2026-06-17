@@ -97,20 +97,20 @@
   class="relative p-4 flex flex-col bg-box-bg border border-border lg:flex-2 min-h-35 lg:min-h-0 select-none font-mono"
 >
   <span
-    class="absolute px-1.5 text-[10px] font-bold uppercase tracking-wider -top-1.75 left-2.5 bg-background text-primary"
+    class="absolute px-1.5 text-tui-xs font-bold uppercase tracking-tui-wide -top-1.75 left-2.5 bg-background text-primary"
     >Tags</span
   >
 
   <!-- Tag search -->
   <div
-    class="flex items-center gap-1.5 px-2 py-0.5 border border-border-dim bg-transparent text-[10px] mb-2 shrink-0"
+    class="flex items-center gap-1.5 px-2 py-0.5 border border-border-dim bg-transparent text-tui-xs mb-2 shrink-0"
   >
     <span class="text-primary font-bold">/</span>
     <Input
       bind:value={tagSearch}
       type="text"
       placeholder="Filter tags..."
-      class="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-dim-foreground font-mono text-[10px] h-auto py-0 focus-visible:border-none focus-visible:ring-0 focus-visible:ring-offset-0"
+      class="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-dim-foreground font-mono text-tui-xs h-auto py-0 focus-visible:border-none focus-visible:ring-0 focus-visible:ring-offset-0"
     />
     {#if tagSearch}
       <Button
@@ -144,7 +144,7 @@
           class="flex-1 truncate cursor-pointer py-0.5"
         >
           <span>* {tag.name}</span>
-          <span class="text-[9px] opacity-70 ml-1" class:text-background={selectedTag === tag.name}
+          <span class="text-tui-2xs opacity-70 ml-1" class:text-background={selectedTag === tag.name}
             >({tag.count})</span
           >
         </div>
@@ -174,7 +174,7 @@
         </div>
       </div>
     {:else}
-      <div class="text-[10px] text-dim-foreground italic py-1">
+      <div class="text-tui-xs text-dim-foreground italic py-1">
         {tagSearch ? '✗ No matching tags' : '> No tags found'}
       </div>
     {/each}
@@ -191,7 +191,7 @@
       <Dialog.Title class="text-xs font-bold uppercase tracking-widest text-primary">
         // Rename Tag
       </Dialog.Title>
-      <Dialog.Description class="text-[10px] text-muted-foreground mt-1">
+      <Dialog.Description class="text-tui-xs text-muted-foreground mt-1">
         Rename
         <span class="text-foreground font-bold">*{tagToRename}</span>
         globally across all bookmarks.
@@ -199,14 +199,14 @@
     </Dialog.Header>
     <div class="px-4 py-3">
       <div class="flex items-center gap-1.5 px-2 py-1.5 border border-border bg-transparent">
-        <span class="text-primary font-bold text-[10px] select-none">*</span>
+        <span class="text-primary font-bold text-tui-xs select-none">*</span>
         <Input
           id="rename-tag-input"
           bind:value={newTagNameValue}
           onkeydown={handleRenameKeydown}
           placeholder="new-tag-name"
           autofocus
-          class="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-dim-foreground font-mono text-[10px] h-auto py-0 focus-visible:border-none focus-visible:ring-0 focus-visible:ring-offset-0"
+          class="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-dim-foreground font-mono text-tui-xs h-auto py-0 focus-visible:border-none focus-visible:ring-0 focus-visible:ring-offset-0"
         />
       </div>
     </div>
@@ -217,7 +217,7 @@
             {...props}
             variant="outline"
             size="xs"
-            class="font-mono text-[10px] rounded-none border border-border-dim hover:border-border text-muted-foreground hover:text-foreground uppercase tracking-wider h-auto py-1 px-3 cursor-pointer"
+            class="font-mono text-tui-xs rounded-none border border-border-dim hover:border-border text-muted-foreground hover:text-foreground uppercase tracking-tui-wide h-auto py-1 px-3 cursor-pointer"
           >
             [cancel]
           </Button>
@@ -227,7 +227,7 @@
         variant="outline"
         size="xs"
         onclick={confirmRename}
-        class="font-mono text-[10px] rounded-none border border-primary text-primary hover:bg-primary hover:text-primary-foreground dark:hover:bg-primary dark:hover:text-primary-foreground uppercase tracking-wider h-auto py-1 px-3 cursor-pointer"
+        class="font-mono text-tui-xs rounded-none border border-primary text-primary hover:bg-primary hover:text-primary-foreground dark:hover:bg-primary dark:hover:text-primary-foreground uppercase tracking-tui-wide h-auto py-1 px-3 cursor-pointer"
       >
         [confirm]
       </Button>
@@ -244,7 +244,7 @@
       <AlertDialog.Title class="text-xs font-bold uppercase tracking-widest text-destructive">
         // Delete Tag
       </AlertDialog.Title>
-      <AlertDialog.Description class="text-[10px] text-muted-foreground mt-1">
+      <AlertDialog.Description class="text-tui-xs text-muted-foreground mt-1">
         Remove
         <span class="text-foreground font-bold">*{tagToDelete}</span>
         from all bookmarks globally. This action cannot be undone.
@@ -257,7 +257,7 @@
             {...props}
             variant="outline"
             size="xs"
-            class="font-mono text-[10px] rounded-none border border-border-dim hover:border-border text-muted-foreground hover:text-foreground uppercase tracking-wider h-auto py-1 px-3 cursor-pointer"
+            class="font-mono text-tui-xs rounded-none border border-border-dim hover:border-border text-muted-foreground hover:text-foreground uppercase tracking-tui-wide h-auto py-1 px-3 cursor-pointer"
           >
             [cancel]
           </Button>
@@ -270,7 +270,7 @@
             variant="outline"
             size="xs"
             onclick={confirmDelete}
-            class="font-mono text-[10px] rounded-none border border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground dark:hover:bg-destructive dark:hover:text-destructive-foreground uppercase tracking-wider h-auto py-1 px-3 cursor-pointer"
+            class="font-mono text-tui-xs rounded-none border border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground dark:hover:bg-destructive dark:hover:text-destructive-foreground uppercase tracking-tui-wide h-auto py-1 px-3 cursor-pointer"
           >
             [delete]
           </Button>

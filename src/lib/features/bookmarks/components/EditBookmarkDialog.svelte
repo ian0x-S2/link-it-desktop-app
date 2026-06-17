@@ -147,7 +147,7 @@
       <Dialog.Title class="text-xs font-bold uppercase tracking-widest text-primary">
         // Edit Bookmark
       </Dialog.Title>
-      <Dialog.Description class="text-[10px] text-muted-foreground mt-1">
+      <Dialog.Description class="text-tui-xs text-muted-foreground mt-1">
         Update details for this bookmark.
       </Dialog.Description>
     </Dialog.Header>
@@ -171,7 +171,7 @@
           </div>
         {:else}
           <div
-            class="aspect-video w-full border border-border border-dashed bg-background flex flex-col items-center justify-center text-[10px] text-dim-foreground font-mono select-none shrink-0 p-4 text-center"
+            class="aspect-video w-full border border-border border-dashed bg-background flex flex-col items-center justify-center text-tui-xs text-dim-foreground font-mono select-none shrink-0 p-4 text-center"
           >
             <span>[ NO IMAGE PREVIEW ]</span>
           </div>
@@ -180,14 +180,14 @@
         <!-- Image URL / File Upload Switch and Inputs -->
         <div class="flex flex-col gap-1">
           <div class="flex items-center gap-2 mb-1 select-none border-b border-border-dim pb-1">
-            <span class="text-[9px] uppercase font-bold text-muted-foreground tracking-wider"
+            <span class="text-tui-2xs uppercase font-bold text-muted-foreground tracking-tui-wide"
               >// Image Source:</span
             >
             <!-- svelte-ignore a11y_click_events_have_key_events -->
             <!-- svelte-ignore a11y_no_static_element_interactions -->
             <span
               onclick={() => (editImageSourceMode = 'url')}
-              class="px-1.5 py-0.5 cursor-pointer transition-colors uppercase tracking-wider text-[9px] {editImageSourceMode ===
+              class="px-1.5 py-0.5 cursor-pointer transition-colors uppercase tracking-tui-wide text-tui-2xs {editImageSourceMode ===
               'url'
                 ? 'bg-primary text-background font-bold'
                 : 'text-muted-foreground hover:text-foreground'}"
@@ -198,7 +198,7 @@
             <!-- svelte-ignore a11y_no_static_element_interactions -->
             <span
               onclick={() => (editImageSourceMode = 'upload')}
-              class="px-1.5 py-0.5 cursor-pointer transition-colors uppercase tracking-wider text-[9px] {editImageSourceMode ===
+              class="px-1.5 py-0.5 cursor-pointer transition-colors uppercase tracking-tui-wide text-tui-2xs {editImageSourceMode ===
               'upload'
                 ? 'bg-primary text-background font-bold'
                 : 'text-muted-foreground hover:text-foreground'}"
@@ -211,7 +211,7 @@
             <div
               class="flex items-center gap-1.5 px-2.5 py-1.5 border border-border bg-transparent"
             >
-              <span class="text-primary font-bold text-[10px] select-none">$</span>
+              <span class="text-primary font-bold text-tui-xs select-none">$</span>
               <Input
                 id="edit-image-url-input"
                 bind:value={editImageUrlInput}
@@ -237,7 +237,7 @@
                     onclick={() => {
                       editImageFileBase64 = '';
                     }}
-                    class="font-mono text-[9px] text-destructive hover:bg-destructive/10 uppercase tracking-wider h-auto py-1 px-2 cursor-pointer border-destructive/30 hover:border-destructive"
+                    class="font-mono text-tui-2xs text-destructive hover:bg-destructive/10 uppercase tracking-tui-wide h-auto py-1 px-2 cursor-pointer border-destructive/30 hover:border-destructive"
                   >
                     [Clear uploaded image]
                   </Button>
@@ -254,11 +254,11 @@
         <div class="flex flex-col gap-1">
           <label
             for="edit-title-input"
-            class="text-[9px] uppercase font-bold text-muted-foreground tracking-wider"
+            class="text-tui-2xs uppercase font-bold text-muted-foreground tracking-tui-wide"
             >// Title</label
           >
           <div class="flex items-center gap-1.5 px-2.5 py-1.5 border border-border bg-transparent">
-            <span class="text-primary font-bold text-[10px] select-none">$</span>
+            <span class="text-primary font-bold text-tui-xs select-none">$</span>
             <Input
               id="edit-title-input"
               bind:value={editTitleValue}
@@ -274,7 +274,7 @@
         <div class="flex flex-col gap-1 flex-1 min-h-35">
           <label
             for="edit-description-input"
-            class="text-[9px] uppercase font-bold text-muted-foreground tracking-wider"
+            class="text-tui-2xs uppercase font-bold text-muted-foreground tracking-tui-wide"
             >// Description</label
           >
           <textarea
@@ -288,16 +288,16 @@
 
         <!-- Tags List with Popover -->
         <div class="flex flex-col gap-1">
-          <span class="text-[9px] uppercase font-bold text-muted-foreground tracking-wider"
+          <span class="text-tui-2xs uppercase font-bold text-muted-foreground tracking-tui-wide"
             >// Tags</span
           >
           <div
             class="flex flex-wrap gap-1.5 items-center p-2 border border-border min-h-9 bg-transparent"
           >
-            {#each editTagsList as tag}
+            {#each editTagsList as tag (tag)}
               <Badge
                 variant="outline"
-                class="text-[9px] px-1 border border-border-dim text-muted-foreground flex items-center gap-1 select-none font-mono"
+                class="text-tui-2xs px-1 border border-border-dim text-muted-foreground flex items-center gap-1 select-none font-mono"
               >
                 *{tag}
                 <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -318,7 +318,7 @@
                     {...props}
                     variant="ghost"
                     size="xs"
-                    class="text-[9px] text-dim-foreground hover:text-primary transition-colors select-none font-bold h-auto p-0 bg-transparent hover:bg-transparent font-mono"
+                    class="text-tui-2xs text-dim-foreground hover:text-primary transition-colors select-none font-bold h-auto p-0 bg-transparent hover:bg-transparent font-mono"
                   >
                     + add tag
                   </Button>
@@ -331,13 +331,13 @@
               >
                 <!-- Input -->
                 <div class="flex items-center gap-1 px-2 py-1.5 border-b border-border">
-                  <span class="text-primary font-bold text-[10px] select-none">#</span>
+                  <span class="text-primary font-bold text-tui-xs select-none">#</span>
                   <Input
                     bind:value={newTagValue}
                     onkeydown={handleTagKeydown}
                     placeholder="tag name..."
                     autofocus
-                    class="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-dim-foreground font-mono text-[10px] h-auto py-0 focus-visible:border-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                    class="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-dim-foreground font-mono text-tui-xs h-auto py-0 focus-visible:border-none focus-visible:ring-0 focus-visible:ring-offset-0"
                   />
                 </div>
                 <!-- Suggestions -->
@@ -347,23 +347,23 @@
                     <!-- svelte-ignore a11y_no_static_element_interactions -->
                     <div
                       onclick={() => submitEditTag(newTagValue)}
-                      class="px-2 py-1 text-[10px] text-primary cursor-pointer hover:bg-accent/30 select-none"
+                      class="px-2 py-1 text-tui-xs text-primary cursor-pointer hover:bg-accent/30 select-none"
                     >
                       [Create: "{newTagValue.trim().toLowerCase()}"]
                     </div>
                   {/if}
-                  {#each tagSuggestions() as suggestion}
+                  {#each tagSuggestions() as suggestion (suggestion)}
                     <!-- svelte-ignore a11y_click_events_have_key_events -->
                     <!-- svelte-ignore a11y_no_static_element_interactions -->
                     <div
                       onclick={() => submitEditTag(suggestion)}
-                      class="px-2 py-1 text-[10px] text-muted-foreground cursor-pointer hover:bg-accent/30 hover:text-foreground select-none"
+                      class="px-2 py-1 text-tui-xs text-muted-foreground cursor-pointer hover:bg-accent/30 hover:text-foreground select-none"
                     >
                       * {suggestion}
                     </div>
                   {/each}
                   {#if tagSuggestions().length === 0 && !isNewTag()}
-                    <div class="px-2 py-1 text-[10px] text-dim-foreground italic select-none">
+                    <div class="px-2 py-1 text-tui-xs text-dim-foreground italic select-none">
                       No suggestions
                     </div>
                   {/if}
@@ -381,7 +381,7 @@
             {...props}
             variant="outline"
             size="xs"
-            class="font-mono text-[10px] rounded-none border border-border-dim hover:border-border text-muted-foreground hover:text-foreground uppercase tracking-wider h-auto py-1 px-3 cursor-pointer"
+            class="font-mono text-tui-xs rounded-none border border-border-dim hover:border-border text-muted-foreground hover:text-foreground uppercase tracking-tui-wide h-auto py-1 px-3 cursor-pointer"
           >
             [cancel]
           </Button>
@@ -391,7 +391,7 @@
         variant="outline"
         size="xs"
         onclick={confirmEdit}
-        class="font-mono text-[10px] rounded-none border border-primary text-primary hover:bg-primary hover:text-primary-foreground dark:hover:bg-primary dark:hover:text-primary-foreground uppercase tracking-wider h-auto py-1 px-3 cursor-pointer"
+        class="font-mono text-tui-xs rounded-none border border-primary text-primary hover:bg-primary hover:text-primary-foreground dark:hover:bg-primary dark:hover:text-primary-foreground uppercase tracking-tui-wide h-auto py-1 px-3 cursor-pointer"
       >
         [save]
       </Button>

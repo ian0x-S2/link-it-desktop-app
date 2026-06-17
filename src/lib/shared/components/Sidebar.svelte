@@ -90,7 +90,7 @@
   <!-- WORKSPACES Box -->
   <div class="relative p-4 flex flex-col bg-box-bg border border-border">
     <span
-      class="absolute px-1.5 text-[10px] font-bold uppercase tracking-wider -top-1.75 left-2.5 bg-background text-primary"
+      class="absolute px-1.5 text-tui-xs font-bold uppercase tracking-tui-wide -top-1.75 left-2.5 bg-background text-primary"
       >Workspaces</span
     >
     <div class="space-y-1 text-xs">
@@ -109,12 +109,12 @@
             {workspace.name}</span
           >
           <div class="flex items-center gap-1">
-            <span class="text-[10px] text-muted-foreground">@{workspace.slug}</span>
+            <span class="text-tui-xs text-muted-foreground">@{workspace.slug}</span>
             {#if workspaces.length > 1}
               <!-- svelte-ignore a11y_click_events_have_key_events -->
               <!-- svelte-ignore a11y_no_static_element_interactions -->
               <span
-                class="text-[10px] text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:text-destructive cursor-pointer ml-1"
+                class="text-tui-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:text-destructive cursor-pointer ml-1"
                 onclick={(e) => {
                   e.stopPropagation();
                   openDeleteDialog(workspace);
@@ -144,7 +144,7 @@
   <!-- CATEGORIES Box -->
   <div class="relative flex flex-col bg-box-bg border border-border flex-1 min-h-0">
     <span
-      class="absolute px-1.5 text-[10px] font-bold uppercase tracking-wider -top-1.75 left-2.5 bg-background text-primary z-10"
+      class="absolute px-1.5 text-tui-xs font-bold uppercase tracking-tui-wide -top-1.75 left-2.5 bg-background text-primary z-10"
       >Categories</span
     >
     <div
@@ -208,7 +208,7 @@
   <!-- ACTIONS Box -->
   <div class="relative p-4 flex flex-col bg-box-bg border border-border gap-2 shrink-0">
     <span
-      class="absolute px-1.5 text-[10px] font-bold uppercase tracking-wider -top-1.75 left-2.5 bg-background text-primary"
+      class="absolute px-1.5 text-tui-xs font-bold uppercase tracking-tui-wide -top-1.75 left-2.5 bg-background text-primary"
       >Actions</span
     >
     <Button
@@ -236,7 +236,7 @@
       [m] Toggle Mode
     </Button>
 
-    <div class="space-y-0.5 text-[10px] text-muted-foreground mt-1 select-none">
+    <div class="space-y-0.5 text-tui-xs text-muted-foreground mt-1 select-none">
       <div>e Export Links</div>
       <div>i Import Links</div>
       <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -263,13 +263,13 @@
       <Dialog.Title class="text-xs font-bold uppercase tracking-widest text-primary">
         // New Workspace
       </Dialog.Title>
-      <Dialog.Description class="text-[10px] text-muted-foreground mt-1">
+      <Dialog.Description class="text-tui-xs text-muted-foreground mt-1">
         Bookmarks are isolated per workspace.
       </Dialog.Description>
     </Dialog.Header>
     <div class="px-4 py-3">
       <div class="flex items-center gap-1.5 px-2 py-1.5 border border-border bg-transparent">
-        <span class="text-primary font-bold text-[10px] select-none">$</span>
+        <span class="text-primary font-bold text-tui-xs select-none">$</span>
         <Input
           bind:value={newWorkspaceName}
           onkeydown={handleCreateKeydown}
@@ -279,7 +279,7 @@
         />
       </div>
       {#if createError}
-        <p class="text-[10px] text-destructive mt-1.5 px-1">{createError}</p>
+        <p class="text-tui-xs text-destructive mt-1.5 px-1">{createError}</p>
       {/if}
     </div>
     <Dialog.Footer class="px-4 pb-4 flex gap-2 justify-end border-t border-border pt-3">
@@ -289,7 +289,7 @@
             {...props}
             variant="outline"
             size="xs"
-            class="font-mono text-[10px] rounded-none border border-border-dim hover:border-border text-muted-foreground hover:text-foreground uppercase tracking-wider h-auto py-1 px-3 cursor-pointer"
+            class="font-mono text-tui-xs rounded-none border border-border-dim hover:border-border text-muted-foreground hover:text-foreground uppercase tracking-tui-wide h-auto py-1 px-3 cursor-pointer"
           >
             [cancel]
           </Button>
@@ -300,7 +300,7 @@
         size="xs"
         onclick={handleCreate}
         disabled={isCreating}
-        class="font-mono text-[10px] rounded-none border border-primary text-primary hover:bg-primary hover:text-primary-foreground dark:hover:bg-primary dark:hover:text-primary-foreground uppercase tracking-wider h-auto py-1 px-3 cursor-pointer disabled:opacity-50"
+        class="font-mono text-tui-xs rounded-none border border-primary text-primary hover:bg-primary hover:text-primary-foreground dark:hover:bg-primary dark:hover:text-primary-foreground uppercase tracking-tui-wide h-auto py-1 px-3 cursor-pointer disabled:opacity-50"
       >
         {isCreating ? '[...]' : '[create]'}
       </Button>
@@ -318,7 +318,7 @@
       <Dialog.Title class="text-xs font-bold uppercase tracking-widest text-destructive">
         // Delete Workspace
       </Dialog.Title>
-      <Dialog.Description class="text-[10px] text-muted-foreground mt-1">
+      <Dialog.Description class="text-tui-xs text-muted-foreground mt-1">
         This will permanently delete
         <span class="text-foreground font-bold">{workspaceToDelete?.name}</span>
         and all its bookmarks. This action cannot be undone.
@@ -331,7 +331,7 @@
             {...props}
             variant="outline"
             size="xs"
-            class="font-mono text-[10px] rounded-none border border-border-dim hover:border-border text-muted-foreground hover:text-foreground uppercase tracking-wider h-auto py-1 px-3 cursor-pointer"
+            class="font-mono text-tui-xs rounded-none border border-border-dim hover:border-border text-muted-foreground hover:text-foreground uppercase tracking-tui-wide h-auto py-1 px-3 cursor-pointer"
           >
             [cancel]
           </Button>
@@ -341,7 +341,7 @@
         variant="outline"
         size="xs"
         onclick={confirmDelete}
-        class="font-mono text-[10px] rounded-none border border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground dark:hover:bg-destructive dark:hover:text-destructive-foreground uppercase tracking-wider h-auto py-1 px-3 cursor-pointer"
+        class="font-mono text-tui-xs rounded-none border border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground dark:hover:bg-destructive dark:hover:text-destructive-foreground uppercase tracking-tui-wide h-auto py-1 px-3 cursor-pointer"
       >
         [delete]
       </Button>

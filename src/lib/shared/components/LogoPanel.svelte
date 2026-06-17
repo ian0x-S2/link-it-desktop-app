@@ -10,18 +10,18 @@
   class="relative p-4 flex flex-col bg-box-bg border border-border lg:flex-[1.5] min-h-27.5 lg:min-h-0 select-none font-mono"
 >
   <span
-    class="absolute px-1.5 text-[10px] font-bold uppercase tracking-wider -top-1.75 left-2.5 bg-background text-primary"
+    class="absolute px-1.5 text-tui-xs font-bold uppercase tracking-tui-wide -top-1.75 left-2.5 bg-background text-primary"
     >Linkit</span
   >
 
-  <div class="text-[9px] text-primary leading-tight font-bold whitespace-pre mb-2 overflow-x-auto">
+  <div class="text-tui-2xs text-primary leading-tight font-bold whitespace-pre mb-2 overflow-x-auto">
     {logo}
   </div>
 
-  <p class="text-[10px] text-muted-foreground mt-1 leading-tight">Local-first link manager.</p>
+  <p class="text-tui-xs text-muted-foreground mt-1 leading-tight">Local-first link manager.</p>
 
   <div
-    class="mt-auto pt-4 flex items-center justify-between border-t border-dashed border-border-dim text-[9px] font-bold shrink-0"
+    class="mt-auto pt-4 flex items-center justify-between border-t border-dashed border-border-dim text-tui-2xs font-bold shrink-0"
   >
     <div class="flex items-center gap-1">
       <span

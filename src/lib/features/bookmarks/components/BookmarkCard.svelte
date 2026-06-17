@@ -72,7 +72,7 @@
       const diffTime = Math.abs(now.getTime() - created.getTime());
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       return `${diffDays}d`;
-    } catch (e) {
+    } catch {
       return '1d';
     }
   }
@@ -88,7 +88,7 @@
   <!-- Card Header -->
   <Card.Header class="p-0 gap-0 min-h-0 @container/card-header block rounded-none border-none">
     <div
-      class="flex items-center justify-between px-2 py-1 border-b border-border text-[10px] text-muted-foreground select-none shrink-0 w-full"
+      class="flex items-center justify-between px-2 py-1 border-b border-border text-tui-xs text-muted-foreground select-none shrink-0 w-full"
     >
       <div class="flex items-center gap-1.5 min-w-0">
         {#if getFavicon(bookmark.url, bookmark.faviconUrl)}
@@ -118,7 +118,7 @@
     </div>
   {:else}
     <div
-      class="aspect-video w-full border-b border-border bg-background flex flex-col items-center justify-center text-[10px] text-dim-foreground font-mono select-none shrink-0 p-2 text-center"
+      class="aspect-video w-full border-b border-border bg-background flex flex-col items-center justify-center text-tui-xs text-dim-foreground font-mono select-none shrink-0 p-2 text-center"
     >
       <span>[ NO PREVIEW ]</span>
       <span class="text-[8px] opacity-40 truncate w-full mt-1">{bookmark.url}</span>
@@ -139,7 +139,7 @@
         </a>
       </h3>
       {#if bookmark.description}
-        <p class="text-[10px] text-muted-foreground line-clamp-2 mt-1 leading-tight">
+        <p class="text-tui-xs text-muted-foreground line-clamp-2 mt-1 leading-tight">
           {bookmark.description}
         </p>
       {/if}
@@ -147,10 +147,10 @@
 
     <!-- Tags Row -->
     <div class="flex flex-wrap gap-1 items-center mt-auto pt-1">
-      {#each bookmark.tags as tag}
+      {#each bookmark.tags as tag (tag)}
         <Badge
           variant="outline"
-          class="text-[9px] px-1 border border-border-dim text-muted-foreground flex items-center gap-1 select-none font-mono"
+          class="text-tui-2xs px-1 border border-border-dim text-muted-foreground flex items-center gap-1 select-none font-mono"
         >
           *{tag}
           <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -171,7 +171,7 @@
               {...props}
               variant="ghost"
               size="xs"
-              class="text-[9px] text-dim-foreground hover:text-primary transition-colors select-none font-bold h-auto p-0 bg-transparent hover:bg-transparent font-mono"
+              class="text-tui-2xs text-dim-foreground hover:text-primary transition-colors select-none font-bold h-auto p-0 bg-transparent hover:bg-transparent font-mono"
             >
               + add
             </Button>
@@ -184,13 +184,13 @@
         >
           <!-- Input -->
           <div class="flex items-center gap-1 px-2 py-1.5 border-b border-border">
-            <span class="text-primary font-bold text-[10px] select-none">#</span>
+            <span class="text-primary font-bold text-tui-xs select-none">#</span>
             <Input
               bind:value={newTagValue}
               onkeydown={handleTagKeydown}
               placeholder="tag name..."
               autofocus
-              class="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-dim-foreground font-mono text-[10px] h-auto py-0 focus-visible:border-none focus-visible:ring-0 focus-visible:ring-offset-0"
+              class="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-dim-foreground font-mono text-tui-xs h-auto py-0 focus-visible:border-none focus-visible:ring-0 focus-visible:ring-offset-0"
             />
           </div>
           <!-- Suggestions -->
@@ -200,23 +200,23 @@
               <!-- svelte-ignore a11y_no_static_element_interactions -->
               <div
                 onclick={() => submitTag(newTagValue)}
-                class="px-2 py-1 text-[10px] text-primary cursor-pointer hover:bg-accent/30 select-none"
+                class="px-2 py-1 text-tui-xs text-primary cursor-pointer hover:bg-accent/30 select-none"
               >
                 [Create: "{newTagValue.trim().toLowerCase()}"]
               </div>
             {/if}
-            {#each tagSuggestions() as suggestion}
+            {#each tagSuggestions() as suggestion (suggestion)}
               <!-- svelte-ignore a11y_click_events_have_key_events -->
               <!-- svelte-ignore a11y_no_static_element_interactions -->
               <div
                 onclick={() => submitTag(suggestion)}
-                class="px-2 py-1 text-[10px] text-muted-foreground cursor-pointer hover:bg-accent/30 hover:text-foreground select-none"
+                class="px-2 py-1 text-tui-xs text-muted-foreground cursor-pointer hover:bg-accent/30 hover:text-foreground select-none"
               >
                 * {suggestion}
               </div>
             {/each}
             {#if tagSuggestions().length === 0 && !isNewTag()}
-              <div class="px-2 py-1 text-[10px] text-dim-foreground italic select-none">
+              <div class="px-2 py-1 text-tui-xs text-dim-foreground italic select-none">
                 No tags yet
               </div>
             {/if}
@@ -227,13 +227,13 @@
 
     <!-- Actions Row -->
     <div
-      class="flex items-center gap-3 pt-2 border-t border-dashed border-border-dim text-[9px] font-bold select-none shrink-0"
+      class="flex items-center gap-3 pt-2 border-t border-dashed border-border-dim text-tui-2xs font-bold select-none shrink-0"
     >
       <Button
         variant="ghost"
         size="xs"
         onclick={() => onToggleFavorite(bookmark.id)}
-        class="text-muted-foreground hover:text-primary transition-colors uppercase h-auto p-0 bg-transparent hover:bg-transparent font-mono text-[9px] font-bold"
+        class="text-muted-foreground hover:text-primary transition-colors uppercase h-auto p-0 bg-transparent hover:bg-transparent font-mono text-tui-2xs font-bold"
       >
         [{bookmark.isFavorite ? '★ unstar' : '☆ star'}]
       </Button>
@@ -241,7 +241,7 @@
         variant="ghost"
         size="xs"
         onclick={() => onEdit(bookmark.id)}
-        class="text-muted-foreground hover:text-primary transition-colors uppercase h-auto p-0 bg-transparent hover:bg-transparent font-mono text-[9px] font-bold"
+        class="text-muted-foreground hover:text-primary transition-colors uppercase h-auto p-0 bg-transparent hover:bg-transparent font-mono text-tui-2xs font-bold"
       >
         [edit]
       </Button>
@@ -249,7 +249,7 @@
         variant="ghost"
         size="xs"
         onclick={() => onDelete(bookmark.id)}
-        class="text-destructive hover:text-red-400 transition-colors uppercase h-auto p-0 bg-transparent hover:bg-transparent font-mono text-[9px] font-bold"
+        class="text-destructive hover:text-red-400 transition-colors uppercase h-auto p-0 bg-transparent hover:bg-transparent font-mono text-tui-2xs font-bold"
       >
         [del]
       </Button>

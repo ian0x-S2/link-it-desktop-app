@@ -121,12 +121,12 @@
       onkeydown={handleKeydown}
     />
     {#if loading}
-      <span class="text-[9px] text-muted-foreground animate-pulse">[loading...]</span>
+      <span class="text-tui-2xs text-muted-foreground animate-pulse">[loading...]</span>
     {/if}
   </div>
 
   {#if validationError}
-    <div class="text-[9px] text-destructive mt-1 font-mono px-3">
+    <div class="text-tui-2xs text-destructive mt-1 font-mono px-3">
       ✗ {validationError}
     </div>
   {/if}
@@ -136,9 +136,9 @@
       class="border border-dashed border-border bg-box-bg/30 p-3 mt-2 text-xs font-mono select-none animate-[pulse_3s_infinite_alternate]"
     >
       <div
-        class="flex items-center justify-between border-b border-border border-dashed pb-1.5 mb-2 text-[9px] text-muted-foreground"
+        class="flex items-center justify-between border-b border-border border-dashed pb-1.5 mb-2 text-tui-2xs text-muted-foreground"
       >
-        <span class="font-bold uppercase tracking-wider text-foreground/80">
+        <span class="font-bold uppercase tracking-tui-wide text-foreground/80">
           {#if loading}
             [ SCRAPING METADATA... ]
           {:else}
@@ -151,7 +151,7 @@
       </div>
 
       {#if loading}
-        <div class="flex flex-col gap-2 text-[10px] text-muted-foreground">
+        <div class="flex flex-col gap-2 text-tui-xs text-muted-foreground">
           <div class="flex items-center gap-2">
             <Skeleton class="size-4 bg-border/40 rounded-none shrink-0" />
             <Skeleton class="h-3 bg-border/40 w-28 rounded-none shrink-0" />
@@ -177,7 +177,7 @@
           {/if}
 
           <div class="flex-1 min-w-0 flex flex-col gap-1">
-            <div class="flex items-center gap-1.5 min-w-0 text-[10px]">
+            <div class="flex items-center gap-1.5 min-w-0 text-tui-xs">
               {#if previewData.faviconUrl}
                 <img
                   src={previewData.faviconUrl}
@@ -192,11 +192,11 @@
             </div>
 
             {#if previewData.description}
-              <p class="text-[10px] text-muted-foreground line-clamp-2 leading-tight">
+              <p class="text-tui-xs text-muted-foreground line-clamp-2 leading-tight">
                 {previewData.description}
               </p>
             {:else}
-              <p class="text-[10px] text-dim-foreground italic">No description found.</p>
+              <p class="text-tui-xs text-dim-foreground italic">No description found.</p>
             {/if}
           </div>
         </div>

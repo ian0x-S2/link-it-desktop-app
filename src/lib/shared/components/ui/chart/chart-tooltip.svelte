@@ -65,7 +65,7 @@
     const tooltipData = chartCtx.tooltip.data;
 
     // Get the x-axis label value from the raw tooltip data (e.g. a Date or month string)
-    const dataLabel = tooltipData == null ? undefined : chartCtx.x(tooltipData);
+    const dataLabel = tooltipData === null || tooltipData === undefined ? undefined : chartCtx.x(tooltipData);
 
     const key = labelKey ?? item?.label ?? item?.key ?? 'value';
     const itemConfig = getPayloadConfigFromPayload(
