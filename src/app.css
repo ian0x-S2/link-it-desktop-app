@@ -136,19 +136,19 @@
 }
 
 [data-theme='everforest'] {
-  --background: oklch(0.9879 0.0163 91.5474);
+  --background: oklch(0.9579 0.022 91.5474);
   --foreground: oklch(0.5154 0.0212 232.866);
-  --card: oklch(0.9579 0.022 91.5474);
+  --card: oklch(0.9879 0.0163 91.5474);
   --card-foreground: oklch(0.5154 0.0212 232.866);
-  --popover: oklch(0.9579 0.022 91.5474);
+  --popover: oklch(0.9879 0.0163 91.5474);
   --popover-foreground: oklch(0.5154 0.0212 232.866);
   --primary: oklch(0.6697 0.156 118.2296);
   --primary-foreground: oklch(0.9879 0.0163 91.5474);
-  --secondary: oklch(0.9279 0.022 91.5474);
+  --secondary: oklch(0.9579 0.022 91.5474);
   --secondary-foreground: oklch(0.5154 0.0212 232.866);
-  --muted: oklch(0.9279 0.022 91.5474);
+  --muted: oklch(0.9579 0.022 91.5474);
   --muted-foreground: oklch(0.6888 0.0243 141.205);
-  --accent: oklch(0.8979 0.022 91.5474);
+  --accent: oklch(0.9279 0.022 91.5474);
   --accent-foreground: oklch(0.5154 0.0212 232.866);
   --destructive: oklch(0.6707 0.1996 25.2047);
   --destructive-foreground: oklch(0.9879 0.0163 91.5474);
@@ -159,9 +159,9 @@
   --ring: oklch(0.6697 0.156 118.2296);
   --radius: 0.625rem;
 
-  --box-bg: oklch(0.9579 0.022 91.5474);
-  --entry-bg: oklch(0.9579 0.022 91.5474);
-  --entry-alt-bg: oklch(0.9279 0.022 91.5474);
+  --box-bg: oklch(0.9879 0.0163 91.5474);
+  --entry-bg: oklch(0.9879 0.0163 91.5474);
+  --entry-alt-bg: oklch(0.9579 0.022 91.5474);
   --dim-foreground: oklch(0.6888 0.0243 141.205);
   --success: oklch(0.7466 0.1545 80.2668);
 }
@@ -198,19 +198,19 @@
 }
 
 [data-theme='nord'] {
-  --background: #eceff4;
+  --background: #e5e9f0;
   --foreground: #2e3440;
-  --card: #e5e9f0;
+  --card: #eceff4;
   --card-foreground: #2e3440;
-  --popover: #e5e9f0;
+  --popover: #eceff4;
   --popover-foreground: #2e3440;
   --primary: #5e81ac;
   --primary-foreground: #eceff4;
-  --secondary: #d8dee9;
+  --secondary: #e5e9f0;
   --secondary-foreground: #2e3440;
-  --muted: #d8dee9;
+  --muted: #e5e9f0;
   --muted-foreground: #4c566a;
-  --accent: #88c0d0;
+  --accent: #d8dee9;
   --accent-foreground: #2e3440;
   --destructive: #bf616a;
   --destructive-foreground: #eceff4;
@@ -221,9 +221,9 @@
   --ring: #88c0d0;
   --radius: 0.5rem;
 
-  --box-bg: #e5e9f0;
+  --box-bg: #eceff4;
   --entry-bg: #eceff4;
-  --entry-alt-bg: #d8dee9;
+  --entry-alt-bg: #e5e9f0;
   --dim-foreground: #4c566a;
   --success: #a3be8c;
 }
