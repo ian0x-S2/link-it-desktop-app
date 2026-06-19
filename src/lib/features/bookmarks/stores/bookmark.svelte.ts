@@ -32,6 +32,7 @@ class BookmarkStore {
   /** Normalizes, validates, fetches metadata if needed, and adds the bookmark. */
   async addBookmark(
     url: string,
+    categoryId: string | null,
     metadata?: {
       title: string;
       description: string;
@@ -55,6 +56,7 @@ class BookmarkStore {
 
     await this.create({
       workspaceId: workspaceStore.activeId,
+      categoryId,
       url: normalized,
       title: resolvedMetadata.title,
       description: resolvedMetadata.description,

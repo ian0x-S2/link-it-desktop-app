@@ -15,6 +15,7 @@ interface BookmarkRow {
   updatedAt: string;
   url: string;
   workspaceId: string;
+  categoryId: string | null;
 }
 
 interface TagRow {
@@ -33,6 +34,7 @@ export class SqliteBookmarkRepository implements BookmarkRepository {
       SELECT
         id,
         workspace_id as workspaceId,
+        category_id as categoryId,
         title,
         url,
         image_url as imageUrl,
@@ -59,6 +61,7 @@ export class SqliteBookmarkRepository implements BookmarkRepository {
         return {
           id: row.id,
           workspaceId: row.workspaceId,
+          categoryId: row.categoryId,
           title: row.title,
           url: row.url,
           imageUrl: row.imageUrl || '',
@@ -83,11 +86,12 @@ export class SqliteBookmarkRepository implements BookmarkRepository {
 
     await db.execute(
       `INSERT INTO bookmarks
-       (id, workspace_id, title, url, image_url, favicon_url, description, created_at, updated_at, is_favorite)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+       (id, workspace_id, category_id, title, url, image_url, favicon_url, description, created_at, updated_at, is_favorite)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
       [
         id,
         data.workspaceId,
+        data.categoryId,
         data.title,
         data.url,
         data.imageUrl || '',
@@ -111,6 +115,7 @@ export class SqliteBookmarkRepository implements BookmarkRepository {
     return {
       id,
       workspaceId: data.workspaceId,
+      categoryId: data.categoryId,
       title: data.title,
       url: data.url,
       imageUrl: data.imageUrl || '',
@@ -185,6 +190,10 @@ export class SqliteBookmarkRepository implements BookmarkRepository {
     if (data.description !== undefined) {
       sets.push(`description = $${paramIndex++}`);
       params.push(data.description);
+    }
+    if (data.categoryId !== undefined) {
+      sets.push(`category_id = $${paramIndex++}`);
+      params.push(data.categoryId);
     }
 
     params.push(id);

@@ -1,5 +1,6 @@
 import { workspaceActions } from '../actions/workspace';
 import type { Workspace, WorkspaceStats } from '../types/workspace';
+import { categoryStore } from '$lib/features/categories/stores/category.svelte';
 
 class WorkspaceStore {
   items = $state<Workspace[]>([]);
@@ -15,17 +16,23 @@ class WorkspaceStore {
     // Select the first workspace (default) if no workspace is active yet.
     if (!this.activeId && this.items.length > 0) {
       this.activeId = this.items[0].id;
+      await categoryStore.load(this.items[0].id);
     }
   }
 
-  select(id: string): void {
+  async select(id: string): Promise<void> {
     this.activeId = id;
+    categoryStore.reset();
+    await categoryStore.load(id);
   }
 
   async create(name: string): Promise<void> {
     const workspace = await workspaceActions.createWorkspace({ name });
     this.items = [...this.items, workspace];
     this.activeId = workspace.id;
+    // Load the freshly seeded categories for the new workspace.
+    categoryStore.reset();
+    await categoryStore.load(workspace.id);
   }
 
   async rename(id: string, name: string): Promise<void> {
@@ -38,7 +45,12 @@ class WorkspaceStore {
     this.items = this.items.filter((w) => w.id !== id);
     // If we deleted the active workspace, switch to the first remaining one.
     if (this.activeId === id) {
-      this.activeId = this.items[0]?.id ?? null;
+      const nextId = this.items[0]?.id ?? null;
+      this.activeId = nextId;
+      categoryStore.reset();
+      if (nextId) {
+        await categoryStore.load(nextId);
+      }
     }
   }
 

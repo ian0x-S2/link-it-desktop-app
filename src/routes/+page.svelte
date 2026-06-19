@@ -3,16 +3,29 @@
   import { setupKeyboardShortcuts } from '$lib/actions/keyboardShortcuts';
   import Sidebar from '$lib/shared/components/Sidebar.svelte';
   import FooterBar from '$lib/shared/components/FooterBar.svelte';
+  import PlaceholderPanel from '$lib/shared/components/PlaceholderPanel.svelte';
+
+  // Bookmarks (Links)
   import { filteredBookmarksStore } from '$lib/features/bookmarks/stores/filteredBookmarks.svelte';
   import { bookmarkStore } from '$lib/features/bookmarks/stores/bookmark.svelte';
-  import { THEMES, themeStore } from '$lib/shared/stores/theme.svelte';
-  import { viewStore } from '$lib/shared/stores/view.svelte';
-  import { workspaceStore } from '$lib/features/workspaces/stores/workspace.svelte';
-
-  // Extracted components
   import EditBookmarkDialog from '$lib/features/bookmarks/components/EditBookmarkDialog.svelte';
   import BookmarkPanel from '$lib/features/bookmarks/components/BookmarkPanel.svelte';
   import BookmarkSidePanels from '$lib/features/bookmarks/components/BookmarkSidePanels.svelte';
+
+  // Pages
+  import PageList from '$lib/features/pages/components/PageList.svelte';
+  import { pageStore } from '$lib/features/pages/stores/page.svelte';
+
+  // Ideas
+  import IdeaList from '$lib/features/ideas/components/IdeaList.svelte';
+  import { ideaStore } from '$lib/features/ideas/stores/idea.svelte';
+
+  // Stores
+  import { THEMES, themeStore } from '$lib/shared/stores/theme.svelte';
+  import { viewStore } from '$lib/shared/stores/view.svelte';
+  import { workspaceStore } from '$lib/features/workspaces/stores/workspace.svelte';
+  import { categoryStore } from '$lib/features/categories/stores/category.svelte';
+  import type { CategoryType } from '$lib/features/categories/types/category';
 
   // Prompt input ref (local UI concern for keyboard shortcut integration)
   let promptInput = $state<HTMLInputElement | null>(null);
@@ -21,9 +34,17 @@
   let editDialogOpen = $state(false);
   let editBookmarkId = $state<string | null>(null);
 
-  const totalItems = $derived(bookmarkStore.activeItems.length);
+  // Derived counts
+  const totalLinks = $derived(bookmarkStore.activeItems.length);
   const favoriteCount = $derived(bookmarkStore.activeItems.filter((b) => b.isFavorite).length);
   const trashCount = $derived(bookmarkStore.trashedItems.length);
+
+  // Active category type — drives center panel rendering
+  const activeCategoryType = $derived<CategoryType | null>(
+    categoryStore.active?.type ?? null,
+  );
+
+  // ── Bookmark handlers ──────────────────────────────────────────────────────
 
   async function handleAddLink(
     url: string,
@@ -34,7 +55,25 @@
       faviconUrl: string;
     } | null,
   ) {
-    await bookmarkStore.addBookmark(url, metadata || undefined);
+    const activeCategory = categoryStore.items.find(c => c.id === viewStore.activeCategoryId);
+    const linksCategory = categoryStore.items.find(c => c.type === 'links');
+    const targetCategoryId = (activeCategory?.type === 'links' ? activeCategory.id : null) || linksCategory?.id || null;
+    await bookmarkStore.addBookmark(url, targetCategoryId, metadata || undefined);
+  }
+
+  async function handleCreateContent() {
+    if (viewStore.specialView || activeCategoryType === 'links') {
+      promptInput?.focus();
+    } else if (activeCategoryType === 'pages' && viewStore.activeCategoryId) {
+      await pageStore.create(viewStore.activeCategoryId);
+    } else if (activeCategoryType === 'ideas' && viewStore.activeCategoryId) {
+      const textarea = document.getElementById('quick-capture-idea-input') as HTMLTextAreaElement | null;
+      if (textarea) {
+        textarea.focus();
+      }
+    } else if (activeCategoryType) {
+      alert(`The "${categoryStore.active?.name ?? 'Content'}" category feature is under development.`);
+    }
   }
 
   function handleEdit(id: string) {
@@ -49,38 +88,30 @@
     const bookmark = bookmarkStore.items.find((b) => b.id === id);
     if (!bookmark) return;
 
-    // 1. Update bookmark title, description, imageUrl
     await bookmarkStore.update(id, {
       title: data.title,
       description: data.description,
       imageUrl: data.imageUrl,
     });
 
-    // 2. Reconcile tags
     const oldTags = bookmark.tags || [];
     const newTags = data.tags;
-
-    // Tags to remove
     for (const tag of oldTags) {
-      if (!newTags.includes(tag)) {
-        await bookmarkStore.removeTag(id, tag);
-      }
+      if (!newTags.includes(tag)) await bookmarkStore.removeTag(id, tag);
     }
-
-    // Tags to add
     for (const tag of newTags) {
-      if (!oldTags.includes(tag)) {
-        await bookmarkStore.addTag(id, tag);
-      }
+      if (!oldTags.includes(tag)) await bookmarkStore.addTag(id, tag);
     }
   }
+
+  // ── Lifecycle ──────────────────────────────────────────────────────────────
 
   $effect(() => {
     untrack(() => {
       themeStore.load();
       workspaceStore.load();
     });
-    return setupKeyboardShortcuts(() => promptInput);
+    return setupKeyboardShortcuts(() => promptInput, handleCreateContent);
   });
 
   // Reload bookmarks whenever the active workspace changes.
@@ -90,9 +121,16 @@
     }
   });
 
-  // Load stats when settings view is active
+  // Select the first category (Links) by default once categories are loaded.
   $effect(() => {
-    if (viewStore.category === 'settings') {
+    if (categoryStore.items.length > 0 && !viewStore.activeCategoryId && !viewStore.specialView) {
+      viewStore.selectCategory(categoryStore.items[0].id);
+    }
+  });
+
+  // Load settings stats when settings view is active.
+  $effect(() => {
+    if (viewStore.specialView === 'settings') {
       workspaceStore.loadStats();
     }
   });
@@ -110,51 +148,130 @@
         activeWorkspaceId={workspaceStore.activeId}
         onSelectWorkspace={(id) => {
           workspaceStore.select(id);
-          viewStore.setCategory('inbox');
+          viewStore.selectCategory(categoryStore.items[0]?.id ?? '');
         }}
         onCreateWorkspace={(name) => workspaceStore.create(name)}
         onDeleteWorkspace={(id) => workspaceStore.delete(id)}
-        selectedCategory={viewStore.category}
-        onSelectCategory={(cat) => viewStore.setCategory(cat)}
-        bookmarkCount={totalItems}
+        categories={categoryStore.items}
+        activeCategoryId={viewStore.activeCategoryId}
+        specialView={viewStore.specialView}
+        onSelectCategory={(id) => viewStore.selectCategory(id)}
+        onSelectSpecialView={(view) => viewStore.selectSpecialView(view)}
+        onCreateCategory={(name, type) => {
+          if (!workspaceStore.activeId) return Promise.resolve();
+          return categoryStore.create({ workspaceId: workspaceStore.activeId, name, type });
+        }}
+        onDeleteCategory={(id) => categoryStore.delete(id)}
+        bookmarkCount={totalLinks}
+        pageCount={pageStore.activeItems.length}
+        ideaCount={ideaStore.activeItems.length}
         {favoriteCount}
         {trashCount}
         currentTheme={themeStore.current}
         themes={THEMES}
         changeTheme={(t) => themeStore.change(t as (typeof THEMES)[number])}
-        onAddLinkClick={() => promptInput?.focus()}
+        onAddContentClick={handleCreateContent}
       />
     </div>
 
-    <!-- Center Column: Main Content -->
-    <BookmarkPanel
-      bookmarks={filteredBookmarksStore.items}
-      category={viewStore.category}
-      mode={viewStore.mode}
-      searchActive={viewStore.searchActive}
-      bind:searchQuery={viewStore.searchQuery}
-      selectedTag={viewStore.selectedTag}
-      bind:promptInput
-      onModeChange={(m) => viewStore.setMode(m)}
-      onSearchToggle={(active) => {
-        viewStore.setSearchActive(active);
-      }}
-      onSearchChange={(q) => {
-        viewStore.searchQuery = q;
-      }}
-      onClearTag={() => viewStore.clearTag()}
-      onEdit={handleEdit}
-      onDelete={(id) =>
-        viewStore.category === 'trash'
-          ? bookmarkStore.deletePermanently(id)
-          : bookmarkStore.softDelete(id)}
-      onToggleFavorite={(id) => bookmarkStore.toggleFavorite(id)}
-      onAddTag={(id, tag) => bookmarkStore.addTag(id, tag)}
-      onRemoveTag={(id, tag) => bookmarkStore.removeTag(id, tag)}
-      onAddLink={handleAddLink}
-      stats={workspaceStore.stats}
-      onCloseSettings={() => viewStore.setCategory('inbox')}
-    />
+    <!-- Center Column: Main Content (routes by category type or special view) -->
+    <div class="flex-1 min-w-0 min-h-0 overflow-hidden flex flex-col pt-2">
+      <div class="flex-1 flex flex-col overflow-hidden border border-border bg-box-bg relative">
+        {#if viewStore.specialView === 'settings'}
+          <!-- Settings — delegate to BookmarkPanel which has SettingsView embedded -->
+          <BookmarkPanel
+            bookmarks={filteredBookmarksStore.items}
+            category="settings"
+            mode={viewStore.mode}
+            searchActive={viewStore.searchActive}
+            bind:searchQuery={viewStore.searchQuery}
+            selectedTag={viewStore.selectedTag}
+            bind:promptInput
+            onModeChange={(m) => viewStore.setMode(m)}
+            onSearchToggle={(active) => viewStore.setSearchActive(active)}
+            onSearchChange={(q) => { viewStore.searchQuery = q; }}
+            onClearTag={() => viewStore.clearTag()}
+            onEdit={handleEdit}
+            onDelete={(id) => bookmarkStore.softDelete(id)}
+            onToggleFavorite={(id) => bookmarkStore.toggleFavorite(id)}
+            onAddTag={(id, tag) => bookmarkStore.addTag(id, tag)}
+            onRemoveTag={(id, tag) => bookmarkStore.removeTag(id, tag)}
+            onAddLink={handleAddLink}
+            stats={workspaceStore.stats}
+            onCloseSettings={() => viewStore.selectCategory(categoryStore.items[0]?.id ?? '')}
+          />
+        {:else if viewStore.specialView === 'favorites' || viewStore.specialView === 'trash'}
+          <!-- Special views: Favorites / Trash — show bookmarks panel -->
+          <BookmarkPanel
+            bookmarks={filteredBookmarksStore.items}
+            category={viewStore.specialView}
+            mode={viewStore.mode}
+            searchActive={viewStore.searchActive}
+            bind:searchQuery={viewStore.searchQuery}
+            selectedTag={viewStore.selectedTag}
+            bind:promptInput
+            onModeChange={(m) => viewStore.setMode(m)}
+            onSearchToggle={(active) => viewStore.setSearchActive(active)}
+            onSearchChange={(q) => { viewStore.searchQuery = q; }}
+            onClearTag={() => viewStore.clearTag()}
+            onEdit={handleEdit}
+            onDelete={(id) =>
+              viewStore.specialView === 'trash'
+                ? bookmarkStore.deletePermanently(id)
+                : bookmarkStore.softDelete(id)}
+            onToggleFavorite={(id) => bookmarkStore.toggleFavorite(id)}
+            onAddTag={(id, tag) => bookmarkStore.addTag(id, tag)}
+            onRemoveTag={(id, tag) => bookmarkStore.removeTag(id, tag)}
+            onAddLink={handleAddLink}
+            stats={workspaceStore.stats}
+            onCloseSettings={() => viewStore.selectCategory(categoryStore.items[0]?.id ?? '')}
+          />
+        {:else if activeCategoryType === 'links'}
+          <!-- Links — existing bookmark panel -->
+          <BookmarkPanel
+            bookmarks={filteredBookmarksStore.items}
+            category="inbox"
+            mode={viewStore.mode}
+            searchActive={viewStore.searchActive}
+            bind:searchQuery={viewStore.searchQuery}
+            selectedTag={viewStore.selectedTag}
+            bind:promptInput
+            onModeChange={(m) => viewStore.setMode(m)}
+            onSearchToggle={(active) => viewStore.setSearchActive(active)}
+            onSearchChange={(q) => { viewStore.searchQuery = q; }}
+            onClearTag={() => viewStore.clearTag()}
+            onEdit={handleEdit}
+            onDelete={(id) => bookmarkStore.softDelete(id)}
+            onToggleFavorite={(id) => bookmarkStore.toggleFavorite(id)}
+            onAddTag={(id, tag) => bookmarkStore.addTag(id, tag)}
+            onRemoveTag={(id, tag) => bookmarkStore.removeTag(id, tag)}
+            onAddLink={handleAddLink}
+            stats={workspaceStore.stats}
+            onCloseSettings={() => viewStore.selectSpecialView('settings')}
+          />
+        {:else if activeCategoryType === 'pages' && viewStore.activeCategoryId && workspaceStore.activeId}
+          <!-- Pages — CodeMirror editor -->
+          <PageList
+            categoryId={viewStore.activeCategoryId}
+          />
+        {:else if activeCategoryType === 'ideas' && viewStore.activeCategoryId}
+          <!-- Ideas — quick capture -->
+          <IdeaList categoryId={viewStore.activeCategoryId} />
+        {:else if activeCategoryType && categoryStore.active}
+          <!-- Future types (Books, Media, Audio, Documents, Images) — placeholder -->
+          <PlaceholderPanel
+            type={activeCategoryType}
+            name={categoryStore.active.name}
+            icon={categoryStore.active.icon}
+          />
+        {:else}
+          <!-- Loading state -->
+          <div class="flex items-center justify-center flex-1 text-tui-xs text-muted-foreground">
+            [loading...]
+          </div>
+        {/if}
+      </div>
+    </div>
 
     <!-- Right Column: Stats + Tags + Logo -->
     <BookmarkSidePanels

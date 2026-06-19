@@ -3,16 +3,21 @@ import { viewStore } from '$lib/shared/stores/view.svelte';
 
 class FilteredBookmarksStore {
   get items() {
-    // Trash view: only soft-deleted items
-    if (viewStore.category === 'trash') {
+    // Trash special view: all soft-deleted bookmarks.
+    if (viewStore.specialView === 'trash') {
       return bookmarkStore.trashedItems;
     }
 
-    // All other views: only active (non-deleted) items
+    // Favorites special view: active bookmarks marked as favorite.
+    if (viewStore.specialView === 'favorites') {
+      return bookmarkStore.activeItems.filter((b) => b.isFavorite);
+    }
+
+    // Regular category view: show active bookmarks for the active category.
     let items = bookmarkStore.activeItems;
 
-    if (viewStore.category === 'favorites') {
-      items = items.filter((b) => b.isFavorite);
+    if (viewStore.activeCategoryId) {
+      items = items.filter((b) => b.categoryId === viewStore.activeCategoryId);
     }
 
     if (viewStore.selectedTag) {

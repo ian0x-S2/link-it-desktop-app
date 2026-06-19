@@ -1,6 +1,7 @@
 import type { WorkspaceRepository } from '../repositories/workspace.repository';
 import type { CreateWorkspaceInput, Workspace, WorkspaceStats } from '../types/workspace';
 import { SqliteWorkspaceRepository } from '../repositories/sqlite-workspace.repository';
+import { getDatabase, seedDefaultCategories } from '$lib/core/database/database';
 
 export class WorkspaceActions {
   private readonly repository: WorkspaceRepository;
@@ -18,7 +19,13 @@ export class WorkspaceActions {
     if (!name) {
       throw new Error('Workspace name cannot be empty.');
     }
-    return await this.repository.create({ name });
+    const workspace = await this.repository.create({ name });
+
+    // Seed the 8 default categories for the new workspace.
+    const db = await getDatabase();
+    await seedDefaultCategories(db, workspace.id);
+
+    return workspace;
   }
 
   async deleteWorkspace(id: string): Promise<void> {
