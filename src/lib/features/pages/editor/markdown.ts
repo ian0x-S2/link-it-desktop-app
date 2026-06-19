@@ -1,35 +1,82 @@
 import { HighlightStyle, syntaxHighlighting } from '@codemirror/language';
-import { tags } from '@lezer/highlight';
+import { tags, Tag, styleTags } from '@lezer/highlight';
 
 /**
- * TUI-themed highlight style that maps to CSS custom properties
- * so it automatically adapts to light/dark mode and all themes.
+ * Custom tags for Markdown syntax indicators (markers).
+ */
+export const customTags = {
+  headerMark: Tag.define(),
+  listMark: Tag.define(),
+  emphasisMark: Tag.define(),
+  quoteMark: Tag.define(),
+  linkMark: Tag.define(),
+  codeMark: Tag.define(),
+};
+
+/**
+ * Markdown extension to assign custom tags to lezer-markdown parser nodes.
+ */
+export const markdownMarkStyling = {
+  props: [
+    styleTags({
+      HeaderMark: customTags.headerMark,
+      ListMark: customTags.listMark,
+      EmphasisMark: customTags.emphasisMark,
+      QuoteMark: customTags.quoteMark,
+      LinkMark: customTags.linkMark,
+      CodeMark: customTags.codeMark,
+    }),
+  ],
+};
+
+/**
+ * TUI-themed highlight style that maps to theme-specific CSS custom properties
+ * so it automatically adapts to light/dark mode and all themes (Catppuccin, Everforest, Nord).
  */
 export const tuiHighlightStyle = HighlightStyle.define([
-  // Headings — primary color, bold
+  // Headings — bold, foreground color
   { tag: tags.heading1, color: 'var(--color-foreground)', fontWeight: 'bold', fontSize: '1.8em' },
   { tag: tags.heading2, color: 'var(--color-foreground)', fontWeight: 'bold', fontSize: '1.45em' },
   { tag: tags.heading3, color: 'var(--color-foreground)', fontWeight: 'bold', fontSize: '1.25em' },
   { tag: [tags.heading4, tags.heading5, tags.heading6], color: 'var(--color-foreground)', fontWeight: 'bold' },
-  // Emphasis
+
+  // Markdown indicators / markers — styled subtly to keep the document clean
+  { tag: customTags.headerMark, color: 'var(--code-mark)', fontWeight: 'normal', opacity: 0.6 },
+  { tag: customTags.listMark, color: 'var(--code-mark)', fontWeight: 'bold' },
+  { tag: customTags.emphasisMark, color: 'var(--code-comment)', fontStyle: 'normal', opacity: 0.5 },
+  { tag: customTags.quoteMark, color: 'var(--code-mark)', fontWeight: 'bold' },
+  { tag: customTags.linkMark, color: 'var(--code-comment)', opacity: 0.5 },
+  { tag: customTags.codeMark, color: 'var(--code-comment)', opacity: 0.6 },
+
+  // Inline Formatting
   { tag: tags.emphasis, fontStyle: 'italic', color: 'var(--color-foreground)' },
   { tag: tags.strong, fontWeight: 'bold', color: 'var(--color-foreground)' },
-  // Links
-  { tag: tags.link, color: 'var(--color-primary)', textDecoration: 'underline' },
-  { tag: tags.url, color: 'var(--color-dim-foreground)' },
-  // Code
-  { tag: tags.monospace, fontFamily: 'var(--font-geist-mono, monospace)', color: 'var(--color-foreground)' },
-  { tag: tags.string, color: 'var(--color-success, #a6e3a1)' },
-  // Marks / punctuation
-  { tag: tags.processingInstruction, color: 'var(--color-muted-foreground)' },
-  { tag: tags.meta, color: 'var(--color-muted-foreground)' },
-  { tag: tags.comment, color: 'var(--color-dim-foreground)', fontStyle: 'italic' },
-  // Lists
-  { tag: tags.list, color: 'var(--color-foreground)' },
-  // Quote
-  { tag: tags.quote, color: 'var(--color-muted-foreground)', fontStyle: 'italic' },
-  // HR / markup
+  { tag: tags.quote, color: 'var(--code-comment)', fontStyle: 'italic' },
   { tag: tags.contentSeparator, color: 'var(--color-border)' },
+
+  // Links
+  { tag: tags.link, color: 'var(--code-keyword)', textDecoration: 'underline' },
+  { tag: tags.url, color: 'var(--code-comment)' },
+
+  // Fenced/Inline Code & Languages Syntax Highlights
+  { 
+    tag: tags.monospace, 
+    fontFamily: 'var(--font-geist-mono, monospace)', 
+    color: 'var(--code-keyword)', 
+    backgroundColor: 'color-mix(in srgb, var(--code-keyword) 8%, transparent)', 
+    padding: '0.1rem 0.25rem',
+    borderRadius: '0.2rem'
+  },
+  { tag: tags.keyword, color: 'var(--code-keyword)', fontWeight: 'bold' },
+  { tag: tags.string, color: 'var(--code-string)' },
+  { tag: tags.number, color: 'var(--code-number)' },
+  { tag: tags.bool, color: 'var(--code-number)' },
+  { tag: tags.comment, color: 'var(--code-comment)', fontStyle: 'italic' },
+  { tag: tags.operator, color: 'var(--code-comment)' },
+  { tag: tags.variableName, color: 'var(--code-variable)' },
+  { tag: tags.className, color: 'var(--code-function)' },
+  { tag: tags.typeName, color: 'var(--code-function)' },
+  { tag: tags.function(tags.variableName), color: 'var(--code-function)' },
 ]);
 
 export const tuiMarkdownHighlight = syntaxHighlighting(tuiHighlightStyle);

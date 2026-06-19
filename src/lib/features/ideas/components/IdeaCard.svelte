@@ -35,7 +35,9 @@
   ></span>
 
   <!-- Content -->
-  <p class="text-xs text-foreground whitespace-pre-wrap break-words leading-relaxed">{idea.content}</p>
+  <p class="text-xs text-foreground whitespace-pre-wrap wrap-break-word leading-relaxed">
+    {idea.content}
+  </p>
 
   <!-- Footer -->
   <div class="flex items-center justify-between mt-0.5">
@@ -46,15 +48,15 @@
       <span
         class="text-tui-xs text-muted-foreground hover:text-primary cursor-pointer"
         onclick={() => onToggleFavorite(idea.id)}
-        title={idea.isFavorite ? 'Unstar' : 'Star'}
-      >{idea.isFavorite ? '[★]' : '[☆]'}</span>
+        title={idea.isFavorite ? 'Unstar' : 'Star'}>{idea.isFavorite ? '[★]' : '[☆]'}</span
+      >
       <!-- svelte-ignore a11y_click_events_have_key_events -->
       <!-- svelte-ignore a11y_no_static_element_interactions -->
       <span
         class="text-tui-xs text-muted-foreground hover:text-destructive cursor-pointer"
         onclick={() => onDelete(idea.id)}
-        title="Delete"
-      >[x]</span>
+        title="Delete">[x]</span
+      >
     </div>
   </div>
 </div>

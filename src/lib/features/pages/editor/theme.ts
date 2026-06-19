@@ -33,17 +33,23 @@ export const tuiEditorTheme = EditorView.theme(
       padding: '0',
     },
     // Cursor
-    '.cm-cursor, .cm-dropCursor': {
-      borderLeftColor: 'var(--color-primary)',
+    '.cm-cursor': {
+      backgroundColor: 'var(--code-keyword)',
+      width: '0.55em !important',
+      borderLeft: 'none !important',
+      opacity: '0.6',
+    },
+    '.cm-dropCursor': {
+      borderLeftColor: 'var(--code-keyword)',
       borderLeftWidth: '2px',
     },
     // Selection
     '&.cm-focused .cm-selectionBackground, .cm-selectionBackground': {
-      backgroundColor: 'color-mix(in srgb, var(--color-primary) 20%, transparent)',
+      backgroundColor: 'color-mix(in srgb, var(--code-keyword) 20%, transparent)',
     },
     // Active line
     '.cm-activeLine': {
-      backgroundColor: 'color-mix(in srgb, var(--color-primary) 5%, transparent)',
+      backgroundColor: 'color-mix(in srgb, var(--code-keyword) 5%, transparent)',
     },
     // Gutters (line numbers)
     '.cm-gutters': {
