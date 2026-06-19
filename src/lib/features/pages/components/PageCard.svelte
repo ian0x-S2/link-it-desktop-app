@@ -28,7 +28,7 @@
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
-  class="group relative flex flex-col gap-2 p-3 border border-border bg-box-bg transition-colors cursor-pointer"
+  class="group relative flex flex-col gap-2 p-3 border border-transparent bg-background transition-colors cursor-pointer"
   onclick={() => onOpen(page.id)}
 >
   <!-- Corner brackets on hover (matches BookmarkCard aesthetic) -->

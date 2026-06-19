@@ -160,7 +160,7 @@
           {/each}
         </div>
       {:else}
-        <div class="flex flex-col">
+        <div class="flex flex-col gap-3">
           {#each displayedPages as page (page.id)}
             <PageItem
               {page}
