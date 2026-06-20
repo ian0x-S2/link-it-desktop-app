@@ -72,21 +72,22 @@ class PageStore {
   async save(id: string, data: UpdatePageInput): Promise<void> {
     this.isSaving = true;
     try {
-      await pageActions.updatePage(id, data);
+      const updatedFields = await pageActions.updatePage(id, data);
       // Update metadata in list.
       const idx = this.items.findIndex((p) => p.id === id);
       if (idx >= 0) {
         this.items[idx] = {
           ...this.items[idx],
-          title: data.title ?? this.items[idx].title,
-          bannerImage: data.bannerImage !== undefined ? data.bannerImage : this.items[idx].bannerImage,
+          title: updatedFields.title ?? this.items[idx].title,
+          bannerImage: updatedFields.bannerImage !== undefined ? updatedFields.bannerImage : this.items[idx].bannerImage,
           updatedAt: new Date().toISOString(),
         };
       }
       if (this.activePage?.id === id) {
-        this.activePage = { ...this.activePage, ...data, updatedAt: new Date().toISOString() };
+        this.activePage = { ...this.activePage, ...updatedFields, updatedAt: new Date().toISOString() };
       }
     } catch (e) {
+      console.error('[PageStore] save failed:', e);
       this.error = e instanceof Error ? e.message : 'Failed to save page.';
     } finally {
       this.isSaving = false;

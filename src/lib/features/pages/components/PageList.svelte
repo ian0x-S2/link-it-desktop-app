@@ -36,7 +36,9 @@
   }
 
   async function handleSave(content: string, bannerImage?: string | null) {
-    if (!pageStore.activePage) return;
+    if (!pageStore.activePage) {
+      return;
+    }
     const data: UpdatePageInput = { content };
     if (bannerImage !== undefined) {
       data.bannerImage = bannerImage;

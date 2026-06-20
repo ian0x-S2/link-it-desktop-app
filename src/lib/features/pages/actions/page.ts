@@ -29,13 +29,14 @@ export class PageActions {
     return await this.repository.create(input);
   }
 
-  async updatePage(id: string, data: UpdatePageInput): Promise<void> {
+  async updatePage(id: string, data: UpdatePageInput): Promise<UpdatePageInput> {
     const update: UpdatePageInput = { ...data };
     // Auto-extract title from content if content changed but title wasn't explicitly set.
     if (data.content !== undefined && data.title === undefined) {
       update.title = extractTitleFromContent(data.content);
     }
     await this.repository.update(id, update);
+    return update;
   }
 
   async softDeletePage(id: string): Promise<void> {

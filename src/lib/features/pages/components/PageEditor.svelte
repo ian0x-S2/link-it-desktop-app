@@ -5,24 +5,21 @@
   import type { Page } from '../types/page';
   import { marked } from 'marked';
   import { Button } from '$lib/shared/components/ui/button';
+  import { browser } from '$app/environment';
+  import { pageStore } from '../stores/page.svelte';
 
-  let {
-    page,
-    isSaving = false,
-    onSave,
-    onClose,
-  }: {
+  let props = $props<{
     page: Page;
     isSaving?: boolean;
     onSave: (content: string, bannerImage?: string | null) => void;
     onClose: () => void;
-  } = $props();
+  }>();
 
   let view: EditorView | null = null;
   let saveTimer: ReturnType<typeof setTimeout> | null = null;
 
   // Local state for banner image initialized via closure to avoid compiler warnings
-  let bannerImage = $state<string | null>((() => page.bannerImage)());
+  let bannerImage = $state<string | null>((() => props.page.bannerImage)());
   let showCoverMenu = $state(false);
   let customUrl = $state('');
 
@@ -30,9 +27,9 @@
   const readOnlyCompartment = new Compartment();
   const editableCompartment = new Compartment();
   let readOnly = $state(
-    typeof window !== 'undefined' && localStorage.getItem('editor-readonly') === 'true',
+    browser && localStorage.getItem('editor-readonly') === 'true',
   );
-  let currentContent = $state((() => page.content)());
+  let currentContent = $state((() => props.page.content)());
 
   // Compile markdown safely
   const renderedHtml = $derived.by(() => {
@@ -45,16 +42,11 @@
     }
   });
 
-  // Extract the latest content from CodeMirror view when entering preview mode
-  $effect(() => {
-    if (readOnly && view) {
-      currentContent = view.state.doc.toString();
-    }
-  });
+
 
   // Save readOnly preference to localStorage
   $effect(() => {
-    if (typeof window !== 'undefined') {
+    if (browser) {
       localStorage.setItem('editor-readonly', String(readOnly));
     }
   });
@@ -95,25 +87,30 @@
     },
   ];
 
-  function scheduleAutosave(content: string) {
+  function scheduleAutosave() {
     if (saveTimer) clearTimeout(saveTimer);
     saveTimer = setTimeout(() => {
-      onSave(content, bannerImage);
+      if (view) {
+        const docText = view.state.doc.toString();
+        props.onSave(docText, bannerImage);
+      }
     }, 1000);
   }
 
   function mountEditor(node: HTMLElement) {
     const state = EditorState.create({
-      doc: currentContent || page.content,
+      doc: currentContent || props.page.content,
       extensions: [
         ...createEditorExtensions(() => {
-          if (view) onSave(view.state.doc.toString(), bannerImage);
+          if (view) {
+            props.onSave(view.state.doc.toString(), bannerImage);
+          }
         }),
         readOnlyCompartment.of(EditorState.readOnly.of(readOnly)),
         editableCompartment.of(EditorView.editable.of(!readOnly)),
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {
-            scheduleAutosave(update.state.doc.toString());
+            scheduleAutosave();
           }
         }),
       ],
@@ -125,7 +122,9 @@
       destroy() {
         if (saveTimer) clearTimeout(saveTimer);
         if (view) {
-          onSave(view.state.doc.toString(), bannerImage);
+          const docText = view.state.doc.toString();
+          currentContent = docText;
+          props.onSave(docText, bannerImage);
           view.destroy();
           view = null;
         }
@@ -137,9 +136,9 @@
     bannerImage = style;
     showCoverMenu = false;
     if (view) {
-      onSave(view.state.doc.toString(), style);
+      props.onSave(view.state.doc.toString(), style);
     } else {
-      onSave(page.content, style);
+      props.onSave(props.page.content, style);
     }
   }
 
@@ -147,9 +146,9 @@
     bannerImage = null;
     showCoverMenu = false;
     if (view) {
-      onSave(view.state.doc.toString(), null);
+      props.onSave(view.state.doc.toString(), null);
     } else {
-      onSave(page.content, null);
+      props.onSave(props.page.content, null);
     }
   }
 
@@ -160,10 +159,17 @@
     showCoverMenu = false;
     customUrl = '';
     if (view) {
-      onSave(view.state.doc.toString(), style);
+      props.onSave(view.state.doc.toString(), style);
     } else {
-      onSave(page.content, style);
+      props.onSave(props.page.content, style);
     }
+  }
+
+  function handleClose() {
+    if (view) {
+      props.onSave(view.state.doc.toString(), bannerImage);
+    }
+    props.onClose();
   }
 </script>
 
@@ -179,20 +185,23 @@
       <!-- svelte-ignore a11y_no_static_element_interactions -->
       <span
         class="text-tui-xs text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
-        onclick={onClose}
+        onclick={handleClose}
       >
         ← back
       </span>
       <span class="text-tui-xs text-muted-foreground">|</span>
       <span class="text-tui-xs text-foreground font-bold truncate max-w-xs"
-        >{page.title || 'Untitled'}</span
+        >{props.page.title || 'Untitled'}</span
       >
     </div>
     <div class="flex items-center gap-3 text-tui-xs text-muted-foreground select-none">
       <!-- Status message -->
       <div class="flex items-center gap-2">
+        {#if pageStore.error}
+          <span class="text-destructive font-bold">[{pageStore.error}]</span>
+        {/if}
         {#if !readOnly}
-          {#if isSaving}
+          {#if props.isSaving}
             <span class="animate-pulse">[saving...]</span>
           {:else}
             <span>[saved]</span>
