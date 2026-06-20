@@ -34,15 +34,15 @@
   let tagInputValue = $state('');
 
   // All unique tags across all bookmarks for autocomplete
-  const allTags = $derived(() => getAllUniqueTags(bookmarkStore.items));
+  const allTags = $derived(getAllUniqueTags(bookmarkStore.items));
 
   function getTagSuggestionsForBookmark(bookmark: Bookmark) {
-    return getTagSuggestions(allTags(), bookmark.tags, tagInputValue);
+    return getTagSuggestions(allTags, bookmark.tags, tagInputValue);
   }
 
   function isNewTagForBookmark(bookmark: Bookmark) {
     const q = tagInputValue.trim().toLowerCase();
-    return isNewTagValue(allTags(), tagInputValue) && !bookmark.tags.includes(q);
+    return isNewTagValue(allTags, tagInputValue) && !bookmark.tags.includes(q);
   }
 
   function openTagPopover(id: string) {

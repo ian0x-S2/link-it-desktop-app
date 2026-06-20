@@ -9,7 +9,7 @@
   let chartType = $state<'bar' | 'line'>('bar');
 
   // Generate last 7 days chronologically (oldest to newest)
-  const last7Days = $derived(() => {
+  const last7Days = $derived.by(() => {
     const days = [];
     const now = new Date();
     for (let i = 6; i >= 0; i--) {
@@ -34,7 +34,7 @@
     return days;
   });
 
-  const chartData = $derived(last7Days());
+  const chartData = $derived(last7Days);
 
   const config = {
     count: {

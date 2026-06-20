@@ -29,7 +29,7 @@
   let tagToDelete = $state<string | null>(null);
 
   // Aggregate all unique tags with their bookmark counts
-  const tagList = $derived(() => {
+  const tagList = $derived.by(() => {
     const counts: Record<string, number> = {};
     for (const b of bookmarks) {
       if (b.tags) {
@@ -45,12 +45,12 @@
   });
 
   // Filtered tags based on search input
-  const filteredTags = $derived(() => {
+  const filteredTags = $derived.by(() => {
     const search = tagSearch.trim().toLowerCase();
     if (!search) {
-      return tagList();
+      return tagList;
     }
-    return tagList().filter((t) => t.name.toLowerCase().includes(search));
+    return tagList.filter((t) => t.name.toLowerCase().includes(search));
   });
 
   function handleRename(tag: string) {
@@ -129,7 +129,7 @@
   <div
     class="flex-1 overflow-y-auto pr-1 space-y-1 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-border hover:[&::-webkit-scrollbar-thumb]:bg-primary min-h-0"
   >
-    {#each filteredTags() as tag (tag.name)}
+    {#each filteredTags as tag (tag.name)}
       <div
         class="flex items-center justify-between text-xs py-0.5 px-1.5 group border border-transparent transition-colors {selectedTag ===
         tag.name

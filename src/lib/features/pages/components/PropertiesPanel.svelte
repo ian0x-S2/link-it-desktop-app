@@ -46,9 +46,11 @@
   }
 </script>
 
-<div class="flex flex-wrap gap-2 items-center font-mono text-tui-xs select-none py-1 border-b border-border/40 mb-4 pb-2">
+<div
+  class="flex flex-wrap gap-2 items-center font-mono text-tui-xs select-none py-1 border-b border-border/40 mb-4 pb-2"
+>
   <span class="text-muted-foreground font-bold tracking-wider">TAGS:</span>
-  
+
   {#each tags as tag (tag)}
     <span
       class="inline-flex items-center gap-1 text-tui-xs text-foreground bg-accent/20 px-1.5 py-0.5 border border-border/60 font-mono"
@@ -58,7 +60,7 @@
       <!-- svelte-ignore a11y_no_static_element_interactions -->
       <span
         onclick={() => handleRemoveTag(tag)}
-        class="text-destructive hover:text-red-400 cursor-pointer font-bold text-[10px] ml-0.5"
+        class="text-destructive hover:text-red-400 cursor-pointer font-bold text-tui-xs ml-0.5"
         title="Remove tag"
       >
         x
@@ -99,7 +101,9 @@
         />
       </div>
       <!-- Suggestions -->
-      <div class="flex flex-col py-0.5 max-h-40 overflow-y-auto [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-border">
+      <div
+        class="flex flex-col py-0.5 max-h-40 overflow-y-auto [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-border"
+      >
         {#if isNewTag}
           <!-- svelte-ignore a11y_click_events_have_key_events -->
           <!-- svelte-ignore a11y_no_static_element_interactions -->

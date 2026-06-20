@@ -35,13 +35,13 @@
   let newTagValue = $state('');
 
   // All unique tags across all bookmarks for autocomplete
-  const allTags = $derived(() => getAllUniqueTags(bookmarkStore.items));
+  const allTags = $derived(getAllUniqueTags(bookmarkStore.items));
 
   // Filter suggestions based on current input (excludes tags already on this bookmark)
-  const tagSuggestions = $derived(() => getTagSuggestions(allTags(), bookmark.tags, newTagValue));
+  const tagSuggestions = $derived(getTagSuggestions(allTags, bookmark.tags, newTagValue));
 
   // Whether the typed value is a brand-new tag not in the global list
-  const isNewTag = $derived(() => isNewTagValue(allTags(), newTagValue));
+  const isNewTag = $derived(isNewTagValue(allTags, newTagValue));
 
   function submitTag(tag: string) {
     const clean = normaliseTag(tag);
@@ -200,7 +200,7 @@
           </div>
           <!-- Suggestions -->
           <div class="flex flex-col py-0.5 max-h-40 overflow-y-auto">
-            {#if isNewTag()}
+            {#if isNewTag}
               <!-- svelte-ignore a11y_click_events_have_key_events -->
               <!-- svelte-ignore a11y_no_static_element_interactions -->
               <div
@@ -210,7 +210,7 @@
                 [Create: "{newTagValue.trim().toLowerCase()}"]
               </div>
             {/if}
-            {#each tagSuggestions() as suggestion (suggestion)}
+            {#each tagSuggestions as suggestion (suggestion)}
               <!-- svelte-ignore a11y_click_events_have_key_events -->
               <!-- svelte-ignore a11y_no_static_element_interactions -->
               <div
@@ -220,7 +220,7 @@
                 * {suggestion}
               </div>
             {/each}
-            {#if tagSuggestions().length === 0 && !isNewTag()}
+            {#if tagSuggestions.length === 0 && !isNewTag}
               <div class="px-2 py-1 text-tui-xs text-dim-foreground italic select-none">
                 No tags yet
               </div>
