@@ -3,6 +3,7 @@
   import PageItem from './PageItem.svelte';
   import PageCard from './PageCard.svelte';
   import PageEditor from './PageEditor.svelte';
+  import type { UpdatePageInput } from '../types/page';
   import { viewStore } from '$lib/shared/stores/view.svelte';
   import { Input } from '$lib/shared/components/ui/input';
 
@@ -36,7 +37,7 @@
 
   async function handleSave(content: string, bannerImage?: string | null) {
     if (!pageStore.activePage) return;
-    const data: any = { content };
+    const data: UpdatePageInput = { content };
     if (bannerImage !== undefined) {
       data.bannerImage = bannerImage;
     }
@@ -46,12 +47,14 @@
 
 {#if pageStore.activePage}
   <!-- Editor view -->
-  <PageEditor
-    page={pageStore.activePage}
-    isSaving={pageStore.isSaving}
-    onSave={handleSave}
-    onClose={() => pageStore.closePage()}
-  />
+  {#key pageStore.activePage.id}
+    <PageEditor
+      page={pageStore.activePage}
+      isSaving={pageStore.isSaving}
+      onSave={handleSave}
+      onClose={() => pageStore.closePage()}
+    />
+  {/key}
 {:else}
   <!-- List view -->
   <!-- Header -->

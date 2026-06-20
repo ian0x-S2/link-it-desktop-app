@@ -4,6 +4,7 @@
   import { createEditorExtensions } from '../editor/index';
   import type { Page } from '../types/page';
   import { marked } from 'marked';
+  import { Button } from '$lib/shared/components/ui/button';
 
   let {
     page,
@@ -20,18 +21,18 @@
   let view: EditorView | null = null;
   let saveTimer: ReturnType<typeof setTimeout> | null = null;
 
-  // Local state for banner image
-  // eslint-disable-next-line svelte/prefer-writable-derived
-  let bannerImage = $state<string | null>(null);
+  // Local state for banner image initialized via closure to avoid compiler warnings
+  let bannerImage = $state<string | null>((() => page.bannerImage)());
   let showCoverMenu = $state(false);
   let customUrl = $state('');
 
   // Compartments to toggle read-only dynamically
   const readOnlyCompartment = new Compartment();
   const editableCompartment = new Compartment();
-  let readOnly = $state(false);
-  // eslint-disable-next-line svelte/prefer-writable-derived
-  let currentContent = $state('');
+  let readOnly = $state(
+    typeof window !== 'undefined' && localStorage.getItem('editor-readonly') === 'true',
+  );
+  let currentContent = $state((() => page.content)());
 
   // Compile markdown safely
   const renderedHtml = $derived.by(() => {
@@ -44,15 +45,17 @@
     }
   });
 
-  // Sync content when page changes
-  $effect(() => {
-    currentContent = page.content;
-  });
-
   // Extract the latest content from CodeMirror view when entering preview mode
   $effect(() => {
     if (readOnly && view) {
       currentContent = view.state.doc.toString();
+    }
+  });
+
+  // Save readOnly preference to localStorage
+  $effect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('editor-readonly', String(readOnly));
     }
   });
 
@@ -74,10 +77,6 @@
         ],
       });
     }
-  });
-
-  $effect(() => {
-    bannerImage = page.bannerImage;
   });
 
   const PRESET_COVERS = [
@@ -241,29 +240,35 @@
         <div
           class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-end p-2 gap-2"
         >
-          <button
+          <Button
             onclick={() => (showCoverMenu = !showCoverMenu)}
-            class="text-tui-xs bg-background/80 hover:bg-background border border-border px-2 py-0.5 font-mono text-foreground font-bold shadow-sm cursor-pointer"
+            variant="outline"
+            size="xs"
+            class="text-tui-xs bg-background/80 hover:bg-background border-border px-2 py-0.5 font-mono text-foreground font-bold shadow-sm cursor-pointer h-auto"
           >
             [change cover]
-          </button>
-          <button
+          </Button>
+          <Button
             onclick={handleRemoveCover}
-            class="text-tui-xs bg-background/80 hover:bg-background border border-border px-2 py-0.5 font-mono text-destructive font-bold shadow-sm cursor-pointer"
+            variant="outline"
+            size="xs"
+            class="text-tui-xs bg-background/80 hover:bg-destructive hover:text-destructive-foreground dark:hover:bg-destructive dark:hover:text-destructive-foreground border-border px-2 py-0.5 font-mono text-destructive font-bold shadow-sm cursor-pointer h-auto"
           >
             [remove]
-          </button>
+          </Button>
         </div>
       </div>
     {:else}
       <!-- Empty banner hover area to Add Cover -->
       <div class="w-full h-8 shrink-0 relative group flex items-center justify-end px-6">
-        <button
+        <Button
           onclick={() => (showCoverMenu = !showCoverMenu)}
-          class="opacity-0 group-hover:opacity-100 transition-opacity text-tui-xs border border-border bg-box-bg hover:border-primary text-muted-foreground hover:text-primary px-2 py-0.5 font-mono font-bold cursor-pointer"
+          variant="outline"
+          size="xs"
+          class="opacity-0 group-hover:opacity-100 transition-opacity text-tui-xs border-border bg-box-bg hover:border-primary text-muted-foreground hover:text-primary px-2 py-0.5 font-mono font-bold cursor-pointer h-auto"
         >
           [+ add cover]
-        </button>
+        </Button>
       </div>
     {/if}
 
@@ -274,25 +279,31 @@
       >
         <div class="flex items-center justify-between border-b border-border pb-1">
           <span class="font-bold text-primary">SELECT COVER</span>
-          <button
+          <Button
             onclick={() => (showCoverMenu = false)}
-            class="text-muted-foreground hover:text-foreground font-bold cursor-pointer">[x]</button
+            variant="ghost"
+            size="xs"
+            class="text-muted-foreground hover:text-foreground font-bold cursor-pointer h-auto p-0"
           >
+            [x]
+          </Button>
         </div>
 
         <!-- Presets grid -->
         <div class="grid grid-cols-2 gap-2">
           {#each PRESET_COVERS as cover (cover.name)}
-            <button
+            <Button
               onclick={() => handleSelectCover(cover.style)}
               style={cover.style}
-              class="h-10 border border-border hover:border-primary transition-colors cursor-pointer relative group flex items-end p-1"
+              variant="outline"
+              class="h-10 w-full rounded-none border border-border hover:border-primary transition-colors cursor-pointer relative group flex items-end justify-start p-1 bg-none"
             >
               <span
-                class="text-[8px] bg-background/90 text-foreground px-1 truncate max-w-full font-mono"
-                >{cover.name}</span
+                class="text-[8px] bg-background/90 text-foreground px-1 truncate max-w-full font-mono normal-case"
               >
-            </button>
+                {cover.name}
+              </span>
+            </Button>
           {/each}
         </div>
 
@@ -304,12 +315,14 @@
               placeholder="https://images.unsplash.com/..."
               class="flex-1 bg-transparent border border-border px-1.5 py-0.5 text-xs text-foreground outline-none focus:border-primary font-mono"
             />
-            <button
+            <Button
               onclick={handleCustomUrlSubmit}
-              class="border border-primary bg-primary text-background font-bold px-2 py-0.5 cursor-pointer text-xs uppercase"
+              variant="default"
+              size="xs"
+              class="border border-primary bg-primary text-background font-bold px-2 py-0.5 cursor-pointer text-xs uppercase h-auto"
             >
               [ok]
-            </button>
+            </Button>
           </div>
         </div>
       </div>
