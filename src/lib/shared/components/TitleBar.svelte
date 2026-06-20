@@ -92,21 +92,21 @@
     <div class="flex items-center gap-1">
       <button
         onclick={handleMinimize}
-        class="w-6 h-5 flex items-center justify-center border border-border bg-box-bg hover:bg-muted text-dim-foreground font-mono text-[10px] transition-colors focus:outline-none cursor-default"
+        class="w-6 h-5 flex items-center justify-center border border-border bg-box-bg hover:bg-muted text-dim-foreground font-mono text-tui-xs transition-colors focus:outline-none cursor-default"
         title="Minimizar"
       >
         _
       </button>
       <button
         onclick={handleToggleMaximize}
-        class="w-6 h-5 flex items-center justify-center border border-border bg-box-bg hover:bg-muted text-dim-foreground font-mono text-[10px] transition-colors focus:outline-none cursor-default"
+        class="w-6 h-5 flex items-center justify-center border border-border bg-box-bg hover:bg-muted text-dim-foreground font-mono text-tui-xs transition-colors focus:outline-none cursor-default"
         title={isMaximized ? 'Restaurar' : 'Maximizar'}
       >
         {isMaximized ? '⛶' : '▢'}
       </button>
       <button
         onclick={handleClose}
-        class="w-6 h-5 flex items-center justify-center border border-border bg-box-bg hover:bg-destructive hover:text-destructive-foreground text-dim-foreground font-mono text-[10px] transition-colors focus:outline-none cursor-default"
+        class="w-6 h-5 flex items-center justify-center border border-border bg-box-bg hover:bg-destructive hover:text-destructive-foreground text-dim-foreground font-mono text-tui-xs transition-colors focus:outline-none cursor-default"
         title="Fechar"
       >
         ✕
