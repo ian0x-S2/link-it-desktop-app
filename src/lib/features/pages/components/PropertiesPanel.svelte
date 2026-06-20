@@ -3,6 +3,7 @@
   import * as Popover from '$lib/shared/components/ui/popover';
   import { Button } from '$lib/shared/components/ui/button';
   import { Input } from '$lib/shared/components/ui/input';
+  import { Badge } from '$lib/shared/components/ui/badge';
   import {
     getAllUniqueTags,
     getTagSuggestions,
@@ -46,26 +47,25 @@
   }
 </script>
 
-<div
-  class="flex flex-wrap gap-2 items-center font-mono text-tui-xs select-none py-1 border-b border-border/40 mb-4 pb-2"
->
+<div class="flex flex-wrap gap-2 items-center font-mono text-tui-xs select-none py-1 border-b border-border/40 mb-4 pb-2">
   <span class="text-muted-foreground font-bold tracking-wider">TAGS:</span>
-
+  
   {#each tags as tag (tag)}
-    <span
-      class="inline-flex items-center gap-1 text-tui-xs text-foreground bg-accent/20 px-1.5 py-0.5 border border-border/60 font-mono"
+    <Badge
+      variant="outline"
+      class="text-tui-2xs px-1 border border-border-dim text-muted-foreground flex items-center gap-1 select-none font-mono"
     >
-      #{tag}
+      *{tag}
       <!-- svelte-ignore a11y_click_events_have_key_events -->
       <!-- svelte-ignore a11y_no_static_element_interactions -->
       <span
         onclick={() => handleRemoveTag(tag)}
-        class="text-destructive hover:text-red-400 cursor-pointer font-bold text-tui-xs ml-0.5"
+        class="text-destructive hover:text-red-400 cursor-pointer font-bold text-[8px] ml-0.5"
         title="Remove tag"
       >
         x
       </span>
-    </span>
+    </Badge>
   {:else}
     <span class="text-dim-foreground italic">[no tags]</span>
   {/each}
@@ -78,7 +78,7 @@
           {...props}
           variant="ghost"
           size="xs"
-          class="text-tui-xs text-primary hover:text-primary-foreground hover:bg-primary/20 transition-colors select-none font-bold h-auto px-1.5 py-0.5 font-mono"
+          class="text-tui-2xs text-dim-foreground hover:text-primary transition-colors select-none font-bold h-auto p-0 bg-transparent hover:bg-transparent font-mono"
         >
           [+ add tag]
         </Button>
