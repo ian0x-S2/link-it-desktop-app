@@ -1,6 +1,7 @@
 import { ideaActions } from '../actions/idea';
 import type { Idea } from '../types/idea';
 import { workspaceStore } from '$lib/features/workspaces/stores/workspace.svelte';
+import { viewStore } from '$lib/shared/stores/view.svelte';
 
 class IdeaStore {
   items = $state<Idea[]>([]);
@@ -11,16 +12,22 @@ class IdeaStore {
     return this.items.filter((i) => i.deletedAt === null);
   }
 
+  get activeItemsFiltered(): Idea[] {
+    const activeCategoryId = viewStore.activeCategoryId;
+    if (!activeCategoryId) return [];
+    return this.items.filter((i) => i.deletedAt === null && i.categoryId === activeCategoryId);
+  }
+
   get trashedItems(): Idea[] {
     return this.items.filter((i) => i.deletedAt !== null);
   }
 
-  async load(categoryId: string): Promise<void> {
+  async load(): Promise<void> {
     if (!workspaceStore.activeId) return;
     this.isLoading = true;
     this.error = null;
     try {
-      this.items = await ideaActions.getIdeas(workspaceStore.activeId, categoryId);
+      this.items = await ideaActions.getIdeas(workspaceStore.activeId);
     } catch (e) {
       this.error = e instanceof Error ? e.message : 'Failed to load ideas.';
     } finally {

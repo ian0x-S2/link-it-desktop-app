@@ -9,8 +9,8 @@ export class IdeaActions {
     this.repository = repository;
   }
 
-  async getIdeas(workspaceId: string, categoryId: string): Promise<Idea[]> {
-    return await this.repository.getAll(workspaceId, categoryId);
+  async getIdeas(workspaceId: string): Promise<Idea[]> {
+    return await this.repository.getAll(workspaceId);
   }
 
   async createIdea(input: CreateIdeaInput): Promise<Idea> {

@@ -1,7 +1,7 @@
 import type { Idea, CreateIdeaInput, UpdateIdeaInput } from '../types/idea';
 
 export interface IdeaRepository {
-  getAll(workspaceId: string, categoryId: string): Promise<Idea[]>;
+  getAll(workspaceId: string): Promise<Idea[]>;
   create(input: CreateIdeaInput): Promise<Idea>;
   update(id: string, data: UpdateIdeaInput): Promise<void>;
   softDelete(id: string): Promise<void>;

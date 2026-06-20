@@ -19,7 +19,7 @@ export class SqliteIdeaRepository implements IdeaRepository {
     return await getDatabase();
   }
 
-  async getAll(workspaceId: string, categoryId: string): Promise<Idea[]> {
+  async getAll(workspaceId: string): Promise<Idea[]> {
     const db = await this.getDb();
     const rows = await db.select<IdeaRow[]>(
       `SELECT
@@ -32,9 +32,9 @@ export class SqliteIdeaRepository implements IdeaRepository {
          created_at    AS createdAt,
          updated_at    AS updatedAt
        FROM ideas
-       WHERE workspace_id = $1 AND category_id = $2
+       WHERE workspace_id = $1
        ORDER BY created_at DESC`,
-      [workspaceId, categoryId],
+      [workspaceId],
     );
 
     return rows.map((r) => ({

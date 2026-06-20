@@ -5,6 +5,9 @@
   import { Input } from '$lib/shared/components/ui/input';
   import type { Workspace } from '$lib/features/workspaces/types/workspace';
   import type { Category, CategoryType } from '$lib/features/categories/types/category';
+  import { bookmarkStore } from '$lib/features/bookmarks/stores/bookmark.svelte';
+  import { pageStore } from '$lib/features/pages/stores/page.svelte';
+  import { ideaStore } from '$lib/features/ideas/stores/idea.svelte';
 
   let {
     workspaces,
@@ -19,9 +22,6 @@
     onSelectSpecialView,
     onCreateCategory,
     onDeleteCategory,
-    bookmarkCount = 0,
-    pageCount = 0,
-    ideaCount = 0,
     favoriteCount = 0,
     trashCount = 0,
     currentTheme,
@@ -41,9 +41,6 @@
     onSelectSpecialView: (view: 'favorites' | 'trash' | 'settings') => void;
     onCreateCategory: (name: string, type: CategoryType) => Promise<void>;
     onDeleteCategory: (id: string) => void;
-    bookmarkCount: number;
-    pageCount: number;
-    ideaCount: number;
     favoriteCount: number;
     trashCount: number;
     currentTheme: string;
@@ -106,9 +103,15 @@
 
   // ── Category count helper ────────────────────────────────────────────────────
   function getCategoryCount(cat: Category): number {
-    if (cat.type === 'links') return bookmarkCount;
-    if (cat.type === 'pages') return pageCount;
-    if (cat.type === 'ideas') return ideaCount;
+    if (cat.type === 'links') {
+      return bookmarkStore.activeItems.filter((b) => b.categoryId === cat.id).length;
+    }
+    if (cat.type === 'pages') {
+      return pageStore.activeItems.filter((p) => p.categoryId === cat.id).length;
+    }
+    if (cat.type === 'ideas') {
+      return ideaStore.activeItems.filter((i) => i.categoryId === cat.id).length;
+    }
     return 0;
   }
 

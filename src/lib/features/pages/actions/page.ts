@@ -17,8 +17,8 @@ export class PageActions {
     this.repository = repository;
   }
 
-  async getPageMetadata(workspaceId: string, categoryId: string): Promise<PageMetadata[]> {
-    return await this.repository.getAllMetadata(workspaceId, categoryId);
+  async getPageMetadata(workspaceId: string): Promise<PageMetadata[]> {
+    return await this.repository.getAllMetadata(workspaceId);
   }
 
   async getPage(id: string): Promise<Page | null> {

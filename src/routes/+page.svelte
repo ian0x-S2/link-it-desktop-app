@@ -35,7 +35,6 @@
   let editBookmarkId = $state<string | null>(null);
 
   // Derived counts
-  const totalLinks = $derived(bookmarkStore.activeItems.length);
   const favoriteCount = $derived(bookmarkStore.activeItems.filter((b) => b.isFavorite).length);
   const trashCount = $derived(bookmarkStore.trashedItems.length);
 
@@ -114,10 +113,12 @@
     return setupKeyboardShortcuts(() => promptInput, handleCreateContent);
   });
 
-  // Reload bookmarks whenever the active workspace changes.
+  // Reload bookmarks, pages, and ideas whenever the active workspace changes.
   $effect(() => {
     if (workspaceStore.activeId) {
       bookmarkStore.load();
+      pageStore.load();
+      ideaStore.load();
     }
   });
 
@@ -162,9 +163,6 @@
           return categoryStore.create({ workspaceId: workspaceStore.activeId, name, type });
         }}
         onDeleteCategory={(id) => categoryStore.delete(id)}
-        bookmarkCount={totalLinks}
-        pageCount={pageStore.activeItems.length}
-        ideaCount={ideaStore.activeItems.length}
         {favoriteCount}
         {trashCount}
         currentTheme={themeStore.current}
@@ -265,10 +263,7 @@
             icon={categoryStore.active.icon}
           />
         {:else}
-          <!-- Loading state -->
-          <div class="flex items-center justify-center flex-1 text-tui-xs text-muted-foreground">
-            [loading...]
-          </div>
+          <div class="flex-1"></div>
         {/if}
       </div>
     </div>

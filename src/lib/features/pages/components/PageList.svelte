@@ -18,18 +18,15 @@
 
   const displayedPages = $derived(
     viewStore.searchActive && viewStore.searchQuery.trim()
-      ? pageStore.activeItems.filter((p) =>
+      ? pageStore.activeItemsFiltered.filter((p) =>
           (p.title || 'Untitled')
             .toLowerCase()
             .includes(viewStore.searchQuery.toLowerCase())
         )
-      : pageStore.activeItems
+      : pageStore.activeItemsFiltered
   );
 
-  // Load pages when categoryId changes.
-  $effect(() => {
-    pageStore.load(categoryId);
-  });
+
 
   async function handleCreate() {
     await pageStore.create(categoryId);
@@ -130,9 +127,7 @@
 
   <!-- Page list -->
   <div class="flex-1 overflow-y-auto p-4 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-box-bg [&::-webkit-scrollbar-thumb]:bg-border hover:[&::-webkit-scrollbar-thumb]:bg-primary min-h-0">
-    {#if pageStore.isLoading}
-      <div class="p-4 text-tui-xs text-muted-foreground">[loading...]</div>
-    {:else if displayedPages.length === 0}
+    {#if displayedPages.length === 0}
       <div class="flex flex-col items-center justify-center h-full gap-3 text-center p-8">
         {#if viewStore.searchActive && viewStore.searchQuery.trim()}
           <p class="text-xs uppercase tracking-wider text-destructive">✗ No records found</p>

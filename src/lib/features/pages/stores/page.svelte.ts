@@ -1,6 +1,7 @@
 import { pageActions } from '../actions/page';
 import type { Page, PageMetadata, UpdatePageInput } from '../types/page';
 import { workspaceStore } from '$lib/features/workspaces/stores/workspace.svelte';
+import { viewStore } from '$lib/shared/stores/view.svelte';
 
 class PageStore {
   /** Lightweight metadata list — no content loaded. */
@@ -17,16 +18,22 @@ class PageStore {
     return this.items.filter((p) => p.deletedAt === null);
   }
 
+  get activeItemsFiltered(): PageMetadata[] {
+    const activeCategoryId = viewStore.activeCategoryId;
+    if (!activeCategoryId) return [];
+    return this.items.filter((p) => p.deletedAt === null && p.categoryId === activeCategoryId);
+  }
+
   get trashedItems(): PageMetadata[] {
     return this.items.filter((p) => p.deletedAt !== null);
   }
 
-  async load(categoryId: string): Promise<void> {
+  async load(): Promise<void> {
     if (!workspaceStore.activeId) return;
     this.isLoading = true;
     this.error = null;
     try {
-      this.items = await pageActions.getPageMetadata(workspaceStore.activeId, categoryId);
+      this.items = await pageActions.getPageMetadata(workspaceStore.activeId);
     } catch (e) {
       this.error = e instanceof Error ? e.message : 'Failed to load pages.';
     } finally {
@@ -87,7 +94,6 @@ class PageStore {
         this.activePage = { ...this.activePage, ...updatedFields, updatedAt: new Date().toISOString() };
       }
     } catch (e) {
-      console.error('[PageStore] save failed:', e);
       this.error = e instanceof Error ? e.message : 'Failed to save page.';
     } finally {
       this.isSaving = false;

@@ -21,7 +21,7 @@ export class SqlitePageRepository implements PageRepository {
     return await getDatabase();
   }
 
-  async getAllMetadata(workspaceId: string, categoryId: string): Promise<PageMetadata[]> {
+  async getAllMetadata(workspaceId: string): Promise<PageMetadata[]> {
     const db = await this.getDb();
     const rows = await db.select<PageRow[]>(
       `SELECT
@@ -35,9 +35,9 @@ export class SqlitePageRepository implements PageRepository {
          created_at    AS createdAt,
          updated_at    AS updatedAt
        FROM pages
-       WHERE workspace_id = $1 AND category_id = $2
+       WHERE workspace_id = $1
        ORDER BY updated_at DESC`,
-      [workspaceId, categoryId],
+      [workspaceId],
     );
 
     const pages = await Promise.all(
