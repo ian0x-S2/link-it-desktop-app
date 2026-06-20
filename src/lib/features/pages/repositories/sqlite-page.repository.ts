@@ -40,17 +40,28 @@ export class SqlitePageRepository implements PageRepository {
       [workspaceId, categoryId],
     );
 
-    return rows.map((r) => ({
-      id: r.id,
-      workspaceId: r.workspaceId,
-      categoryId: r.categoryId,
-      title: r.title,
-      bannerImage: r.bannerImage ?? null,
-      isFavorite: r.isFavorite === 1,
-      deletedAt: r.deletedAt ?? null,
-      createdAt: r.createdAt,
-      updatedAt: r.updatedAt,
-    }));
+    const pages = await Promise.all(
+      rows.map(async (r) => {
+        const tagsRows = await db.select<{ tag: string }[]>(
+          'SELECT tag FROM page_tags WHERE page_id = $1',
+          [r.id],
+        );
+        return {
+          id: r.id,
+          workspaceId: r.workspaceId,
+          categoryId: r.categoryId,
+          title: r.title,
+          bannerImage: r.bannerImage ?? null,
+          isFavorite: r.isFavorite === 1,
+          deletedAt: r.deletedAt ?? null,
+          createdAt: r.createdAt,
+          updatedAt: r.updatedAt,
+          tags: tagsRows.map((t) => t.tag),
+        };
+      })
+    );
+
+    return pages;
   }
 
   async getById(id: string): Promise<Page | null> {
@@ -74,6 +85,12 @@ export class SqlitePageRepository implements PageRepository {
 
     if (rows.length === 0) return null;
     const r = rows[0];
+
+    const tagsRows = await db.select<{ tag: string }[]>(
+      'SELECT tag FROM page_tags WHERE page_id = $1',
+      [id],
+    );
+
     return {
       id: r.id,
       workspaceId: r.workspaceId,
@@ -85,6 +102,7 @@ export class SqlitePageRepository implements PageRepository {
       deletedAt: r.deletedAt ?? null,
       createdAt: r.createdAt,
       updatedAt: r.updatedAt,
+      tags: tagsRows.map((t) => t.tag),
     };
   }
 
@@ -103,6 +121,15 @@ export class SqlitePageRepository implements PageRepository {
       [id, input.workspaceId, input.categoryId, title, content, bannerImage, now],
     );
 
+    if (input.tags && input.tags.length > 0) {
+      for (const tag of input.tags) {
+        await db.execute('INSERT OR IGNORE INTO page_tags (page_id, tag) VALUES ($1, $2)', [
+          id,
+          tag,
+        ]);
+      }
+    }
+
     return {
       id,
       workspaceId: input.workspaceId,
@@ -114,6 +141,7 @@ export class SqlitePageRepository implements PageRepository {
       deletedAt: null,
       createdAt: now,
       updatedAt: now,
+      tags: input.tags ?? [],
     };
   }
 
@@ -157,5 +185,21 @@ export class SqlitePageRepository implements PageRepository {
       'UPDATE pages SET is_favorite = NOT is_favorite, updated_at = $1 WHERE id = $2',
       [now, id],
     );
+  }
+
+  async addTag(pageId: string, tag: string): Promise<void> {
+    const db = await this.getDb();
+    await db.execute('INSERT OR IGNORE INTO page_tags (page_id, tag) VALUES ($1, $2)', [
+      pageId,
+      tag,
+    ]);
+  }
+
+  async removeTag(pageId: string, tag: string): Promise<void> {
+    const db = await this.getDb();
+    await db.execute('DELETE FROM page_tags WHERE page_id = $1 AND tag = $2', [
+      pageId,
+      tag,
+    ]);
   }
 }

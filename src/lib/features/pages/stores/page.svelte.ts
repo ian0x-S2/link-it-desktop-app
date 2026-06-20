@@ -127,6 +127,48 @@ class PageStore {
       this.activePage = { ...this.activePage, isFavorite: !this.activePage.isFavorite };
     }
   }
+
+  async addTag(pageId: string, tag: string): Promise<void> {
+    await pageActions.addTag(pageId, tag);
+    const idx = this.items.findIndex((p) => p.id === pageId);
+    if (idx >= 0) {
+      const existing = this.items[idx].tags || [];
+      if (!existing.includes(tag)) {
+        this.items[idx] = {
+          ...this.items[idx],
+          tags: [...existing, tag],
+        };
+      }
+    }
+    if (this.activePage?.id === pageId) {
+      const existing = this.activePage.tags || [];
+      if (!existing.includes(tag)) {
+        this.activePage = {
+          ...this.activePage,
+          tags: [...existing, tag],
+        };
+      }
+    }
+  }
+
+  async removeTag(pageId: string, tag: string): Promise<void> {
+    await pageActions.removeTag(pageId, tag);
+    const idx = this.items.findIndex((p) => p.id === pageId);
+    if (idx >= 0) {
+      const existing = this.items[idx].tags || [];
+      this.items[idx] = {
+        ...this.items[idx],
+        tags: existing.filter((t) => t !== tag),
+      };
+    }
+    if (this.activePage?.id === pageId) {
+      const existing = this.activePage.tags || [];
+      this.activePage = {
+        ...this.activePage,
+        tags: existing.filter((t) => t !== tag),
+      };
+    }
+  }
 }
 
 export const pageStore = new PageStore();

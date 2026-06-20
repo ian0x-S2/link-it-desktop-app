@@ -54,6 +54,14 @@ export class PageActions {
   async toggleFavorite(id: string): Promise<void> {
     await this.repository.toggleFavorite(id);
   }
+
+  async addTag(pageId: string, tag: string): Promise<void> {
+    await this.repository.addTag(pageId, tag);
+  }
+
+  async removeTag(pageId: string, tag: string): Promise<void> {
+    await this.repository.removeTag(pageId, tag);
+  }
 }
 
 export const pageActions = new PageActions(new SqlitePageRepository());

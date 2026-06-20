@@ -9,6 +9,7 @@ export type Page = {
   deletedAt: string | null;
   createdAt: string;
   updatedAt: string;
+  tags: string[];
 };
 
 export type CreatePageInput = {
@@ -17,9 +18,10 @@ export type CreatePageInput = {
   title?: string;
   content?: string;
   bannerImage?: string;
+  tags?: string[];
 };
 
-export type UpdatePageInput = Partial<Pick<Page, 'title' | 'content' | 'isFavorite' | 'bannerImage'>>;
+export type UpdatePageInput = Partial<Pick<Page, 'title' | 'content' | 'isFavorite' | 'bannerImage' | 'tags'>>;
 
 /** Lightweight page metadata for list views (no content). */
 export type PageMetadata = Omit<Page, 'content'>;

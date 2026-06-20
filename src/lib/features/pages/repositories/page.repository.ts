@@ -9,4 +9,6 @@ export interface PageRepository {
   restore(id: string): Promise<void>;
   deletePermanently(id: string): Promise<void>;
   toggleFavorite(id: string): Promise<void>;
+  addTag(pageId: string, tag: string): Promise<void>;
+  removeTag(pageId: string, tag: string): Promise<void>;
 }

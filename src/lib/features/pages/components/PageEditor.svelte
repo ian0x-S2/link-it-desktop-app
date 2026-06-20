@@ -1,12 +1,13 @@
 <script lang="ts">
   import { EditorView } from '@codemirror/view';
-  import { EditorState, Compartment } from '@codemirror/state';
+  import { EditorState } from '@codemirror/state';
   import { createEditorExtensions } from '../editor/index';
   import type { Page } from '../types/page';
   import { marked } from 'marked';
   import { Button } from '$lib/shared/components/ui/button';
   import { browser } from '$app/environment';
   import { pageStore } from '../stores/page.svelte';
+  import PropertiesPanel from './PropertiesPanel.svelte';
 
   let props = $props<{
     page: Page;
@@ -23,9 +24,6 @@
   let showCoverMenu = $state(false);
   let customUrl = $state('');
 
-  // Compartments to toggle read-only dynamically
-  const readOnlyCompartment = new Compartment();
-  const editableCompartment = new Compartment();
   let readOnly = $state(
     browser && localStorage.getItem('editor-readonly') === 'true',
   );
@@ -58,18 +56,6 @@
       readOnly = !readOnly;
     }
   }
-
-  // Reactive effect to toggle editor configuration
-  $effect(() => {
-    if (view) {
-      view.dispatch({
-        effects: [
-          readOnlyCompartment.reconfigure(EditorState.readOnly.of(readOnly)),
-          editableCompartment.reconfigure(EditorView.editable.of(!readOnly)),
-        ],
-      });
-    }
-  });
 
   const PRESET_COVERS = [
     {
@@ -106,8 +92,6 @@
             props.onSave(view.state.doc.toString(), bannerImage);
           }
         }),
-        readOnlyCompartment.of(EditorState.readOnly.of(readOnly)),
-        editableCompartment.of(EditorView.editable.of(!readOnly)),
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {
             scheduleAutosave();
@@ -133,6 +117,7 @@
   }
 
   async function handleSelectCover(style: string) {
+    if (saveTimer) clearTimeout(saveTimer);
     bannerImage = style;
     showCoverMenu = false;
     if (view) {
@@ -143,6 +128,7 @@
   }
 
   async function handleRemoveCover() {
+    if (saveTimer) clearTimeout(saveTimer);
     bannerImage = null;
     showCoverMenu = false;
     if (view) {
@@ -154,6 +140,7 @@
 
   async function handleCustomUrlSubmit() {
     if (!customUrl.trim()) return;
+    if (saveTimer) clearTimeout(saveTimer);
     const style = `background-image: url('${customUrl.trim()}'); background-size: cover; background-position: center;`;
     bannerImage = style;
     showCoverMenu = false;
@@ -167,7 +154,11 @@
 
   function handleClose() {
     if (view) {
-      props.onSave(view.state.doc.toString(), bannerImage);
+      if (saveTimer) clearTimeout(saveTimer);
+      const docText = view.state.doc.toString();
+      props.onSave(docText, bannerImage);
+      view.destroy();
+      view = null;
     }
     props.onClose();
   }
@@ -339,6 +330,10 @@
 
     <!-- Notion Page Header Container (centered, max-width matching editor) -->
     <div class="w-full max-w-[80ch] flex flex-col">
+      <div class="px-6 pt-4">
+        <PropertiesPanel pageId={props.page.id} />
+      </div>
+
       {#if readOnly}
         <div class="markdown-preview w-full py-8 px-6">
           <!-- eslint-disable-next-line svelte/no-at-html-tags -->
