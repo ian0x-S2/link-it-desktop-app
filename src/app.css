@@ -525,3 +525,10 @@
 .markdown-preview tr:nth-child(even) {
   background-color: var(--entry-bg);
 }
+
+.markdown-preview mark {
+  background-color: var(--code-mark);
+  color: var(--background);
+  padding: 0.1rem 0.25rem;
+  border-radius: 0.15rem;
+}
