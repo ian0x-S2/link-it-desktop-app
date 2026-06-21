@@ -24,9 +24,7 @@
   let showCoverMenu = $state(false);
   let customUrl = $state('');
 
-  let readOnly = $state(
-    browser && localStorage.getItem('editor-readonly') === 'true',
-  );
+  let readOnly = $state(browser && localStorage.getItem('editor-readonly') === 'true');
   let currentContent = $state((() => props.page.content)());
 
   // Compile markdown safely
@@ -39,8 +37,6 @@
       return '';
     }
   });
-
-
 
   // Save readOnly preference to localStorage
   $effect(() => {
@@ -341,7 +337,7 @@
         </div>
       {:else}
         <!-- CodeMirror Mount Point -->
-        <div use:mountEditor class="w-full"></div>
+        <div  class="w-full"></div>
       {/if}
     </div>
   </div>
