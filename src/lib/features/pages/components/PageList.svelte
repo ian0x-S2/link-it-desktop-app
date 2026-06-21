@@ -7,12 +7,6 @@
   import { viewStore } from '$lib/shared/stores/view.svelte';
   import { Input } from '$lib/shared/components/ui/input';
 
-  let {
-    categoryId,
-  }: {
-    categoryId: string;
-  } = $props();
-
   const activePageId = $derived(pageStore.activePage?.id ?? null);
   let searchInput = $state<HTMLInputElement | null>(null);
 
@@ -26,11 +20,10 @@
       : pageStore.activeItemsFiltered
   );
 
-
-
   async function handleCreate() {
-    await pageStore.create(categoryId);
+    await pageStore.create();
   }
+
 
   async function handleSave(content: string, bannerImage?: string | null) {
     if (!pageStore.activePage) {

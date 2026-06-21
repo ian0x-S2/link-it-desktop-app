@@ -6,7 +6,6 @@ import type { IdeaRepository } from './idea.repository';
 interface IdeaRow {
   id: string;
   workspaceId: string;
-  categoryId: string;
   content: string;
   isFavorite: number;
   deletedAt: string | null;
@@ -25,7 +24,6 @@ export class SqliteIdeaRepository implements IdeaRepository {
       `SELECT
          id,
          workspace_id  AS workspaceId,
-         category_id   AS categoryId,
          content,
          is_favorite   AS isFavorite,
          deleted_at    AS deletedAt,
@@ -40,7 +38,6 @@ export class SqliteIdeaRepository implements IdeaRepository {
     return rows.map((r) => ({
       id: r.id,
       workspaceId: r.workspaceId,
-      categoryId: r.categoryId,
       content: r.content,
       isFavorite: r.isFavorite === 1,
       deletedAt: r.deletedAt ?? null,
@@ -56,15 +53,14 @@ export class SqliteIdeaRepository implements IdeaRepository {
 
     await db.execute(
       `INSERT INTO ideas
-         (id, workspace_id, category_id, content, is_favorite, created_at, updated_at)
-       VALUES ($1, $2, $3, $4, 0, $5, $5)`,
-      [id, input.workspaceId, input.categoryId, input.content, now],
+         (id, workspace_id, content, is_favorite, created_at, updated_at)
+       VALUES ($1, $2, $3, 0, $4, $4)`,
+      [id, input.workspaceId, input.content, now],
     );
 
     return {
       id,
       workspaceId: input.workspaceId,
-      categoryId: input.categoryId,
       content: input.content,
       isFavorite: false,
       deletedAt: null,

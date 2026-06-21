@@ -1,7 +1,6 @@
 export type Bookmark = {
   id: string;
   workspaceId: string;
-  categoryId: string | null;
   title: string;
   url: string;
   imageUrl: string;

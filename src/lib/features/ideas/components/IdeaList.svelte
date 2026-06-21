@@ -3,16 +3,10 @@
   import IdeaCard from './IdeaCard.svelte';
   import IdeaInputBar from './IdeaInputBar.svelte';
 
-  let {
-    categoryId,
-  }: {
-    categoryId: string;
-  } = $props();
-
 
 
   async function handleCreate(content: string) {
-    await ideaStore.create(categoryId, content);
+    await ideaStore.create(content);
   }
 </script>
 

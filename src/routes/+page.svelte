@@ -3,7 +3,6 @@
   import { setupKeyboardShortcuts } from '$lib/actions/keyboardShortcuts';
   import Sidebar from '$lib/shared/components/Sidebar.svelte';
   import FooterBar from '$lib/shared/components/FooterBar.svelte';
-  import PlaceholderPanel from '$lib/shared/components/PlaceholderPanel.svelte';
 
   // Bookmarks (Links)
   import { filteredBookmarksStore } from '$lib/features/bookmarks/stores/filteredBookmarks.svelte';
@@ -19,6 +18,30 @@
   // Ideas
   import IdeaList from '$lib/features/ideas/components/IdeaList.svelte';
   import { ideaStore } from '$lib/features/ideas/stores/idea.svelte';
+
+  // Books
+  import { bookStore } from '$lib/features/books/stores/book.svelte';
+  import BookPanel from '$lib/features/books/components/BookPanel.svelte';
+
+  // Media
+  import { mediaStore } from '$lib/features/media/stores/media.svelte';
+  import MediaPanel from '$lib/features/media/components/MediaPanel.svelte';
+
+  // Audio
+  import { audioStore } from '$lib/features/audio/stores/audio.svelte';
+  import AudioPanel from '$lib/features/audio/components/AudioPanel.svelte';
+
+  // Documents
+  import { documentStore } from '$lib/features/documents/stores/document.svelte';
+  import DocumentPanel from '$lib/features/documents/components/DocumentPanel.svelte';
+
+  // Images
+  import { imageStore } from '$lib/features/images/stores/image.svelte';
+  import ImagePanel from '$lib/features/images/components/ImagePanel.svelte';
+
+  // Custom
+  import { customStore } from '$lib/features/custom/stores/custom.svelte';
+  import CustomItemPanel from '$lib/features/custom/components/CustomItemPanel.svelte';
 
   // Stores
   import { THEMES, themeStore } from '$lib/shared/stores/theme.svelte';
@@ -54,24 +77,21 @@
       faviconUrl: string;
     } | null,
   ) {
-    const activeCategory = categoryStore.items.find(c => c.id === viewStore.activeCategoryId);
-    const linksCategory = categoryStore.items.find(c => c.type === 'links');
-    const targetCategoryId = (activeCategory?.type === 'links' ? activeCategory.id : null) || linksCategory?.id || null;
-    await bookmarkStore.addBookmark(url, targetCategoryId, metadata || undefined);
+    await bookmarkStore.addBookmark(url, metadata || undefined);
   }
 
   async function handleCreateContent() {
     if (viewStore.specialView || activeCategoryType === 'links') {
       promptInput?.focus();
-    } else if (activeCategoryType === 'pages' && viewStore.activeCategoryId) {
-      await pageStore.create(viewStore.activeCategoryId);
+    } else if (activeCategoryType === 'pages') {
+      await pageStore.create();
     } else if (activeCategoryType === 'ideas' && viewStore.activeCategoryId) {
       const textarea = document.getElementById('quick-capture-idea-input') as HTMLTextAreaElement | null;
       if (textarea) {
         textarea.focus();
       }
     } else if (activeCategoryType) {
-      alert(`The "${categoryStore.active?.name ?? 'Content'}" category feature is under development.`);
+      promptInput?.focus();
     }
   }
 
@@ -113,12 +133,18 @@
     return setupKeyboardShortcuts(() => promptInput, handleCreateContent);
   });
 
-  // Reload bookmarks, pages, and ideas whenever the active workspace changes.
+  // Reload bookmarks, pages, ideas, and items whenever the active workspace changes.
   $effect(() => {
     if (workspaceStore.activeId) {
       bookmarkStore.load();
       pageStore.load();
       ideaStore.load();
+      bookStore.load();
+      mediaStore.load();
+      audioStore.load();
+      documentStore.load();
+      imageStore.load();
+      customStore.load();
     }
   });
 
@@ -249,19 +275,22 @@
           />
         {:else if activeCategoryType === 'pages' && viewStore.activeCategoryId && workspaceStore.activeId}
           <!-- Pages — CodeMirror editor -->
-          <PageList
-            categoryId={viewStore.activeCategoryId}
-          />
-        {:else if activeCategoryType === 'ideas' && viewStore.activeCategoryId}
+          <PageList />
+        {:else if activeCategoryType === 'ideas'}
           <!-- Ideas — quick capture -->
-          <IdeaList categoryId={viewStore.activeCategoryId} />
-        {:else if activeCategoryType && categoryStore.active}
-          <!-- Future types (Books, Media, Audio, Documents, Images) — placeholder -->
-          <PlaceholderPanel
-            type={activeCategoryType}
-            name={categoryStore.active.name}
-            icon={categoryStore.active.icon}
-          />
+          <IdeaList />
+        {:else if activeCategoryType === 'books'}
+          <BookPanel bind:promptInput />
+        {:else if activeCategoryType === 'media'}
+          <MediaPanel bind:promptInput />
+        {:else if activeCategoryType === 'audio'}
+          <AudioPanel bind:promptInput />
+        {:else if activeCategoryType === 'documents'}
+          <DocumentPanel bind:promptInput />
+        {:else if activeCategoryType === 'images'}
+          <ImagePanel bind:promptInput />
+        {:else if activeCategoryType === 'custom'}
+          <CustomItemPanel bind:promptInput />
         {:else}
           <div class="flex-1"></div>
         {/if}

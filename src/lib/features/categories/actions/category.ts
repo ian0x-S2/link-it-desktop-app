@@ -34,6 +34,10 @@ export class CategoryActions {
   async reorderCategories(ids: string[]): Promise<void> {
     await this.repository.reorder(ids);
   }
+
+  async toggleHidden(id: string): Promise<void> {
+    await this.repository.toggleHidden(id);
+  }
 }
 
 export const categoryActions = new CategoryActions(new SqliteCategoryRepository());

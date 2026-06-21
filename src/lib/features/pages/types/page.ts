@@ -1,7 +1,6 @@
 export type Page = {
   id: string;
   workspaceId: string;
-  categoryId: string;
   title: string;
   content: string;
   bannerImage: string | null;
@@ -14,7 +13,6 @@ export type Page = {
 
 export type CreatePageInput = {
   workspaceId: string;
-  categoryId: string;
   title?: string;
   content?: string;
   bannerImage?: string;

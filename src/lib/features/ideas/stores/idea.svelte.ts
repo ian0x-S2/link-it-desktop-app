@@ -13,9 +13,7 @@ class IdeaStore {
   }
 
   get activeItemsFiltered(): Idea[] {
-    const activeCategoryId = viewStore.activeCategoryId;
-    if (!activeCategoryId) return [];
-    return this.items.filter((i) => i.deletedAt === null && i.categoryId === activeCategoryId);
+    return this.items.filter((i) => i.deletedAt === null);
   }
 
   get trashedItems(): Idea[] {
@@ -35,12 +33,11 @@ class IdeaStore {
     }
   }
 
-  async create(categoryId: string, content: string): Promise<void> {
+  async create(content: string): Promise<void> {
     if (!workspaceStore.activeId) return;
     try {
       const idea = await ideaActions.createIdea({
         workspaceId: workspaceStore.activeId,
-        categoryId,
         content,
       });
       this.items = [idea, ...this.items];

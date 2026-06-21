@@ -8,6 +8,12 @@
   import { bookmarkStore } from '$lib/features/bookmarks/stores/bookmark.svelte';
   import { pageStore } from '$lib/features/pages/stores/page.svelte';
   import { ideaStore } from '$lib/features/ideas/stores/idea.svelte';
+  import { bookStore } from '$lib/features/books/stores/book.svelte';
+  import { mediaStore } from '$lib/features/media/stores/media.svelte';
+  import { audioStore } from '$lib/features/audio/stores/audio.svelte';
+  import { documentStore } from '$lib/features/documents/stores/document.svelte';
+  import { imageStore } from '$lib/features/images/stores/image.svelte';
+  import { customStore } from '$lib/features/custom/stores/custom.svelte';
 
   let {
     workspaces,
@@ -103,15 +109,15 @@
 
   // ── Category count helper ────────────────────────────────────────────────────
   function getCategoryCount(cat: Category): number {
-    if (cat.type === 'links') {
-      return bookmarkStore.activeItems.filter((b) => b.categoryId === cat.id).length;
-    }
-    if (cat.type === 'pages') {
-      return pageStore.activeItems.filter((p) => p.categoryId === cat.id).length;
-    }
-    if (cat.type === 'ideas') {
-      return ideaStore.activeItems.filter((i) => i.categoryId === cat.id).length;
-    }
+    if (cat.type === 'links') return bookmarkStore.activeItems.length;
+    if (cat.type === 'pages') return pageStore.activeItems.length;
+    if (cat.type === 'ideas') return ideaStore.activeItems.length;
+    if (cat.type === 'books') return bookStore.activeItems.length;
+    if (cat.type === 'media') return mediaStore.activeItems.length;
+    if (cat.type === 'audio') return audioStore.activeItems.length;
+    if (cat.type === 'documents') return documentStore.activeItems.length;
+    if (cat.type === 'images') return imageStore.activeItems.length;
+    if (cat.type === 'custom') return customStore.activeItems.filter((i) => i.categoryId === cat.id).length;
     return 0;
   }
 

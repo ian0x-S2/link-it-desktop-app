@@ -1,7 +1,6 @@
 import { pageActions } from '../actions/page';
 import type { Page, PageMetadata, UpdatePageInput } from '../types/page';
 import { workspaceStore } from '$lib/features/workspaces/stores/workspace.svelte';
-import { viewStore } from '$lib/shared/stores/view.svelte';
 
 class PageStore {
   /** Lightweight metadata list — no content loaded. */
@@ -19,9 +18,7 @@ class PageStore {
   }
 
   get activeItemsFiltered(): PageMetadata[] {
-    const activeCategoryId = viewStore.activeCategoryId;
-    if (!activeCategoryId) return [];
-    return this.items.filter((p) => p.deletedAt === null && p.categoryId === activeCategoryId);
+    return this.items.filter((p) => p.deletedAt === null);
   }
 
   get trashedItems(): PageMetadata[] {
@@ -57,12 +54,11 @@ class PageStore {
     this.activePage = null;
   }
 
-  async create(categoryId: string): Promise<Page | null> {
+  async create(): Promise<Page | null> {
     if (!workspaceStore.activeId) return null;
     try {
       const page = await pageActions.createPage({
         workspaceId: workspaceStore.activeId,
-        categoryId,
       });
       // Prepend metadata to the list.
       const { content: _, ...meta } = page;

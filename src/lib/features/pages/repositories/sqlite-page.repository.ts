@@ -6,7 +6,6 @@ import type { PageRepository } from './page.repository';
 interface PageRow {
   id: string;
   workspaceId: string;
-  categoryId: string;
   title: string;
   content?: string;
   bannerImage?: string | null;
@@ -27,7 +26,6 @@ export class SqlitePageRepository implements PageRepository {
       `SELECT
          id,
          workspace_id  AS workspaceId,
-         category_id   AS categoryId,
          title,
          banner_image  AS bannerImage,
          is_favorite   AS isFavorite,
@@ -49,7 +47,6 @@ export class SqlitePageRepository implements PageRepository {
         return {
           id: r.id,
           workspaceId: r.workspaceId,
-          categoryId: r.categoryId,
           title: r.title,
           bannerImage: r.bannerImage ?? null,
           isFavorite: r.isFavorite === 1,
@@ -70,7 +67,6 @@ export class SqlitePageRepository implements PageRepository {
       `SELECT
          id,
          workspace_id  AS workspaceId,
-         category_id   AS categoryId,
          title,
          content,
          banner_image  AS bannerImage,
@@ -94,7 +90,6 @@ export class SqlitePageRepository implements PageRepository {
     return {
       id: r.id,
       workspaceId: r.workspaceId,
-      categoryId: r.categoryId,
       title: r.title,
       content: r.content ?? '',
       bannerImage: r.bannerImage ?? null,
@@ -116,9 +111,9 @@ export class SqlitePageRepository implements PageRepository {
 
     await db.execute(
       `INSERT INTO pages
-         (id, workspace_id, category_id, title, content, banner_image, is_favorite, created_at, updated_at)
-       VALUES ($1, $2, $3, $4, $5, $6, 0, $7, $7)`,
-      [id, input.workspaceId, input.categoryId, title, content, bannerImage, now],
+         (id, workspace_id, title, content, banner_image, is_favorite, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, 0, $6, $6)`,
+      [id, input.workspaceId, title, content, bannerImage, now],
     );
 
     if (input.tags && input.tags.length > 0) {
@@ -133,7 +128,6 @@ export class SqlitePageRepository implements PageRepository {
     return {
       id,
       workspaceId: input.workspaceId,
-      categoryId: input.categoryId,
       title,
       content,
       bannerImage,

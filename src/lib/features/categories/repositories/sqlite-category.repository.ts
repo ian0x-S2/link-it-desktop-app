@@ -11,6 +11,7 @@ interface CategoryRow {
   type: string;
   icon: string | null;
   isDefault: number;
+  isHidden: number;
   position: number;
   createdAt: string;
 }
@@ -31,6 +32,7 @@ export class SqliteCategoryRepository implements CategoryRepository {
          type,
          icon,
          is_default    AS isDefault,
+         is_hidden     AS isHidden,
          position,
          created_at    AS createdAt
        FROM categories
@@ -47,6 +49,7 @@ export class SqliteCategoryRepository implements CategoryRepository {
       type: r.type as Category['type'],
       icon: r.icon,
       isDefault: r.isDefault === 1,
+      isHidden: r.isHidden === 1,
       position: r.position,
       createdAt: r.createdAt,
     }));
@@ -75,8 +78,8 @@ export class SqliteCategoryRepository implements CategoryRepository {
 
     await db.execute(
       `INSERT INTO categories
-         (id, workspace_id, name, slug, type, icon, is_default, position, created_at)
-       VALUES ($1, $2, $3, $4, $5, $6, 0, $7, $8)`,
+         (id, workspace_id, name, slug, type, icon, is_default, is_hidden, position, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, 0, 0, $7, $8)`,
       [id, input.workspaceId, input.name, slug, input.type, icon, nextPos, now],
     );
 
@@ -88,6 +91,7 @@ export class SqliteCategoryRepository implements CategoryRepository {
       type: input.type,
       icon,
       isDefault: false,
+      isHidden: false,
       position: nextPos,
       createdAt: now,
     };
@@ -103,5 +107,10 @@ export class SqliteCategoryRepository implements CategoryRepository {
     for (let i = 0; i < ids.length; i++) {
       await db.execute('UPDATE categories SET position = $1 WHERE id = $2', [i, ids[i]]);
     }
+  }
+
+  async toggleHidden(id: string): Promise<void> {
+    const db = await this.getDb();
+    await db.execute('UPDATE categories SET is_hidden = NOT is_hidden WHERE id = $1', [id]);
   }
 }

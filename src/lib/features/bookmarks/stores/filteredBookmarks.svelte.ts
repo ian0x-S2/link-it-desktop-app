@@ -13,12 +13,8 @@ class FilteredBookmarksStore {
       return bookmarkStore.activeItems.filter((b) => b.isFavorite);
     }
 
-    // Regular category view: show active bookmarks for the active category.
+    // Regular category view: show all active bookmarks.
     let items = bookmarkStore.activeItems;
-
-    if (viewStore.activeCategoryId) {
-      items = items.filter((b) => b.categoryId === viewStore.activeCategoryId);
-    }
 
     if (viewStore.selectedTag) {
       items = items.filter((b) => b.tags?.includes(viewStore.selectedTag!));

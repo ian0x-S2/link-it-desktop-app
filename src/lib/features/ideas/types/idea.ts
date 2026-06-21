@@ -1,7 +1,6 @@
 export type Idea = {
   id: string;
   workspaceId: string;
-  categoryId: string;
   content: string;
   isFavorite: boolean;
   deletedAt: string | null;
@@ -11,7 +10,6 @@ export type Idea = {
 
 export type CreateIdeaInput = {
   workspaceId: string;
-  categoryId: string;
   content: string;
 };
 

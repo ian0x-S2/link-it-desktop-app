@@ -1,15 +1,16 @@
-import type { Bookmark } from '../types/bookmark';
 
 const MAX_SUGGESTIONS = 8;
 
 /**
- * Collects all unique tags from a list of bookmarks, sorted alphabetically.
+ * Collects all unique tags from a list of items, sorted alphabetically.
  */
-export function getAllUniqueTags(items: Bookmark[]): string[] {
+export function getAllUniqueTags(items: { tags?: string[] }[]): string[] {
   const tagSet = new Set<string>();
   for (const b of items) {
-    for (const t of b.tags) {
-      tagSet.add(t);
+    if (b.tags) {
+      for (const t of b.tags) {
+        tagSet.add(t);
+      }
     }
   }
   return [...tagSet].sort();

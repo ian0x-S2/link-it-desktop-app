@@ -5,4 +5,6 @@ export interface CategoryRepository {
   create(input: CreateCategoryInput): Promise<Category>;
   delete(id: string): Promise<void>;
   reorder(ids: string[]): Promise<void>;
+  toggleHidden(id: string): Promise<void>;
 }
+

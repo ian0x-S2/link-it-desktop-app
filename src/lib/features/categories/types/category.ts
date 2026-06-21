@@ -18,6 +18,8 @@ export type Category = {
   /** Single-char TUI icon: L, P, *, B, M, A, D, I, or user-defined */
   icon: string | null;
   isDefault: boolean;
+  /** When true the category is hidden from the sidebar but still exists. */
+  isHidden: boolean;
   position: number;
   createdAt: string;
 };

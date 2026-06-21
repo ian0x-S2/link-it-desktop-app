@@ -12,6 +12,11 @@ class CategoryStore {
     return this.items.find((c) => c.id === activeId) ?? null;
   }
 
+  /** Categories visible in the sidebar (not hidden). */
+  get visibleItems(): Category[] {
+    return this.items.filter((c) => !c.isHidden);
+  }
+
   /** Count of user-created (non-default) categories. */
   get customItems(): Category[] {
     return this.items.filter((c) => !c.isDefault);
@@ -57,6 +62,25 @@ class CategoryStore {
   /** Reset when switching workspaces — categories will be re-loaded. */
   reset(): void {
     this.items = [];
+  }
+
+  /**
+   * Toggle visibility of a built-in category in the sidebar.
+   * Does not delete data — items remain queryable by workspace.
+   */
+  async toggleHidden(id: string): Promise<void> {
+    await categoryActions.toggleHidden(id);
+    const idx = this.items.findIndex((c) => c.id === id);
+    if (idx >= 0) {
+      this.items[idx] = { ...this.items[idx], isHidden: !this.items[idx].isHidden };
+    }
+    // If we hid the currently active category, move to next visible one.
+    if (viewStore.activeCategoryId === id) {
+      const next = this.visibleItems.find((c) => c.id !== id);
+      if (next) {
+        viewStore.selectCategory(next.id);
+      }
+    }
   }
 }
 
