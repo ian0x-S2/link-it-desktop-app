@@ -133,6 +133,24 @@
     return setupKeyboardShortcuts(() => promptInput, handleCreateContent);
   });
 
+  // Close active page when navigating categories/views or switching workspaces
+  $effect(() => {
+    viewStore.onNavigate = () => {
+      pageStore.closePage();
+    };
+    return () => {
+      viewStore.onNavigate = undefined;
+    };
+  });
+
+  $effect(() => {
+    if (workspaceStore.activeId) {
+      untrack(() => {
+        pageStore.closePage();
+      });
+    }
+  });
+
   // Reload bookmarks, pages, ideas, and items whenever the active workspace changes.
   $effect(() => {
     if (workspaceStore.activeId) {

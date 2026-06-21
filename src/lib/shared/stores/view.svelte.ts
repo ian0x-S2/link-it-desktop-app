@@ -39,6 +39,8 @@ class ViewStore {
 
   // ── Navigation ───────────────────────────────────────────────────────────────
 
+  onNavigate?: () => void;
+
   /** Navigate to a DB-persisted category by its ID. */
   selectCategory(id: string): void {
     this.activeCategoryId = id;
@@ -46,6 +48,7 @@ class ViewStore {
     this.selectedTag = null;
     this.searchActive = false;
     this.searchQuery = '';
+    this.onNavigate?.();
   }
 
   /** Navigate to a special view (favorites / trash / settings). */
@@ -55,6 +58,7 @@ class ViewStore {
     this.selectedTag = null;
     this.searchActive = false;
     this.searchQuery = '';
+    this.onNavigate?.();
   }
 
   setMode(mode: ViewMode): void {
