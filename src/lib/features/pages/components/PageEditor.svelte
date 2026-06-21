@@ -8,6 +8,7 @@
   import { browser } from '$app/environment';
   import { pageStore } from '../stores/page.svelte';
   import PropertiesPanel from './PropertiesPanel.svelte';
+  import EditorContextMenu from './EditorContextMenu.svelte';
 
   let props = $props<{
     page: Page;
@@ -102,17 +103,15 @@
 
     view = new EditorView({ state, parent: node });
 
-    return {
-      destroy() {
-        if (saveTimer) clearTimeout(saveTimer);
-        if (view) {
-          const docText = view.state.doc.toString();
-          currentContent = docText;
-          props.onSave(docText, bannerImage);
-          view.destroy();
-          view = null;
-        }
-      },
+    return () => {
+      if (saveTimer) clearTimeout(saveTimer);
+      if (view) {
+        const docText = view.state.doc.toString();
+        currentContent = docText;
+        props.onSave(docText, bannerImage);
+        view.destroy();
+        view = null;
+      }
     };
   }
 
@@ -150,6 +149,125 @@
     } else {
       props.onSave(props.page.content, style);
     }
+  }
+
+  let contextMenuOpen = $state(false);
+  let contextMenuX = $state(0);
+  let contextMenuY = $state(0);
+
+  function handleContextMenu(e: MouseEvent) {
+    if (readOnly) return;
+    e.preventDefault();
+    contextMenuX = e.clientX;
+    contextMenuY = e.clientY;
+    contextMenuOpen = true;
+  }
+
+  function handleSelectFormat(type: string) {
+    applyFormat(type);
+    contextMenuOpen = false;
+  }
+
+  function applyFormat(type: string) {
+    if (!view) return;
+    const { state, dispatch } = view;
+    const mainSelection = state.selection.main;
+    const selectedText = state.sliceDoc(mainSelection.from, mainSelection.to);
+
+    switch (type) {
+      case 'bold': {
+        const replacement = `**${selectedText || 'bold text'}**`;
+        dispatch(state.update({
+          changes: { from: mainSelection.from, to: mainSelection.to, insert: replacement },
+          selection: { anchor: mainSelection.from + 2 + (selectedText ? selectedText.length : 9) }
+        }));
+        break;
+      }
+      case 'italic': {
+        const replacement = `*${selectedText || 'italic text'}*`;
+        dispatch(state.update({
+          changes: { from: mainSelection.from, to: mainSelection.to, insert: replacement },
+          selection: { anchor: mainSelection.from + 1 + (selectedText ? selectedText.length : 11) }
+        }));
+        break;
+      }
+      case 'highlight': {
+        const replacement = `==${selectedText || 'highlighted text'}==`;
+        dispatch(state.update({
+          changes: { from: mainSelection.from, to: mainSelection.to, insert: replacement },
+          selection: { anchor: mainSelection.from + 2 + (selectedText ? selectedText.length : 16) }
+        }));
+        break;
+      }
+      case 'inline-code': {
+        const replacement = `\`${selectedText || 'code'}\``;
+        dispatch(state.update({
+          changes: { from: mainSelection.from, to: mainSelection.to, insert: replacement },
+          selection: { anchor: mainSelection.from + 1 + (selectedText ? selectedText.length : 4) }
+        }));
+        break;
+      }
+      case 'code-block': {
+        const replacement = `\n\`\`\`javascript\n${selectedText || '// code here'}\n\`\`\`\n`;
+        dispatch(state.update({
+          changes: { from: mainSelection.from, to: mainSelection.to, insert: replacement },
+          selection: { anchor: mainSelection.from + 15 + (selectedText ? selectedText.length : 12) }
+        }));
+        break;
+      }
+      case 'h1':
+      case 'h2':
+      case 'h3': {
+        const line = state.doc.lineAt(mainSelection.from);
+        const prefix = type === 'h1' ? '# ' : type === 'h2' ? '## ' : '### ';
+        dispatch(state.update({
+          changes: { from: line.from, to: line.from, insert: prefix },
+          selection: { anchor: mainSelection.from + prefix.length }
+        }));
+        break;
+      }
+      case 'unordered-list': {
+        const line = state.doc.lineAt(mainSelection.from);
+        dispatch(state.update({
+          changes: { from: line.from, to: line.from, insert: '- ' },
+          selection: { anchor: mainSelection.from + 2 }
+        }));
+        break;
+      }
+      case 'ordered-list': {
+        const line = state.doc.lineAt(mainSelection.from);
+        dispatch(state.update({
+          changes: { from: line.from, to: line.from, insert: '1. ' },
+          selection: { anchor: mainSelection.from + 3 }
+        }));
+        break;
+      }
+      case 'table': {
+        const replacement = `\n| Column 1 | Column 2 |\n| -------- | -------- |\n| Cell 1   | Cell 2   |\n`;
+        dispatch(state.update({
+          changes: { from: mainSelection.from, to: mainSelection.to, insert: replacement },
+          selection: { anchor: mainSelection.from + replacement.length }
+        }));
+        break;
+      }
+      case 'callout': {
+        const line = state.doc.lineAt(mainSelection.from);
+        dispatch(state.update({
+          changes: { from: line.from, to: line.from, insert: '> [!NOTE]\n> ' },
+          selection: { anchor: mainSelection.from + 13 }
+        }));
+        break;
+      }
+      case 'hr': {
+        const replacement = `\n---\n`;
+        dispatch(state.update({
+          changes: { from: mainSelection.from, to: mainSelection.to, insert: replacement },
+          selection: { anchor: mainSelection.from + replacement.length }
+        }));
+        break;
+      }
+    }
+    view.focus();
   }
 
   function handleClose() {
@@ -341,11 +459,25 @@
         </div>
       {:else}
         <!-- CodeMirror Mount Point -->
-        <div use:mountEditor class="w-full"></div>
+        <!-- svelte-ignore a11y_no_static_element_interactions -->
+        <div
+          {@attach mountEditor}
+          class="w-full"
+          oncontextmenu={handleContextMenu}
+        ></div>
       {/if}
     </div>
   </div>
 </div>
+
+{#if contextMenuOpen}
+  <EditorContextMenu
+    x={contextMenuX}
+    y={contextMenuY}
+    onSelect={handleSelectFormat}
+    onClose={() => (contextMenuOpen = false)}
+  />
+{/if}
 
 <style>
   :global(.cm-editor) {
