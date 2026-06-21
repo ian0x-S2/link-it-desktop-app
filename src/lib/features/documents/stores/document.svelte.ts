@@ -1,7 +1,6 @@
 import { documentActions } from '../actions/document';
 import type { DocumentItem, CreateDocumentInput, UpdateDocumentInput } from '../types/document';
 import { workspaceStore } from '$lib/features/workspaces/stores/workspace.svelte';
-import { viewStore } from '$lib/shared/stores/view.svelte';
 
 class DocumentStore {
   items = $state<DocumentItem[]>([]);

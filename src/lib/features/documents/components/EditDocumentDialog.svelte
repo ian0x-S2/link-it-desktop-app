@@ -128,6 +128,8 @@
           {#each editTagsList as tag (tag)}
             <Badge variant="outline" class="text-tui-2xs px-1 border border-border-dim text-muted-foreground flex items-center gap-1 select-none font-mono">
               *{tag}
+              <!-- svelte-ignore a11y_click_events_have_key_events -->
+              <!-- svelte-ignore a11y_no_static_element_interactions -->
               <span onclick={() => (editTagsList = editTagsList.filter((t) => t !== tag))} class="text-destructive hover:text-red-400 cursor-pointer font-bold text-[8px] ml-0.5" title="Remove tag">x</span>
             </Badge>
           {/each}
@@ -145,9 +147,13 @@
               </div>
               <div class="flex flex-col py-0.5 max-h-40 overflow-y-auto">
                 {#if isNewTag}
+                  <!-- svelte-ignore a11y_click_events_have_key_events -->
+                  <!-- svelte-ignore a11y_no_static_element_interactions -->
                   <div onclick={() => submitEditTag(newTagValue)} class="px-2 py-1 text-tui-xs text-primary cursor-pointer hover:bg-accent/30 select-none">[Create: "{newTagValue.trim().toLowerCase()}"]</div>
                 {/if}
                 {#each tagSuggestions as suggestion (suggestion)}
+                  <!-- svelte-ignore a11y_click_events_have_key_events -->
+                  <!-- svelte-ignore a11y_no_static_element_interactions -->
                   <div onclick={() => submitEditTag(suggestion)} class="px-2 py-1 text-tui-xs text-muted-foreground cursor-pointer hover:bg-accent/30 hover:text-foreground select-none">* {suggestion}</div>
                 {/each}
                 {#if tagSuggestions.length === 0 && !isNewTag}

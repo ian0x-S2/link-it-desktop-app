@@ -1,7 +1,6 @@
 import { mediaActions } from '../actions/media';
 import type { Media, CreateMediaInput, UpdateMediaInput } from '../types/media';
 import { workspaceStore } from '$lib/features/workspaces/stores/workspace.svelte';
-import { viewStore } from '$lib/shared/stores/view.svelte';
 
 class MediaStore {
   items = $state<Media[]>([]);

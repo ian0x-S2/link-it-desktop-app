@@ -144,6 +144,13 @@ editor/
 
 ---
 
+# Typography & TUI Tokens
+
+- Prefer the design system's TUI typography tokens over hardcoded absolute pixel sizes.
+- For example, instead of using `text-[9px]`, write `text-tui-2xs`. Always prioritize custom design system classes to maintain the TUI aesthetic.
+
+---
+
 # Layer Responsibilities
 
 ## UI Layer

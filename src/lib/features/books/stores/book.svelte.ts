@@ -1,7 +1,6 @@
 import { bookActions } from '../actions/book';
 import type { Book, CreateBookInput, UpdateBookInput } from '../types/book';
 import { workspaceStore } from '$lib/features/workspaces/stores/workspace.svelte';
-import { viewStore } from '$lib/shared/stores/view.svelte';
 
 class BookStore {
   items = $state<Book[]>([]);

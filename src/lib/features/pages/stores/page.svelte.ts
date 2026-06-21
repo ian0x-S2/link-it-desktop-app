@@ -61,6 +61,7 @@ class PageStore {
         workspaceId: workspaceStore.activeId,
       });
       // Prepend metadata to the list.
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { content: _, ...meta } = page;
       this.items = [meta, ...this.items];
       this.activePage = page;

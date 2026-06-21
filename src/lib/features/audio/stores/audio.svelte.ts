@@ -1,7 +1,6 @@
 import { audioActions } from '../actions/audio';
 import type { Audio, CreateAudioInput, UpdateAudioInput } from '../types/audio';
 import { workspaceStore } from '$lib/features/workspaces/stores/workspace.svelte';
-import { viewStore } from '$lib/shared/stores/view.svelte';
 
 class AudioStore {
   items = $state<Audio[]>([]);

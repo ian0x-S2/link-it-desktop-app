@@ -1,7 +1,6 @@
 import { imageActions } from '../actions/image';
 import type { ImageItem, CreateImageInput, UpdateImageInput } from '../types/image';
 import { workspaceStore } from '$lib/features/workspaces/stores/workspace.svelte';
-import { viewStore } from '$lib/shared/stores/view.svelte';
 
 class ImageStore {
   items = $state<ImageItem[]>([]);

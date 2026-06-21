@@ -1,7 +1,6 @@
 import { ideaActions } from '../actions/idea';
 import type { Idea } from '../types/idea';
 import { workspaceStore } from '$lib/features/workspaces/stores/workspace.svelte';
-import { viewStore } from '$lib/shared/stores/view.svelte';
 
 class IdeaStore {
   items = $state<Idea[]>([]);

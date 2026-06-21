@@ -14,7 +14,6 @@
   let editId = $state<string | null>(null);
 
   const activeCategory = $derived(categoryStore.active);
-  const activeCategoryId = $derived(viewStore.activeCategoryId);
 
   const displayedItems = $derived.by(() => {
     let list = imageStore.activeItemsFiltered;
@@ -66,8 +65,14 @@
     [{activeCategory?.icon ?? '?'}] {activeCategory?.name ?? 'Images'}
   </span>
   <div class="flex items-center gap-1.5">
+    <!-- svelte-ignore a11y_click_events_have_key_events -->
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
     <span onclick={() => viewStore.setMode('list')} class="px-1.5 py-0.5 cursor-pointer transition-colors uppercase tracking-tui-wide text-tui-xs {viewStore.mode === 'list' ? 'bg-primary text-background font-bold' : 'hover:text-foreground'}">[l]ist</span>
+    <!-- svelte-ignore a11y_click_events_have_key_events -->
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
     <span onclick={() => viewStore.setMode('grid')} class="px-1.5 py-0.5 cursor-pointer transition-colors uppercase tracking-tui-wide text-tui-xs {viewStore.mode === 'grid' ? 'bg-primary text-background font-bold' : 'hover:text-foreground'}">[g]rid</span>
+    <!-- svelte-ignore a11y_click_events_have_key_events -->
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
     <span onclick={() => {
       const nextActive = !viewStore.searchActive;
       viewStore.setSearchActive(nextActive);
