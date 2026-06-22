@@ -2,6 +2,7 @@
   import { Button } from '$lib/shared/components/ui/button';
   import * as Dialog from '$lib/shared/components/ui/dialog';
   import { Input } from '$lib/shared/components/ui/input';
+  import { Textarea } from '$lib/shared/components/ui/textarea';
   import { Badge } from '$lib/shared/components/ui/badge';
   import * as Popover from '$lib/shared/components/ui/popover';
   import { bookStore } from '../stores/book.svelte';
@@ -108,7 +109,7 @@
 
       <div class="flex flex-col gap-1">
         <label for="edit-content" class="text-tui-2xs uppercase font-bold text-muted-foreground tracking-tui-wide">// Description / Notes</label>
-        <textarea id="edit-content" bind:value={editContentValue} rows="3" class="w-full bg-transparent border border-border outline-none text-foreground font-mono text-xs px-2.5 py-1.5 focus-visible:border-primary resize-none transition-colors"></textarea>
+        <Textarea id="edit-content" bind:value={editContentValue} rows={3} class="w-full bg-transparent border border-border outline-none text-foreground font-mono text-xs px-2.5 py-1.5 focus-visible:border-primary resize-none transition-colors" />
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3">

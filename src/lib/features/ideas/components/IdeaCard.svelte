@@ -3,6 +3,7 @@
   import { Badge } from '$lib/shared/components/ui/badge';
   import { Button } from '$lib/shared/components/ui/button';
   import { Input } from '$lib/shared/components/ui/input';
+  import { Textarea } from '$lib/shared/components/ui/textarea';
   import * as Popover from '$lib/shared/components/ui/popover';
   import { ideaStore } from '../stores/idea.svelte';
   import {
@@ -117,12 +118,6 @@
       addTagOpen = false;
     }
   }
-
-  function focusOnMount(node: HTMLTextAreaElement) {
-    requestAnimationFrame(() => {
-      node.focus();
-    });
-  }
 </script>
 
 <div
@@ -147,13 +142,14 @@
   <!-- Content & Inline Edit -->
   {#if isEditing}
     <div class="flex flex-col gap-2">
-      <textarea
+      <Textarea
         bind:value={editContent}
         onkeydown={handleEditKeydown}
         rows={5}
+        autofocus
         class="w-full bg-background text-foreground border border-border p-2 font-mono text-xs focus:outline-none focus:border-primary resize-y min-h-25"
         placeholder="Edit idea content..."
-        {@attach focusOnMount}></textarea>
+      />
       <div class="flex items-center gap-2 justify-end text-tui-2xs font-mono select-none">
         <!-- svelte-ignore a11y_click_events_have_key_events -->
         <!-- svelte-ignore a11y_no_static_element_interactions -->

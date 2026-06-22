@@ -2,6 +2,7 @@
   import { Button } from '$lib/shared/components/ui/button';
   import * as Dialog from '$lib/shared/components/ui/dialog';
   import { Input } from '$lib/shared/components/ui/input';
+  import { Textarea } from '$lib/shared/components/ui/textarea';
   import { Badge } from '$lib/shared/components/ui/badge';
   import * as Popover from '$lib/shared/components/ui/popover';
   import {
@@ -209,7 +210,7 @@
 
           {#if editImageSourceMode === 'url'}
             <div
-              class="flex items-center gap-1.5 px-2.5 py-1.5 border border-border bg-transparent"
+              class="flex items-center gap-1.5 px-2.5 py-1.5 border border-border bg-transparent focus-within:border-primary transition-colors"
             >
               <span class="text-primary font-bold text-tui-xs select-none">$</span>
               <Input
@@ -257,7 +258,9 @@
             class="text-tui-2xs uppercase font-bold text-muted-foreground tracking-tui-wide"
             >// Title</label
           >
-          <div class="flex items-center gap-1.5 px-2.5 py-1.5 border border-border bg-transparent">
+          <div
+            class="flex items-center gap-1.5 px-2.5 py-1.5 border border-border bg-transparent focus-within:border-primary transition-colors"
+          >
             <span class="text-primary font-bold text-tui-xs select-none">$</span>
             <Input
               id="edit-title-input"
@@ -277,13 +280,13 @@
             class="text-tui-2xs uppercase font-bold text-muted-foreground tracking-tui-wide"
             >// Description</label
           >
-          <textarea
+          <Textarea
             id="edit-description-input"
             bind:value={editDescriptionValue}
-            rows="5"
+            rows={5}
             placeholder="Description..."
             class="w-full h-full bg-transparent border border-border outline-none text-foreground placeholder:text-dim-foreground font-mono text-xs px-2.5 py-1.5 focus-visible:border-primary focus-visible:ring-0 focus-visible:ring-offset-0 resize-none transition-colors"
-          ></textarea>
+          />
         </div>
 
         <!-- Tags List with Popover -->
