@@ -4,6 +4,7 @@
   import { Button } from '$lib/shared/components/ui/button';
   import { Input } from '$lib/shared/components/ui/input';
   import * as Popover from '$lib/shared/components/ui/popover';
+  import { focus } from '$lib/actions/focus';
   import { ideaStore } from '../stores/idea.svelte';
   import {
     getAllUniqueTags,
@@ -147,7 +148,7 @@
         rows={5}
         class="w-full bg-background text-foreground border border-border p-2 font-mono text-xs focus:outline-none focus:border-primary resize-y min-h-25"
         placeholder="Edit idea content..."
-        autofocus></textarea>
+        use:focus></textarea>
       <div class="flex items-center gap-2 justify-end text-tui-2xs font-mono select-none">
         <!-- svelte-ignore a11y_click_events_have_key_events -->
         <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -165,7 +166,7 @@
     </div>
   {:else}
     <p
-      class="text-xs text-foreground whitespace-pre-wrap wrap-break-word leading-relaxed cursor-text select-text select-none"
+      class="text-xs text-foreground whitespace-pre-wrap wrap-break-word leading-relaxed cursor-text select-text"
       ondblclick={startEditing}
     >
       {idea.content}

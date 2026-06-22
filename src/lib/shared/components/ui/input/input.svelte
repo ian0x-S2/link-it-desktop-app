@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { HTMLInputAttributes, HTMLInputTypeAttribute } from 'svelte/elements';
   import { cn, type WithElementRef } from '$lib/utils/utils.js';
+  import { focus } from '$lib/actions/focus';
 
   type InputType = Exclude<HTMLInputTypeAttribute, 'file'>;
 
@@ -16,6 +17,7 @@
     files = $bindable(),
     class: className,
     'data-slot': dataSlot = 'input',
+    autofocus,
     ...restProps
   }: Props = $props();
 </script>
@@ -31,6 +33,7 @@
     type="file"
     bind:files
     bind:value
+    use:focus={autofocus}
     {...restProps}
   />
 {:else}
@@ -43,6 +46,7 @@
     )}
     {type}
     bind:value
+    use:focus={autofocus}
     {...restProps}
   />
 {/if}
