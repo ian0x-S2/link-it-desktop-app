@@ -1,7 +1,6 @@
 <script lang="ts">
   import type { HTMLInputAttributes, HTMLInputTypeAttribute } from 'svelte/elements';
   import { cn, type WithElementRef } from '$lib/utils/utils.js';
-  import { focus } from '$lib/actions/focus';
 
   type InputType = Exclude<HTMLInputTypeAttribute, 'file'>;
 
@@ -20,6 +19,14 @@
     autofocus,
     ...restProps
   }: Props = $props();
+
+  function focusOnMount(node: HTMLInputElement) {
+    if (autofocus) {
+      requestAnimationFrame(() => {
+        node.focus();
+      });
+    }
+  }
 </script>
 
 {#if type === 'file'}
@@ -33,7 +40,7 @@
     type="file"
     bind:files
     bind:value
-    use:focus={autofocus}
+    {@attach focusOnMount}
     {...restProps}
   />
 {:else}
@@ -46,7 +53,7 @@
     )}
     {type}
     bind:value
-    use:focus={autofocus}
+    {@attach focusOnMount}
     {...restProps}
   />
 {/if}

@@ -4,7 +4,6 @@
   import { Button } from '$lib/shared/components/ui/button';
   import { Input } from '$lib/shared/components/ui/input';
   import * as Popover from '$lib/shared/components/ui/popover';
-  import { focus } from '$lib/actions/focus';
   import { ideaStore } from '../stores/idea.svelte';
   import {
     getAllUniqueTags,
@@ -118,6 +117,12 @@
       addTagOpen = false;
     }
   }
+
+  function focusOnMount(node: HTMLTextAreaElement) {
+    requestAnimationFrame(() => {
+      node.focus();
+    });
+  }
 </script>
 
 <div
@@ -148,7 +153,7 @@
         rows={5}
         class="w-full bg-background text-foreground border border-border p-2 font-mono text-xs focus:outline-none focus:border-primary resize-y min-h-25"
         placeholder="Edit idea content..."
-        use:focus></textarea>
+        {@attach focusOnMount}></textarea>
       <div class="flex items-center gap-2 justify-end text-tui-2xs font-mono select-none">
         <!-- svelte-ignore a11y_click_events_have_key_events -->
         <!-- svelte-ignore a11y_no_static_element_interactions -->

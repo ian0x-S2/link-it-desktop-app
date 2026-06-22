@@ -117,6 +117,7 @@
       bind:value
       type="text"
       placeholder="Paste link to add..."
+      autofocus
       class="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-muted-foreground font-mono text-xs h-auto py-0 focus-visible:border-none focus-visible:ring-0 focus-visible:ring-offset-0"
       onkeydown={handleKeydown}
     />

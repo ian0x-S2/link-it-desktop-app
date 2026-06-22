@@ -34,6 +34,12 @@
       (e.target as HTMLElement)?.blur();
     }
   }
+
+  function focusOnMount(node: HTMLTextAreaElement) {
+    requestAnimationFrame(() => {
+      node.focus();
+    });
+  }
 </script>
 
 <div class="shrink-0 border-b border-border bg-box-bg px-3 py-2 h-15.5 flex items-center">
@@ -46,6 +52,7 @@
       placeholder="Capture a quick idea... (Enter to save, Shift+Enter for newline)"
       rows={2}
       disabled={isSubmitting}
+      {@attach focusOnMount}
       class="flex-1 bg-transparent text-foreground placeholder:text-dim-foreground font-mono text-xs resize-none outline-none border-none focus:outline-none leading-relaxed disabled:opacity-50"
     ></textarea>
     {#if input.trim()}
