@@ -317,21 +317,20 @@
     </div>
 
     <!-- Right Column: Stats + Tags + Logo -->
-    {#if activeCategoryType === 'ideas'}
-      <IdeaSidePanels
-        ideas={ideaStore.items}
-        bind:selectedTag={viewStore.selectedTag}
-        onRenameTag={(oldTag, newTag) => ideaStore.renameTagGlobally(oldTag, newTag)}
-        onDeleteTag={(tag) => ideaStore.deleteTagGlobally(tag)}
-      />
-    {:else}
-      <BookmarkSidePanels
-        bookmarks={bookmarkStore.items}
-        bind:selectedTag={viewStore.selectedTag}
-        onRenameTag={(oldTag, newTag) => bookmarkStore.renameTagGlobally(oldTag, newTag)}
-        onDeleteTag={(tag) => bookmarkStore.deleteTagGlobally(tag)}
-      />
-    {/if}
+    <IdeaSidePanels
+      ideas={ideaStore.items}
+      bind:selectedTag={viewStore.selectedTag}
+      onRenameTag={(oldTag, newTag) => ideaStore.renameTagGlobally(oldTag, newTag)}
+      onDeleteTag={(tag) => ideaStore.deleteTagGlobally(tag)}
+      class={activeCategoryType !== 'ideas' ? 'hidden' : ''}
+    />
+    <BookmarkSidePanels
+      bookmarks={bookmarkStore.items}
+      bind:selectedTag={viewStore.selectedTag}
+      onRenameTag={(oldTag, newTag) => bookmarkStore.renameTagGlobally(oldTag, newTag)}
+      onDeleteTag={(tag) => bookmarkStore.deleteTagGlobally(tag)}
+      class={activeCategoryType === 'ideas' ? 'hidden' : ''}
+    />
   </div>
 
   <!-- Footer -->
