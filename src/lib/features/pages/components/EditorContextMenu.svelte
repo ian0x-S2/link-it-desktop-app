@@ -127,7 +127,7 @@
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
   bind:this={menuElement}
-  class="fixed z-50 bg-box-bg border border-border shadow-xl font-mono text-[11px] p-1 flex flex-col w-52 select-none"
+  class="fixed z-50 bg-box-bg border border-border shadow-xl font-mono text-tui-sm p-1 flex flex-col w-52 select-none"
   style="left: {adjustedX}px; top: {adjustedY}px;"
   oncontextmenu={(e) => e.preventDefault()}
 >
@@ -140,7 +140,9 @@
         class="group flex items-center justify-between px-2.5 py-1 text-left hover:bg-primary hover:text-background text-foreground transition-colors cursor-pointer w-full rounded-none border-none bg-transparent"
       >
         <span>{item.label}</span>
-        <span class="text-muted-foreground group-hover:text-background text-[10px]">[{item.key}]</span>
+        <span class="text-muted-foreground group-hover:text-background text-tui-xs"
+          >[{item.key}]</span
+        >
       </button>
     {/if}
   {/each}
