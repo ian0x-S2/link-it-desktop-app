@@ -1,6 +1,7 @@
 import { ideaActions } from '../actions/idea';
 import type { Idea } from '../types/idea';
 import { workspaceStore } from '$lib/features/workspaces/stores/workspace.svelte';
+import { renameTagGloballyHelper, deleteTagGloballyHelper } from '$lib/utils/tag';
 
 class IdeaStore {
   items = $state<Idea[]>([]);
@@ -108,37 +109,21 @@ class IdeaStore {
   }
 
   async renameTagGlobally(oldTag: string, newTag: string): Promise<void> {
-    for (let i = 0; i < this.items.length; i++) {
-      const item = this.items[i];
-      if (item.tags?.includes(oldTag)) {
-        await ideaActions.removeTag(item.id, oldTag);
-        if (item.tags.includes(newTag)) {
-          this.items[i] = {
-            ...item,
-            tags: item.tags.filter((t) => t !== oldTag),
-          };
-        } else {
-          await ideaActions.addTag(item.id, newTag);
-          this.items[i] = {
-            ...item,
-            tags: [...item.tags.filter((t) => t !== oldTag), newTag],
-          };
-        }
-      }
-    }
+    this.items = await renameTagGloballyHelper(
+      this.items,
+      oldTag,
+      newTag,
+      (id, t) => ideaActions.addTag(id, t),
+      (id, t) => ideaActions.removeTag(id, t)
+    );
   }
 
   async deleteTagGlobally(tag: string): Promise<void> {
-    for (let i = 0; i < this.items.length; i++) {
-      const item = this.items[i];
-      if (item.tags?.includes(tag)) {
-        await ideaActions.removeTag(item.id, tag);
-        this.items[i] = {
-          ...item,
-          tags: item.tags.filter((t) => t !== tag),
-        };
-      }
-    }
+    this.items = await deleteTagGloballyHelper(
+      this.items,
+      tag,
+      (id, t) => ideaActions.removeTag(id, t)
+    );
   }
 }
 

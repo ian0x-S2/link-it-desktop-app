@@ -1,6 +1,7 @@
 import { imageActions } from '../actions/image';
 import type { ImageItem, CreateImageInput, UpdateImageInput } from '../types/image';
 import { workspaceStore } from '$lib/features/workspaces/stores/workspace.svelte';
+import { renameTagGloballyHelper, deleteTagGloballyHelper } from '$lib/utils/tag';
 
 class ImageStore {
   items = $state<ImageItem[]>([]);
@@ -122,24 +123,13 @@ class ImageStore {
 
   async renameTagGlobally(oldTag: string, newTag: string): Promise<void> {
     try {
-      for (let i = 0; i < this.items.length; i++) {
-        const item = this.items[i];
-        if (item.tags?.includes(oldTag)) {
-          await imageActions.removeTag(item.id, oldTag);
-          if (item.tags.includes(newTag)) {
-            this.items[i] = {
-              ...item,
-              tags: item.tags.filter((t) => t !== oldTag),
-            };
-          } else {
-            await imageActions.addTag(item.id, newTag);
-            this.items[i] = {
-              ...item,
-              tags: [...item.tags.filter((t) => t !== oldTag), newTag],
-            };
-          }
-        }
-      }
+      this.items = await renameTagGloballyHelper(
+        this.items,
+        oldTag,
+        newTag,
+        (id, t) => imageActions.addTag(id, t),
+        (id, t) => imageActions.removeTag(id, t)
+      );
     } catch (e) {
       this.error = e instanceof Error ? e.message : 'Failed to rename tag globally.';
     }
@@ -147,16 +137,11 @@ class ImageStore {
 
   async deleteTagGlobally(tag: string): Promise<void> {
     try {
-      for (let i = 0; i < this.items.length; i++) {
-        const item = this.items[i];
-        if (item.tags?.includes(tag)) {
-          await imageActions.removeTag(item.id, tag);
-          this.items[i] = {
-            ...item,
-            tags: item.tags.filter((t) => t !== tag),
-          };
-        }
-      }
+      this.items = await deleteTagGloballyHelper(
+        this.items,
+        tag,
+        (id, t) => imageActions.removeTag(id, t)
+      );
     } catch (e) {
       this.error = e instanceof Error ? e.message : 'Failed to delete tag globally.';
     }

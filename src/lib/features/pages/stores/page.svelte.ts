@@ -1,6 +1,7 @@
 import { pageActions } from '../actions/page';
 import type { Page, PageMetadata, UpdatePageInput } from '../types/page';
 import { workspaceStore } from '$lib/features/workspaces/stores/workspace.svelte';
+import { renameTagGloballyHelper, deleteTagGloballyHelper } from '$lib/utils/tag';
 
 class PageStore {
   /** Lightweight metadata list — no content loaded. */
@@ -176,24 +177,13 @@ class PageStore {
   }
 
   async renameTagGlobally(oldTag: string, newTag: string): Promise<void> {
-    for (let i = 0; i < this.items.length; i++) {
-      const p = this.items[i];
-      if (p.tags?.includes(oldTag)) {
-        await pageActions.removeTag(p.id, oldTag);
-        if (p.tags.includes(newTag)) {
-          this.items[i] = {
-            ...p,
-            tags: p.tags.filter((t) => t !== oldTag),
-          };
-        } else {
-          await pageActions.addTag(p.id, newTag);
-          this.items[i] = {
-            ...p,
-            tags: [...p.tags.filter((t) => t !== oldTag), newTag],
-          };
-        }
-      }
-    }
+    this.items = await renameTagGloballyHelper(
+      this.items,
+      oldTag,
+      newTag,
+      (id, t) => pageActions.addTag(id, t),
+      (id, t) => pageActions.removeTag(id, t)
+    );
     if (this.activePage?.tags?.includes(oldTag)) {
       if (this.activePage.tags.includes(newTag)) {
         this.activePage = {
@@ -210,16 +200,11 @@ class PageStore {
   }
 
   async deleteTagGlobally(tag: string): Promise<void> {
-    for (let i = 0; i < this.items.length; i++) {
-      const p = this.items[i];
-      if (p.tags?.includes(tag)) {
-        await pageActions.removeTag(p.id, tag);
-        this.items[i] = {
-          ...p,
-          tags: p.tags.filter((t) => t !== tag),
-        };
-      }
-    }
+    this.items = await deleteTagGloballyHelper(
+      this.items,
+      tag,
+      (id, t) => pageActions.removeTag(id, t)
+    );
     if (this.activePage?.tags?.includes(tag)) {
       this.activePage = {
         ...this.activePage,

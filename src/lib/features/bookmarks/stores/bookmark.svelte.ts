@@ -1,6 +1,7 @@
 import { bookmarkActions } from '../actions/bookmark';
 import type { Bookmark } from '../types/bookmark';
 import { workspaceStore } from '$lib/features/workspaces/stores/workspace.svelte';
+import { renameTagGloballyHelper, deleteTagGloballyHelper } from '$lib/utils/tag';
 
 class BookmarkStore {
   items = $state<Bookmark[]>([]);
@@ -143,37 +144,21 @@ class BookmarkStore {
   }
 
   async renameTagGlobally(oldTag: string, newTag: string): Promise<void> {
-    for (let i = 0; i < this.items.length; i++) {
-      const b = this.items[i];
-      if (b.tags?.includes(oldTag)) {
-        await bookmarkActions.removeTag(b.id, oldTag);
-        if (b.tags.includes(newTag)) {
-          this.items[i] = {
-            ...b,
-            tags: b.tags.filter((t) => t !== oldTag),
-          };
-        } else {
-          await bookmarkActions.addTag(b.id, newTag);
-          this.items[i] = {
-            ...b,
-            tags: [...b.tags.filter((t) => t !== oldTag), newTag],
-          };
-        }
-      }
-    }
+    this.items = await renameTagGloballyHelper(
+      this.items,
+      oldTag,
+      newTag,
+      (id, t) => bookmarkActions.addTag(id, t),
+      (id, t) => bookmarkActions.removeTag(id, t)
+    );
   }
 
   async deleteTagGlobally(tag: string): Promise<void> {
-    for (let i = 0; i < this.items.length; i++) {
-      const b = this.items[i];
-      if (b.tags?.includes(tag)) {
-        await bookmarkActions.removeTag(b.id, tag);
-        this.items[i] = {
-          ...b,
-          tags: b.tags.filter((t) => t !== tag),
-        };
-      }
-    }
+    this.items = await deleteTagGloballyHelper(
+      this.items,
+      tag,
+      (id, t) => bookmarkActions.removeTag(id, t)
+    );
   }
 }
 

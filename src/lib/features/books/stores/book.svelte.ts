@@ -1,6 +1,7 @@
 import { bookActions } from '../actions/book';
 import type { Book, CreateBookInput, UpdateBookInput } from '../types/book';
 import { workspaceStore } from '$lib/features/workspaces/stores/workspace.svelte';
+import { renameTagGloballyHelper, deleteTagGloballyHelper } from '$lib/utils/tag';
 
 class BookStore {
   items = $state<Book[]>([]);
@@ -122,24 +123,13 @@ class BookStore {
 
   async renameTagGlobally(oldTag: string, newTag: string): Promise<void> {
     try {
-      for (let i = 0; i < this.items.length; i++) {
-        const item = this.items[i];
-        if (item.tags?.includes(oldTag)) {
-          await bookActions.removeTag(item.id, oldTag);
-          if (item.tags.includes(newTag)) {
-            this.items[i] = {
-              ...item,
-              tags: item.tags.filter((t) => t !== oldTag),
-            };
-          } else {
-            await bookActions.addTag(item.id, newTag);
-            this.items[i] = {
-              ...item,
-              tags: [...item.tags.filter((t) => t !== oldTag), newTag],
-            };
-          }
-        }
-      }
+      this.items = await renameTagGloballyHelper(
+        this.items,
+        oldTag,
+        newTag,
+        (id, t) => bookActions.addTag(id, t),
+        (id, t) => bookActions.removeTag(id, t)
+      );
     } catch (e) {
       this.error = e instanceof Error ? e.message : 'Failed to rename tag globally.';
     }
@@ -147,16 +137,11 @@ class BookStore {
 
   async deleteTagGlobally(tag: string): Promise<void> {
     try {
-      for (let i = 0; i < this.items.length; i++) {
-        const item = this.items[i];
-        if (item.tags?.includes(tag)) {
-          await bookActions.removeTag(item.id, tag);
-          this.items[i] = {
-            ...item,
-            tags: item.tags.filter((t) => t !== tag),
-          };
-        }
-      }
+      this.items = await deleteTagGloballyHelper(
+        this.items,
+        tag,
+        (id, t) => bookActions.removeTag(id, t)
+      );
     } catch (e) {
       this.error = e instanceof Error ? e.message : 'Failed to delete tag globally.';
     }

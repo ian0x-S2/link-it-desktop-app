@@ -1,6 +1,7 @@
 import { customActions } from '../actions/custom';
 import type { CustomItem, CreateCustomInput, UpdateCustomInput } from '../types/custom';
 import { workspaceStore } from '$lib/features/workspaces/stores/workspace.svelte';
+import { renameTagGloballyHelper, deleteTagGloballyHelper } from '$lib/utils/tag';
 import { viewStore } from '$lib/shared/stores/view.svelte';
 
 class CustomStore {
@@ -125,24 +126,13 @@ class CustomStore {
 
   async renameTagGlobally(oldTag: string, newTag: string): Promise<void> {
     try {
-      for (let i = 0; i < this.items.length; i++) {
-        const item = this.items[i];
-        if (item.tags?.includes(oldTag)) {
-          await customActions.removeTag(item.id, oldTag);
-          if (item.tags.includes(newTag)) {
-            this.items[i] = {
-              ...item,
-              tags: item.tags.filter((t) => t !== oldTag),
-            };
-          } else {
-            await customActions.addTag(item.id, newTag);
-            this.items[i] = {
-              ...item,
-              tags: [...item.tags.filter((t) => t !== oldTag), newTag],
-            };
-          }
-        }
-      }
+      this.items = await renameTagGloballyHelper(
+        this.items,
+        oldTag,
+        newTag,
+        (id, t) => customActions.addTag(id, t),
+        (id, t) => customActions.removeTag(id, t)
+      );
     } catch (e) {
       this.error = e instanceof Error ? e.message : 'Failed to rename tag globally.';
     }
@@ -150,16 +140,11 @@ class CustomStore {
 
   async deleteTagGlobally(tag: string): Promise<void> {
     try {
-      for (let i = 0; i < this.items.length; i++) {
-        const item = this.items[i];
-        if (item.tags?.includes(tag)) {
-          await customActions.removeTag(item.id, tag);
-          this.items[i] = {
-            ...item,
-            tags: item.tags.filter((t) => t !== tag),
-          };
-        }
-      }
+      this.items = await deleteTagGloballyHelper(
+        this.items,
+        tag,
+        (id, t) => customActions.removeTag(id, t)
+      );
     } catch (e) {
       this.error = e instanceof Error ? e.message : 'Failed to delete tag globally.';
     }
