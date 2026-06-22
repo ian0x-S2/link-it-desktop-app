@@ -9,17 +9,15 @@
   import { bookmarkStore } from '$lib/features/bookmarks/stores/bookmark.svelte';
   import EditBookmarkDialog from '$lib/features/bookmarks/components/EditBookmarkDialog.svelte';
   import BookmarkPanel from '$lib/features/bookmarks/components/BookmarkPanel.svelte';
-  import BookmarkSidePanels from '$lib/features/bookmarks/components/BookmarkSidePanels.svelte';
+  import GenericSidePanels from '$lib/shared/components/GenericSidePanels.svelte';
 
   // Pages
   import PageList from '$lib/features/pages/components/PageList.svelte';
   import { pageStore } from '$lib/features/pages/stores/page.svelte';
-  import PageSidePanels from '$lib/features/pages/components/PageSidePanels.svelte';
 
   // Ideas
   import IdeaList from '$lib/features/ideas/components/IdeaList.svelte';
   import { ideaStore } from '$lib/features/ideas/stores/idea.svelte';
-  import IdeaSidePanels from '$lib/features/ideas/components/IdeaSidePanels.svelte';
 
   // Books
   import { bookStore } from '$lib/features/books/stores/book.svelte';
@@ -318,27 +316,79 @@
     </div>
 
     <!-- Right Column: Stats + Tags + Logo -->
-    <IdeaSidePanels
-      ideas={ideaStore.items}
-      bind:selectedTag={viewStore.selectedTag}
-      onRenameTag={(oldTag, newTag) => ideaStore.renameTagGlobally(oldTag, newTag)}
-      onDeleteTag={(tag) => ideaStore.deleteTagGlobally(tag)}
-      class={activeCategoryType !== 'ideas' ? 'hidden' : ''}
-    />
-    <PageSidePanels
-      pages={pageStore.items}
-      bind:selectedTag={viewStore.selectedTag}
-      onRenameTag={(oldTag, newTag) => pageStore.renameTagGlobally(oldTag, newTag)}
-      onDeleteTag={(tag) => pageStore.deleteTagGlobally(tag)}
-      class={activeCategoryType !== 'pages' ? 'hidden' : ''}
-    />
-    <BookmarkSidePanels
-      bookmarks={bookmarkStore.items}
-      bind:selectedTag={viewStore.selectedTag}
-      onRenameTag={(oldTag, newTag) => bookmarkStore.renameTagGlobally(oldTag, newTag)}
-      onDeleteTag={(tag) => bookmarkStore.deleteTagGlobally(tag)}
-      class={activeCategoryType === 'ideas' || activeCategoryType === 'pages' ? 'hidden' : ''}
-    />
+    {#if activeCategoryType === 'links' || viewStore.specialView === 'favorites' || viewStore.specialView === 'trash' || viewStore.specialView === 'settings'}
+      <GenericSidePanels
+        items={bookmarkStore.activeItems}
+        bind:selectedTag={viewStore.selectedTag}
+        onRenameTag={(oldTag, newTag) => bookmarkStore.renameTagGlobally(oldTag, newTag)}
+        onDeleteTag={(tag) => bookmarkStore.deleteTagGlobally(tag)}
+        entityPluralLabel="bookmarks"
+      />
+    {:else if activeCategoryType === 'ideas'}
+      <GenericSidePanels
+        items={ideaStore.activeItems}
+        bind:selectedTag={viewStore.selectedTag}
+        onRenameTag={(oldTag, newTag) => ideaStore.renameTagGlobally(oldTag, newTag)}
+        onDeleteTag={(tag) => ideaStore.deleteTagGlobally(tag)}
+        entityPluralLabel="ideas"
+      />
+    {:else if activeCategoryType === 'pages'}
+      <GenericSidePanels
+        items={pageStore.activeItems}
+        bind:selectedTag={viewStore.selectedTag}
+        onRenameTag={(oldTag, newTag) => pageStore.renameTagGlobally(oldTag, newTag)}
+        onDeleteTag={(tag) => pageStore.deleteTagGlobally(tag)}
+        entityPluralLabel="notes"
+      />
+    {:else if activeCategoryType === 'books'}
+      <GenericSidePanels
+        items={bookStore.activeItems}
+        bind:selectedTag={viewStore.selectedTag}
+        onRenameTag={(oldTag, newTag) => bookStore.renameTagGlobally(oldTag, newTag)}
+        onDeleteTag={(tag) => bookStore.deleteTagGlobally(tag)}
+        entityPluralLabel="books"
+      />
+    {:else if activeCategoryType === 'media'}
+      <GenericSidePanels
+        items={mediaStore.activeItems}
+        bind:selectedTag={viewStore.selectedTag}
+        onRenameTag={(oldTag, newTag) => mediaStore.renameTagGlobally(oldTag, newTag)}
+        onDeleteTag={(tag) => mediaStore.deleteTagGlobally(tag)}
+        entityPluralLabel="media items"
+      />
+    {:else if activeCategoryType === 'audio'}
+      <GenericSidePanels
+        items={audioStore.activeItems}
+        bind:selectedTag={viewStore.selectedTag}
+        onRenameTag={(oldTag, newTag) => audioStore.renameTagGlobally(oldTag, newTag)}
+        onDeleteTag={(tag) => audioStore.deleteTagGlobally(tag)}
+        entityPluralLabel="audio files"
+      />
+    {:else if activeCategoryType === 'documents'}
+      <GenericSidePanels
+        items={documentStore.activeItems}
+        bind:selectedTag={viewStore.selectedTag}
+        onRenameTag={(oldTag, newTag) => documentStore.renameTagGlobally(oldTag, newTag)}
+        onDeleteTag={(tag) => documentStore.deleteTagGlobally(tag)}
+        entityPluralLabel="documents"
+      />
+    {:else if activeCategoryType === 'images'}
+      <GenericSidePanels
+        items={imageStore.activeItems}
+        bind:selectedTag={viewStore.selectedTag}
+        onRenameTag={(oldTag, newTag) => imageStore.renameTagGlobally(oldTag, newTag)}
+        onDeleteTag={(tag) => imageStore.deleteTagGlobally(tag)}
+        entityPluralLabel="images"
+      />
+    {:else if activeCategoryType === 'custom'}
+      <GenericSidePanels
+        items={customStore.activeItems}
+        bind:selectedTag={viewStore.selectedTag}
+        onRenameTag={(oldTag, newTag) => customStore.renameTagGlobally(oldTag, newTag)}
+        onDeleteTag={(tag) => customStore.deleteTagGlobally(tag)}
+        entityPluralLabel="items"
+      />
+    {/if}
   </div>
 
   <!-- Footer -->

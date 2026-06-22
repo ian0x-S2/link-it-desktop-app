@@ -122,6 +122,48 @@ class CustomStore {
       this.error = e instanceof Error ? e.message : 'Failed to remove tag.';
     }
   }
+
+  async renameTagGlobally(oldTag: string, newTag: string): Promise<void> {
+    try {
+      for (let i = 0; i < this.items.length; i++) {
+        const item = this.items[i];
+        if (item.tags?.includes(oldTag)) {
+          await customActions.removeTag(item.id, oldTag);
+          if (item.tags.includes(newTag)) {
+            this.items[i] = {
+              ...item,
+              tags: item.tags.filter((t) => t !== oldTag),
+            };
+          } else {
+            await customActions.addTag(item.id, newTag);
+            this.items[i] = {
+              ...item,
+              tags: [...item.tags.filter((t) => t !== oldTag), newTag],
+            };
+          }
+        }
+      }
+    } catch (e) {
+      this.error = e instanceof Error ? e.message : 'Failed to rename tag globally.';
+    }
+  }
+
+  async deleteTagGlobally(tag: string): Promise<void> {
+    try {
+      for (let i = 0; i < this.items.length; i++) {
+        const item = this.items[i];
+        if (item.tags?.includes(tag)) {
+          await customActions.removeTag(item.id, tag);
+          this.items[i] = {
+            ...item,
+            tags: item.tags.filter((t) => t !== tag),
+          };
+        }
+      }
+    } catch (e) {
+      this.error = e instanceof Error ? e.message : 'Failed to delete tag globally.';
+    }
+  }
 }
 
 export const customStore = new CustomStore();

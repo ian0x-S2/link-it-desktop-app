@@ -2,9 +2,13 @@
   import { AreaChart, BarChart, Tooltip } from 'layerchart';
   import { Button } from '$lib/shared/components/ui/button';
   import * as Chart from '$lib/shared/components/ui/chart/index.js';
-  import type { PageMetadata } from '../types/page';
 
-  let { pages = [] }: { pages: PageMetadata[] } = $props();
+  interface Item {
+    createdAt: string;
+    isFavorite: boolean;
+  }
+
+  let { items = [] }: { items: Item[] } = $props();
 
   let chartType = $state<'bar' | 'line'>('bar');
 
@@ -20,9 +24,9 @@
         day: 'numeric',
       });
 
-      const count = pages.filter((p) => {
+      const count = items.filter((b) => {
         try {
-          const cb = new Date(p.createdAt);
+          const cb = new Date(b.createdAt);
           return cb.toDateString() === d.toDateString();
         } catch {
           return false;
@@ -52,8 +56,8 @@
   ];
 
   // Summary counts
-  const totalCount = $derived(pages.length);
-  const favoriteCount = $derived(pages.filter((p) => p.isFavorite).length);
+  const totalCount = $derived(items.length);
+  const favoriteCount = $derived(items.filter((b) => b.isFavorite).length);
 </script>
 
 <div

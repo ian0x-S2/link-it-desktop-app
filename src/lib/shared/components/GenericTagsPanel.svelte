@@ -3,18 +3,23 @@
   import { Button } from '$lib/shared/components/ui/button';
   import * as Dialog from '$lib/shared/components/ui/dialog';
   import { Input } from '$lib/shared/components/ui/input';
-  import type { PageMetadata } from '../types/page';
+
+  interface ItemWithTags {
+    tags: string[];
+  }
 
   let {
-    pages = [],
+    items = [],
     selectedTag = $bindable(null),
     onRenameTag,
     onDeleteTag,
+    entityPluralLabel = 'items',
   }: {
-    pages: PageMetadata[];
+    items: ItemWithTags[];
     selectedTag: string | null;
     onRenameTag: (oldTag: string, newTag: string) => void;
     onDeleteTag: (tag: string) => void;
+    entityPluralLabel?: string;
   } = $props();
 
   let tagSearch = $state('');
@@ -28,12 +33,12 @@
   let deleteDialogOpen = $state(false);
   let tagToDelete = $state<string | null>(null);
 
-  // Aggregate all unique tags with their page counts
+  // Aggregate all unique tags with their item counts
   const tagList = $derived.by(() => {
     const counts: Record<string, number> = {};
-    for (const p of pages) {
-      if (p.tags) {
-        for (const t of p.tags) {
+    for (const item of items) {
+      if (item.tags) {
+        for (const t of item.tags) {
           counts[t] = (counts[t] || 0) + 1;
         }
       }
@@ -194,7 +199,7 @@
       <Dialog.Description class="text-tui-xs text-muted-foreground mt-1">
         Rename
         <span class="text-foreground font-bold">*{tagToRename}</span>
-        globally across all notes.
+        globally across all {entityPluralLabel}.
       </Dialog.Description>
     </Dialog.Header>
     <div class="px-4 py-3">
@@ -247,7 +252,7 @@
       <AlertDialog.Description class="text-tui-xs text-muted-foreground mt-1">
         Remove
         <span class="text-foreground font-bold">*{tagToDelete}</span>
-        from all notes globally. This action cannot be undone.
+        from all {entityPluralLabel} globally. This action cannot be undone.
       </AlertDialog.Description>
     </AlertDialog.Header>
     <AlertDialog.Footer class="px-4 pb-4 flex gap-2 justify-end border-t border-border pt-3">
