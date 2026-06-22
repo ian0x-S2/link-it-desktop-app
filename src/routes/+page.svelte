@@ -14,6 +14,7 @@
   // Pages
   import PageList from '$lib/features/pages/components/PageList.svelte';
   import { pageStore } from '$lib/features/pages/stores/page.svelte';
+  import PageSidePanels from '$lib/features/pages/components/PageSidePanels.svelte';
 
   // Ideas
   import IdeaList from '$lib/features/ideas/components/IdeaList.svelte';
@@ -324,12 +325,19 @@
       onDeleteTag={(tag) => ideaStore.deleteTagGlobally(tag)}
       class={activeCategoryType !== 'ideas' ? 'hidden' : ''}
     />
+    <PageSidePanels
+      pages={pageStore.items}
+      bind:selectedTag={viewStore.selectedTag}
+      onRenameTag={(oldTag, newTag) => pageStore.renameTagGlobally(oldTag, newTag)}
+      onDeleteTag={(tag) => pageStore.deleteTagGlobally(tag)}
+      class={activeCategoryType !== 'pages' ? 'hidden' : ''}
+    />
     <BookmarkSidePanels
       bookmarks={bookmarkStore.items}
       bind:selectedTag={viewStore.selectedTag}
       onRenameTag={(oldTag, newTag) => bookmarkStore.renameTagGlobally(oldTag, newTag)}
       onDeleteTag={(tag) => bookmarkStore.deleteTagGlobally(tag)}
-      class={activeCategoryType === 'ideas' ? 'hidden' : ''}
+      class={activeCategoryType === 'ideas' || activeCategoryType === 'pages' ? 'hidden' : ''}
     />
   </div>
 

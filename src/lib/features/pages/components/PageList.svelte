@@ -10,15 +10,24 @@
   const activePageId = $derived(pageStore.activePage?.id ?? null);
   let searchInput = $state<HTMLInputElement | null>(null);
 
-  const displayedPages = $derived(
-    viewStore.searchActive && viewStore.searchQuery.trim()
-      ? pageStore.activeItemsFiltered.filter((p) =>
-          (p.title || 'Untitled')
-            .toLowerCase()
-            .includes(viewStore.searchQuery.toLowerCase())
-        )
-      : pageStore.activeItemsFiltered
-  );
+  const displayedPages = $derived.by(() => {
+    let list = pageStore.activeItemsFiltered;
+
+    // 1. Filter by tag
+    if (viewStore.selectedTag) {
+      list = list.filter((p) => p.tags?.includes(viewStore.selectedTag!));
+    }
+
+    // 2. Filter by search query
+    if (viewStore.searchActive && viewStore.searchQuery.trim()) {
+      const q = viewStore.searchQuery.toLowerCase();
+      list = list.filter((p) =>
+        (p.title || 'Untitled').toLowerCase().includes(q)
+      );
+    }
+
+    return list;
+  });
 
   async function handleCreate() {
     await pageStore.create();
@@ -97,6 +106,24 @@
       </div>
     </div>
   </div>
+
+  <!-- Tag Filter Indicator Badge if a tag is active -->
+  {#if viewStore.selectedTag}
+    <div
+      class="flex items-center justify-between px-4 py-1 border-b border-border bg-accent/25 text-tui-xs text-primary shrink-0 select-none font-bold"
+    >
+      <div class="flex items-center gap-1 font-mono">
+        <span>FILTERED BY:</span>
+        <span class="underline">#{viewStore.selectedTag}</span>
+      </div>
+      <button
+        onclick={() => viewStore.clearTag()}
+        class="text-destructive hover:text-red-400 font-bold tracking-tui-wide cursor-pointer bg-transparent hover:bg-transparent border-none p-0 h-auto font-mono text-tui-xs"
+      >
+        [x] CLEAR
+      </button>
+    </div>
+  {/if}
 
   <!-- Input Container (prevents layout shift) -->
   {#if viewStore.searchActive}

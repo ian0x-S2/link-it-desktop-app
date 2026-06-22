@@ -174,6 +174,59 @@ class PageStore {
       };
     }
   }
+
+  async renameTagGlobally(oldTag: string, newTag: string): Promise<void> {
+    for (let i = 0; i < this.items.length; i++) {
+      const p = this.items[i];
+      if (p.tags?.includes(oldTag)) {
+        await pageActions.removeTag(p.id, oldTag);
+        if (p.tags.includes(newTag)) {
+          this.items[i] = {
+            ...p,
+            tags: p.tags.filter((t) => t !== oldTag),
+          };
+        } else {
+          await pageActions.addTag(p.id, newTag);
+          this.items[i] = {
+            ...p,
+            tags: [...p.tags.filter((t) => t !== oldTag), newTag],
+          };
+        }
+      }
+    }
+    if (this.activePage?.tags?.includes(oldTag)) {
+      if (this.activePage.tags.includes(newTag)) {
+        this.activePage = {
+          ...this.activePage,
+          tags: this.activePage.tags.filter((t) => t !== oldTag),
+        };
+      } else {
+        this.activePage = {
+          ...this.activePage,
+          tags: [...this.activePage.tags.filter((t) => t !== oldTag), newTag],
+        };
+      }
+    }
+  }
+
+  async deleteTagGlobally(tag: string): Promise<void> {
+    for (let i = 0; i < this.items.length; i++) {
+      const p = this.items[i];
+      if (p.tags?.includes(tag)) {
+        await pageActions.removeTag(p.id, tag);
+        this.items[i] = {
+          ...p,
+          tags: p.tags.filter((t) => t !== tag),
+        };
+      }
+    }
+    if (this.activePage?.tags?.includes(tag)) {
+      this.activePage = {
+        ...this.activePage,
+        tags: this.activePage.tags.filter((t) => t !== tag),
+      };
+    }
+  }
 }
 
 export const pageStore = new PageStore();
