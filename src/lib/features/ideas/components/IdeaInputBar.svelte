@@ -36,8 +36,8 @@
   }
 </script>
 
-<div class="shrink-0 border-b border-border bg-box-bg px-3 py-2">
-  <div class="flex items-start gap-2">
+<div class="shrink-0 border-b border-border bg-box-bg px-3 py-2 h-15.5 flex items-center">
+  <div class="flex items-start gap-2 w-full">
     <span class="text-primary font-bold text-tui-xs pt-1 select-none shrink-0">[*]</span>
     <textarea
       id="quick-capture-idea-input"
@@ -53,8 +53,8 @@
       <!-- svelte-ignore a11y_no_static_element_interactions -->
       <span
         class="text-tui-xs text-primary hover:text-foreground cursor-pointer font-bold transition-colors pt-1 shrink-0"
-        onclick={handleSubmit}
-      >{isSubmitting ? '[...]' : '[add]'}</span>
+        onclick={handleSubmit}>{isSubmitting ? '[...]' : '[add]'}</span
+      >
     {/if}
   </div>
   {#if error}

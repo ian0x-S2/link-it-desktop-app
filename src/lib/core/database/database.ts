@@ -116,6 +116,16 @@ async function initDatabase(database: Database): Promise<void> {
   `);
 
   await database.execute(`
+    CREATE TABLE IF NOT EXISTS idea_tags (
+      idea_id TEXT NOT NULL,
+      tag     TEXT NOT NULL,
+      PRIMARY KEY (idea_id, tag),
+      FOREIGN KEY (idea_id) REFERENCES ideas(id) ON DELETE CASCADE
+    )
+  `);
+
+
+  await database.execute(`
     CREATE TABLE IF NOT EXISTS books (
       id           TEXT PRIMARY KEY,
       workspace_id TEXT NOT NULL,

@@ -8,4 +8,6 @@ export interface IdeaRepository {
   restore(id: string): Promise<void>;
   deletePermanently(id: string): Promise<void>;
   toggleFavorite(id: string): Promise<void>;
+  addTag(ideaId: string, tag: string): Promise<void>;
+  removeTag(ideaId: string, tag: string): Promise<void>;
 }

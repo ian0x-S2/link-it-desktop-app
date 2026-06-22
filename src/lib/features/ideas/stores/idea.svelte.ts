@@ -74,6 +74,72 @@ class IdeaStore {
       this.items[idx] = { ...this.items[idx], isFavorite: !this.items[idx].isFavorite };
     }
   }
+
+  async update(id: string, content: string): Promise<void> {
+    await ideaActions.updateIdea(id, content);
+    const idx = this.items.findIndex((i) => i.id === id);
+    if (idx >= 0) {
+      this.items[idx] = {
+        ...this.items[idx],
+        content: content.trim(),
+        updatedAt: new Date().toISOString(),
+      };
+    }
+  }
+
+  async addTag(ideaId: string, tag: string): Promise<void> {
+    await ideaActions.addTag(ideaId, tag);
+    const idx = this.items.findIndex((i) => i.id === ideaId);
+    if (idx >= 0) {
+      const currentTags = this.items[idx].tags || [];
+      if (!currentTags.includes(tag)) {
+        this.items[idx] = { ...this.items[idx], tags: [...currentTags, tag] };
+      }
+    }
+  }
+
+  async removeTag(ideaId: string, tag: string): Promise<void> {
+    await ideaActions.removeTag(ideaId, tag);
+    const idx = this.items.findIndex((i) => i.id === ideaId);
+    if (idx >= 0) {
+      const currentTags = this.items[idx].tags || [];
+      this.items[idx] = { ...this.items[idx], tags: currentTags.filter((t) => t !== tag) };
+    }
+  }
+
+  async renameTagGlobally(oldTag: string, newTag: string): Promise<void> {
+    for (let i = 0; i < this.items.length; i++) {
+      const item = this.items[i];
+      if (item.tags?.includes(oldTag)) {
+        await ideaActions.removeTag(item.id, oldTag);
+        if (item.tags.includes(newTag)) {
+          this.items[i] = {
+            ...item,
+            tags: item.tags.filter((t) => t !== oldTag),
+          };
+        } else {
+          await ideaActions.addTag(item.id, newTag);
+          this.items[i] = {
+            ...item,
+            tags: [...item.tags.filter((t) => t !== oldTag), newTag],
+          };
+        }
+      }
+    }
+  }
+
+  async deleteTagGlobally(tag: string): Promise<void> {
+    for (let i = 0; i < this.items.length; i++) {
+      const item = this.items[i];
+      if (item.tags?.includes(tag)) {
+        await ideaActions.removeTag(item.id, tag);
+        this.items[i] = {
+          ...item,
+          tags: item.tags.filter((t) => t !== tag),
+        };
+      }
+    }
+  }
 }
 
 export const ideaStore = new IdeaStore();

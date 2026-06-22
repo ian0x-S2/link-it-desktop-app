@@ -36,6 +36,22 @@ export class IdeaActions {
   async toggleFavorite(id: string): Promise<void> {
     await this.repository.toggleFavorite(id);
   }
+
+  async updateIdea(id: string, content: string): Promise<void> {
+    const cleanContent = content.trim();
+    if (!cleanContent) {
+      throw new Error('Idea content cannot be empty.');
+    }
+    await this.repository.update(id, { content: cleanContent });
+  }
+
+  async addTag(ideaId: string, tag: string): Promise<void> {
+    await this.repository.addTag(ideaId, tag);
+  }
+
+  async removeTag(ideaId: string, tag: string): Promise<void> {
+    await this.repository.removeTag(ideaId, tag);
+  }
 }
 
 export const ideaActions = new IdeaActions(new SqliteIdeaRepository());

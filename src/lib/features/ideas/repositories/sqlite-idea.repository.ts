@@ -35,15 +35,26 @@ export class SqliteIdeaRepository implements IdeaRepository {
       [workspaceId],
     );
 
-    return rows.map((r) => ({
-      id: r.id,
-      workspaceId: r.workspaceId,
-      content: r.content,
-      isFavorite: r.isFavorite === 1,
-      deletedAt: r.deletedAt ?? null,
-      createdAt: r.createdAt,
-      updatedAt: r.updatedAt,
-    }));
+    const ideas = await Promise.all(
+      rows.map(async (r) => {
+        const tagsRows = await db.select<{ tag: string }[]>(
+          'SELECT tag FROM idea_tags WHERE idea_id = $1',
+          [r.id],
+        );
+        return {
+          id: r.id,
+          workspaceId: r.workspaceId,
+          content: r.content,
+          isFavorite: r.isFavorite === 1,
+          deletedAt: r.deletedAt ?? null,
+          createdAt: r.createdAt,
+          updatedAt: r.updatedAt,
+          tags: tagsRows.map((t) => t.tag),
+        };
+      })
+    );
+
+    return ideas;
   }
 
   async create(input: CreateIdeaInput): Promise<Idea> {
@@ -66,6 +77,7 @@ export class SqliteIdeaRepository implements IdeaRepository {
       deletedAt: null,
       createdAt: now,
       updatedAt: now,
+      tags: [],
     };
   }
 
@@ -107,5 +119,21 @@ export class SqliteIdeaRepository implements IdeaRepository {
       'UPDATE ideas SET is_favorite = NOT is_favorite, updated_at = $1 WHERE id = $2',
       [now, id],
     );
+  }
+
+  async addTag(ideaId: string, tag: string): Promise<void> {
+    const db = await this.getDb();
+    await db.execute('INSERT OR IGNORE INTO idea_tags (idea_id, tag) VALUES ($1, $2)', [
+      ideaId,
+      tag,
+    ]);
+  }
+
+  async removeTag(ideaId: string, tag: string): Promise<void> {
+    const db = await this.getDb();
+    await db.execute('DELETE FROM idea_tags WHERE idea_id = $1 AND tag = $2', [
+      ideaId,
+      tag,
+    ]);
   }
 }

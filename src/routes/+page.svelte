@@ -18,6 +18,7 @@
   // Ideas
   import IdeaList from '$lib/features/ideas/components/IdeaList.svelte';
   import { ideaStore } from '$lib/features/ideas/stores/idea.svelte';
+  import IdeaSidePanels from '$lib/features/ideas/components/IdeaSidePanels.svelte';
 
   // Books
   import { bookStore } from '$lib/features/books/stores/book.svelte';
@@ -316,12 +317,21 @@
     </div>
 
     <!-- Right Column: Stats + Tags + Logo -->
-    <BookmarkSidePanels
-      bookmarks={bookmarkStore.items}
-      bind:selectedTag={viewStore.selectedTag}
-      onRenameTag={(oldTag, newTag) => bookmarkStore.renameTagGlobally(oldTag, newTag)}
-      onDeleteTag={(tag) => bookmarkStore.deleteTagGlobally(tag)}
-    />
+    {#if activeCategoryType === 'ideas'}
+      <IdeaSidePanels
+        ideas={ideaStore.items}
+        bind:selectedTag={viewStore.selectedTag}
+        onRenameTag={(oldTag, newTag) => ideaStore.renameTagGlobally(oldTag, newTag)}
+        onDeleteTag={(tag) => ideaStore.deleteTagGlobally(tag)}
+      />
+    {:else}
+      <BookmarkSidePanels
+        bookmarks={bookmarkStore.items}
+        bind:selectedTag={viewStore.selectedTag}
+        onRenameTag={(oldTag, newTag) => bookmarkStore.renameTagGlobally(oldTag, newTag)}
+        onDeleteTag={(tag) => bookmarkStore.deleteTagGlobally(tag)}
+      />
+    {/if}
   </div>
 
   <!-- Footer -->

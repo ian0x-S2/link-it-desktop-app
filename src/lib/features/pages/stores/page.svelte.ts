@@ -54,11 +54,13 @@ class PageStore {
     this.activePage = null;
   }
 
-  async create(): Promise<Page | null> {
+  async create(title?: string, content?: string): Promise<Page | null> {
     if (!workspaceStore.activeId) return null;
     try {
       const page = await pageActions.createPage({
         workspaceId: workspaceStore.activeId,
+        title,
+        content,
       });
       // Prepend metadata to the list.
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
