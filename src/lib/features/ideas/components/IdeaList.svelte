@@ -74,7 +74,7 @@
 <div
   class="flex items-center justify-between px-4 py-1.5 border-b border-border bg-box-bg text-xs text-muted-foreground shrink-0 select-none"
 >
-  <span class="font-bold uppercase tracking-widest text-foreground">[*] Ideas</span>
+  <span class="font-bold uppercase tracking-widest text-foreground">Ideas</span>
   <div class="flex items-center gap-1.5 select-none">
     <!-- Starred / All Tabs -->
     <!-- svelte-ignore a11y_click_events_have_key_events -->

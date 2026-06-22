@@ -121,9 +121,7 @@
 </script>
 
 <div
-  class="group relative flex flex-col gap-2.5 p-3 border bg-box-bg transition-all duration-150 rounded-none shadow-none text-foreground {idea.isFavorite
-    ? 'border-primary/50'
-    : 'border-border'}"
+  class="group relative flex flex-col gap-2.5 p-3 border border-border bg-background transition-all duration-150 rounded-none shadow-none text-foreground"
 >
   <!-- Corner brackets on hover (4 vertices) -->
   <span
@@ -263,7 +261,7 @@
     >
       <span class="text-dim-foreground">{formatRelativeTime(idea.createdAt)}</span>
 
-      <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div class="flex items-center gap-2">
         <!-- Star / Unstar -->
         <!-- svelte-ignore a11y_click_events_have_key_events -->
         <!-- svelte-ignore a11y_no_static_element_interactions -->
