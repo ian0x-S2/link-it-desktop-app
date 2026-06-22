@@ -1,11 +1,12 @@
 import { HighlightStyle, syntaxHighlighting } from '@codemirror/language';
 import { tags, Tag, styleTags } from '@lezer/highlight';
+import { Decoration, MatchDecorator, ViewPlugin, type ViewUpdate } from '@codemirror/view';
 
 /**
  * Custom tags for Markdown syntax indicators (markers).
  */
 export const customTags = {
-  headerMark: Tag.define(),
+  headingMark: Tag.define(),
   listMark: Tag.define(),
   emphasisMark: Tag.define(),
   quoteMark: Tag.define(),
@@ -19,7 +20,7 @@ export const customTags = {
 export const markdownMarkStyling = {
   props: [
     styleTags({
-      HeaderMark: customTags.headerMark,
+      HeadingMark: customTags.headingMark,
       ListMark: customTags.listMark,
       EmphasisMark: customTags.emphasisMark,
       QuoteMark: customTags.quoteMark,
@@ -41,7 +42,7 @@ export const tuiHighlightStyle = HighlightStyle.define([
   { tag: [tags.heading4, tags.heading5, tags.heading6], color: 'var(--color-foreground)', fontWeight: 'bold' },
 
   // Markdown indicators / markers — styled subtly to keep the document clean
-  { tag: customTags.headerMark, color: 'var(--code-mark)', fontWeight: 'normal', opacity: 0.6 },
+  { tag: customTags.headingMark, color: 'var(--code-mark)', fontWeight: 'normal', opacity: 0.6 },
   { tag: customTags.listMark, color: 'var(--code-mark)', fontWeight: 'bold' },
   { tag: customTags.emphasisMark, color: 'var(--code-comment)', fontStyle: 'normal', opacity: 0.5 },
   { tag: customTags.quoteMark, color: 'var(--code-mark)', fontWeight: 'bold' },
@@ -80,3 +81,20 @@ export const tuiHighlightStyle = HighlightStyle.define([
 ]);
 
 export const tuiMarkdownHighlight = syntaxHighlighting(tuiHighlightStyle);
+
+const highlightDecorator = new MatchDecorator({
+  regexp: /==([^=]+)==/g,
+  decoration: () => Decoration.mark({ class: 'cm-tui-highlight' })
+});
+
+export const tuiHighlightPlugin = ViewPlugin.define(
+  view => ({
+    decorations: highlightDecorator.createDeco(view),
+    update(update: ViewUpdate) {
+      this.decorations = highlightDecorator.updateDeco(update, this.decorations);
+    }
+  }),
+  {
+    decorations: v => v.decorations
+  }
+);

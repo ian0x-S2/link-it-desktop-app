@@ -83,6 +83,13 @@ export const tuiEditorTheme = EditorView.theme(
     '.cm-searchMatch.cm-searchMatch-selected': {
       backgroundColor: 'color-mix(in srgb, var(--color-primary) 50%, transparent)',
     },
+    // Highlight syntax style mapping
+    '.cm-tui-highlight': {
+      backgroundColor: 'var(--code-mark)',
+      color: 'var(--background)',
+      padding: '0.1rem 0.25rem',
+      borderRadius: '0.2rem',
+    },
   },
   { dark: false },
 );

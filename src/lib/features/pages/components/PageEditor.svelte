@@ -5,6 +5,34 @@
   import type { Page } from '../types/page';
   import { marked } from 'marked';
   import { Button } from '$lib/shared/components/ui/button';
+
+  // Register marked extension to support ==highlight== syntax in markdown preview
+  marked.use({
+    extensions: [
+      {
+        name: 'highlight',
+        level: 'inline',
+        start(src) {
+          return src.indexOf('==');
+        },
+        tokenizer(src) {
+          const rule = /^==([^=]+)==/;
+          const match = rule.exec(src);
+          if (match) {
+            return {
+              type: 'highlight',
+              raw: match[0],
+              text: match[1],
+              tokens: this.lexer.inlineTokens(match[1]),
+            };
+          }
+        },
+        renderer(token) {
+          return `<mark>${this.parser.parseInline(token.tokens || [])}</mark>`;
+        },
+      },
+    ],
+  });
   import { browser } from '$app/environment';
   import { pageStore } from '../stores/page.svelte';
   import PropertiesPanel from './PropertiesPanel.svelte';

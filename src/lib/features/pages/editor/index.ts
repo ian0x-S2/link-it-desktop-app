@@ -6,7 +6,7 @@ import { keymap } from '@codemirror/view';
 import { EditorState } from '@codemirror/state';
 
 import { tuiEditorTheme } from './theme';
-import { tuiMarkdownHighlight, markdownMarkStyling } from './markdown';
+import { tuiMarkdownHighlight, markdownMarkStyling, tuiHighlightPlugin } from './markdown';
 
 /**
  * Composes all CodeMirror extensions for the TUI markdown editor.
@@ -25,6 +25,7 @@ export function createEditorExtensions(onSave?: () => void) {
     // Theme
     tuiEditorTheme,
     tuiMarkdownHighlight,
+    tuiHighlightPlugin,
 
     // History (undo/redo)
     history(),
