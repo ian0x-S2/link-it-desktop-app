@@ -50,6 +50,7 @@
   import { pageStore } from '../stores/page.svelte';
   import PropertiesPanel from './PropertiesPanel.svelte';
   import EditorContextMenu from './EditorContextMenu.svelte';
+  import { themeStore } from '$lib/shared/stores/theme.svelte';
 
   let props = $props<{
     page: Page;
@@ -99,21 +100,86 @@
     }
   }
 
-  const PRESET_COVERS = [
-    {
-      name: 'TUI Grid',
-      style:
-        'background-color: var(--color-box-bg); background-image: radial-gradient(var(--color-border) 1px, transparent 1px); background-size: 16px 16px;',
-    },
-    { name: 'Sunset Gradient', style: 'background: linear-gradient(135deg, #ff7e5f, #feb47b);' },
-    { name: 'Aurora Gradient', style: 'background: linear-gradient(135deg, #02aab0, #00cdac);' },
-    { name: 'Nordic Forest', style: 'background: linear-gradient(135deg, #11998e, #38ef7d);' },
-    { name: 'Vaporwave', style: 'background: linear-gradient(135deg, #7f00ff, #e100ff);' },
-    {
-      name: 'Matrix Rain',
-      style: 'background: linear-gradient(180deg, #0f2027, #203a43, #2c5364);',
-    },
-  ];
+  function getImageUrl(style: string | null): string | null {
+    if (!style) return null;
+    const match = style.match(/url\(['"]?([^'"]+)['"]?\)/);
+    return match ? match[1] : null;
+  }
+
+  const PRESET_COVERS = $derived.by(() => {
+    const currentTheme = themeStore.current;
+    if (currentTheme === 'everforest') {
+      return [
+        {
+          name: 'Green Forest',
+          style: "background-image: url('/covers/everforest_1.webp'); background-size: cover; background-position: center;",
+        },
+        {
+          name: 'Mojave Minimal',
+          style: "background-image: url('/covers/everforest_2.webp'); background-size: cover; background-position: center;",
+        },
+        {
+          name: 'Forest Stairs',
+          style: "background-image: url('/covers/everforest_3.webp'); background-size: cover; background-position: center;",
+        },
+        {
+          name: 'Foggy Valley',
+          style: "background-image: url('/covers/everforest_4.webp'); background-size: cover; background-position: center;",
+        },
+        {
+          name: 'Beach Nature',
+          style: "background-image: url('/covers/everforest_5.webp'); background-size: cover; background-position: center;",
+        },
+      ];
+    } else if (currentTheme === 'catppuccin') {
+      return [
+        {
+          name: 'Abstract Swirls',
+          style: "background-image: url('/covers/catppuccin_1.webp'); background-size: cover; background-position: center;",
+        },
+        {
+          name: 'Asian Village',
+          style: "background-image: url('/covers/catppuccin_2.webp'); background-size: cover; background-position: center;",
+        },
+        {
+          name: 'Astronaut',
+          style: "background-image: url('/covers/catppuccin_3.webp'); background-size: cover; background-position: center;",
+        },
+        {
+          name: 'Biking Sunset',
+          style: "background-image: url('/covers/catppuccin_4.webp'); background-size: cover; background-position: center;",
+        },
+        {
+          name: 'Black Hole',
+          style: "background-image: url('/covers/catppuccin_5.webp'); background-size: cover; background-position: center;",
+        },
+      ];
+    } else {
+      // Default to Nordic wallpapers (for 'nord' theme)
+      return [
+        {
+          name: 'Abstract Nord',
+          style: "background-image: url('/covers/nord_1.webp'); background-size: cover; background-position: center;",
+        },
+        {
+          name: 'Minimal Nord',
+          style: "background-image: url('/covers/nord_2.webp'); background-size: cover; background-position: center;",
+        },
+        {
+          name: 'Arctic Landscape',
+          style: "background-image: url('/covers/nord_3.webp'); background-size: cover; background-position: center;",
+        },
+        {
+          name: 'At the Coffeshop',
+          style: "background-image: url('/covers/nord_4.webp'); background-size: cover; background-position: center;",
+        },
+        {
+          name: 'Ign Mountain',
+          style: "background-image: url('/covers/nord_5.webp'); background-size: cover; background-position: center;",
+        },
+      ];
+    }
+  });
 
   function scheduleAutosave() {
     if (saveTimer) clearTimeout(saveTimer);
@@ -432,60 +498,67 @@
     {/if}
 
     <!-- Cover Selection Popover Menu -->
-    {#if showCoverMenu}
-      <div
-        class="absolute top-12 right-6 bg-box-bg border border-border p-3 z-20 w-80 shadow-md font-mono text-xs flex flex-col gap-3"
-      >
-        <div class="flex items-center justify-between border-b border-border pb-1">
-          <span class="font-bold text-primary">SELECT COVER</span>
+    <div
+      class="absolute top-12 right-6 bg-box-bg border border-border p-3 z-20 w-80 shadow-md font-mono text-xs flex flex-col gap-3 transition-all duration-150 {showCoverMenu ? 'opacity-100 scale-100 pointer-events-auto' : 'opacity-0 scale-95 pointer-events-none'}"
+    >
+      <div class="flex items-center justify-between border-b border-border pb-1">
+        <span class="font-bold text-primary">SELECT COVER</span>
+        <Button
+          onclick={() => (showCoverMenu = false)}
+          variant="ghost"
+          size="xs"
+          class="text-muted-foreground hover:text-foreground font-bold cursor-pointer h-auto p-0"
+        >
+          [x]
+        </Button>
+      </div>
+
+      <!-- Presets grid -->
+      <div class="grid grid-cols-2 gap-2">
+        {#each PRESET_COVERS as cover (cover.name)}
           <Button
-            onclick={() => (showCoverMenu = false)}
-            variant="ghost"
-            size="xs"
-            class="text-muted-foreground hover:text-foreground font-bold cursor-pointer h-auto p-0"
+            onclick={() => handleSelectCover(cover.style)}
+            variant="outline"
+            class="h-10 w-full rounded-none border border-border hover:border-primary transition-colors cursor-pointer relative overflow-hidden group flex items-end justify-start p-1 bg-muted/10"
           >
-            [x]
+            {#if getImageUrl(cover.style)}
+              <img
+                src={getImageUrl(cover.style)}
+                alt={cover.name}
+                loading="lazy"
+                class="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity pointer-events-none"
+              />
+            {:else}
+              <div style={cover.style} class="absolute inset-0 w-full h-full pointer-events-none"></div>
+            {/if}
+            <span
+              class="relative z-10 text-[8px] bg-background/90 text-foreground px-1 truncate max-w-full font-mono normal-case text-ellipsis"
+            >
+              {cover.name}
+            </span>
+          </Button>
+        {/each}
+      </div>
+
+      <div class="border-t border-border pt-2 flex flex-col gap-1.5">
+        <span class="text-tui-2xs text-muted-foreground uppercase">Or paste image URL:</span>
+        <div class="flex gap-1">
+          <input
+            bind:value={customUrl}
+            placeholder="https://images.unsplash.com/..."
+            class="flex-1 bg-transparent border border-border px-1.5 py-0.5 text-xs text-foreground outline-none focus:border-primary font-mono"
+          />
+          <Button
+            onclick={handleCustomUrlSubmit}
+            variant="default"
+            size="xs"
+            class="border border-primary bg-primary text-background font-bold px-2 py-0.5 cursor-pointer text-xs uppercase h-auto"
+          >
+            [ok]
           </Button>
         </div>
-
-        <!-- Presets grid -->
-        <div class="grid grid-cols-2 gap-2">
-          {#each PRESET_COVERS as cover (cover.name)}
-            <Button
-              onclick={() => handleSelectCover(cover.style)}
-              style={cover.style}
-              variant="outline"
-              class="h-10 w-full rounded-none border border-border hover:border-primary transition-colors cursor-pointer relative group flex items-end justify-start p-1 bg-none"
-            >
-              <span
-                class="text-[8px] bg-background/90 text-foreground px-1 truncate max-w-full font-mono normal-case"
-              >
-                {cover.name}
-              </span>
-            </Button>
-          {/each}
-        </div>
-
-        <div class="border-t border-border pt-2 flex flex-col gap-1.5">
-          <span class="text-tui-2xs text-muted-foreground uppercase">Or paste image URL:</span>
-          <div class="flex gap-1">
-            <input
-              bind:value={customUrl}
-              placeholder="https://images.unsplash.com/..."
-              class="flex-1 bg-transparent border border-border px-1.5 py-0.5 text-xs text-foreground outline-none focus:border-primary font-mono"
-            />
-            <Button
-              onclick={handleCustomUrlSubmit}
-              variant="default"
-              size="xs"
-              class="border border-primary bg-primary text-background font-bold px-2 py-0.5 cursor-pointer text-xs uppercase h-auto"
-            >
-              [ok]
-            </Button>
-          </div>
-        </div>
       </div>
-    {/if}
+    </div>
 
     <!-- Notion Page Header Container (centered, max-width matching editor) -->
     <div class="w-full max-w-[80ch] flex flex-col">
