@@ -47,89 +47,106 @@
   }
 </script>
 
-<div class="flex flex-wrap gap-2 items-center font-mono text-tui-xs select-none py-1 border-b border-border/40 mb-4 pb-2">
-  <span class="text-muted-foreground font-bold tracking-wider">TAGS:</span>
-  
-  {#each tags as tag (tag)}
-    <Badge
-      variant="outline"
-      class="text-tui-2xs px-1 border border-border-dim text-muted-foreground flex items-center gap-1 select-none font-mono"
-    >
-      *{tag}
-      <!-- svelte-ignore a11y_click_events_have_key_events -->
-      <!-- svelte-ignore a11y_no_static_element_interactions -->
-      <span
-        onclick={() => handleRemoveTag(tag)}
-        class="text-destructive hover:text-red-400 cursor-pointer font-bold text-[8px] ml-0.5"
-        title="Remove tag"
-      >
-        x
-      </span>
-    </Badge>
-  {:else}
-    <span class="text-dim-foreground italic">[no tags]</span>
-  {/each}
+<div class="flex flex-col gap-1.5 font-mono text-tui-xs select-none py-1 border-b border-border/40 mb-4 pb-2">
+  <!-- Tags row -->
+  <div class="flex flex-wrap gap-2 items-center">
+    <span class="text-muted-foreground font-bold tracking-wider">TAGS:</span>
 
-  <!-- Add Tag Popover -->
-  <Popover.Root bind:open={addTagOpen}>
-    <Popover.Trigger>
-      {#snippet child({ props })}
-        <Button
-          {...props}
-          variant="ghost"
-          size="xs"
-          class="text-tui-2xs text-dim-foreground hover:text-primary transition-colors select-none font-bold h-auto p-0 bg-transparent hover:bg-transparent font-mono"
-        >
-          [+ add tag]
-        </Button>
-      {/snippet}
-    </Popover.Trigger>
-    <Popover.Content
-      class="w-52 p-0 rounded-none border border-border bg-box-bg font-mono shadow-lg z-50"
-      align="start"
-      sideOffset={4}
-    >
-      <!-- Input -->
-      <div class="flex items-center gap-1 px-2 py-1.5 border-b border-border">
-        <span class="text-primary font-bold text-tui-xs select-none">#</span>
-        <Input
-          bind:value={newTagValue}
-          onkeydown={handleTagKeydown}
-          placeholder="tag name..."
-          autofocus
-          class="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-dim-foreground font-mono text-tui-xs h-auto py-0 focus-visible:border-none focus-visible:ring-0 focus-visible:ring-offset-0"
-        />
-      </div>
-      <!-- Suggestions -->
-      <div
-        class="flex flex-col py-0.5 max-h-40 overflow-y-auto [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-border"
+    {#each tags as tag (tag)}
+      <Badge
+        variant="outline"
+        class="text-tui-2xs px-1 border border-border text-muted-foreground flex items-center gap-1 select-none font-mono rounded-none"
       >
-        {#if isNewTag}
-          <!-- svelte-ignore a11y_click_events_have_key_events -->
-          <!-- svelte-ignore a11y_no_static_element_interactions -->
-          <div
-            onclick={() => handleAddTag(newTagValue)}
-            class="px-2 py-1 text-tui-xs text-primary cursor-pointer hover:bg-primary/10 select-none"
+        *{tag}
+        <!-- svelte-ignore a11y_click_events_have_key_events -->
+        <!-- svelte-ignore a11y_no_static_element_interactions -->
+        <span
+          onclick={() => handleRemoveTag(tag)}
+          class="text-destructive hover:text-red-400 cursor-pointer font-bold text-[8px] ml-0.5"
+          title="Remove tag"
+        >
+          x
+        </span>
+      </Badge>
+    {:else}
+      <span class="text-dim-foreground italic">[no tags]</span>
+    {/each}
+
+    <!-- Add Tag Popover -->
+    <Popover.Root bind:open={addTagOpen}>
+      <Popover.Trigger>
+        {#snippet child({ props })}
+          <Button
+            {...props}
+            variant="ghost"
+            size="xs"
+            class="text-tui-2xs text-dim-foreground hover:text-primary transition-colors select-none font-bold h-auto p-0 bg-transparent hover:bg-transparent font-mono"
           >
-            [Create: "{newTagValue.trim().toLowerCase()}"]
-          </div>
-        {/if}
-        {#each tagSuggestions as suggestion (suggestion)}
-          <!-- svelte-ignore a11y_click_events_have_key_events -->
-          <!-- svelte-ignore a11y_no_static_element_interactions -->
-          <div
-            onclick={() => handleAddTag(suggestion)}
-            class="px-2 py-1 text-tui-xs text-muted-foreground cursor-pointer hover:bg-primary/5 hover:text-foreground select-none"
-          >
-            # {suggestion}
-          </div>
-        {/each}
-        {#if tagSuggestions.length === 0 && !isNewTag}
-          <div class="px-2 py-1 text-tui-xs text-dim-foreground italic select-none">
-            No suggestions
-          </div>
-        {/if}
-      </div>
-    </Popover.Content>
-  </Popover.Root>
+            [+ add tag]
+          </Button>
+        {/snippet}
+      </Popover.Trigger>
+      <Popover.Content
+        class="w-52 p-0 rounded-none border border-border bg-box-bg font-mono shadow-lg z-50"
+        align="start"
+        sideOffset={4}
+      >
+        <!-- Input -->
+        <div class="flex items-center gap-1 px-2 py-1.5 border-b border-border">
+          <span class="text-primary font-bold text-tui-xs select-none">#</span>
+          <Input
+            bind:value={newTagValue}
+            onkeydown={handleTagKeydown}
+            placeholder="tag name..."
+            autofocus
+            class="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-dim-foreground font-mono text-tui-xs h-auto py-0 focus-visible:border-none focus-visible:ring-0 focus-visible:ring-offset-0"
+          />
+        </div>
+        <!-- Suggestions -->
+        <div
+          class="flex flex-col py-0.5 max-h-40 overflow-y-auto [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-border"
+        >
+          {#if isNewTag}
+            <!-- svelte-ignore a11y_click_events_have_key_events -->
+            <!-- svelte-ignore a11y_no_static_element_interactions -->
+            <div
+              onclick={() => handleAddTag(newTagValue)}
+              class="px-2 py-1 text-tui-xs text-primary cursor-pointer hover:bg-primary/10 select-none"
+            >
+              [Create: "{newTagValue.trim().toLowerCase()}"]
+            </div>
+          {/if}
+          {#each tagSuggestions as suggestion (suggestion)}
+            <!-- svelte-ignore a11y_click_events_have_key_events -->
+            <!-- svelte-ignore a11y_no_static_element_interactions -->
+            <div
+              onclick={() => handleAddTag(suggestion)}
+              class="px-2 py-1 text-tui-xs text-muted-foreground cursor-pointer hover:bg-primary/5 hover:text-foreground select-none"
+            >
+              # {suggestion}
+            </div>
+          {/each}
+          {#if tagSuggestions.length === 0 && !isNewTag}
+            <div class="px-2 py-1 text-tui-xs text-dim-foreground italic select-none">
+              No suggestions
+            </div>
+          {/if}
+        </div>
+      </Popover.Content>
+    </Popover.Root>
+  </div>
+
+  <!-- Meta: created / updated -->
+  {#if page}
+    <div class="flex flex-col gap-y-0.5 text-tui-2xs text-dim-foreground/70 mt-1">
+      <span>
+        <span class="text-dim-foreground/50 uppercase tracking-tui-wide">created:</span>
+        {new Date(page.createdAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}
+      </span>
+      <span>
+        <span class="text-dim-foreground/50 uppercase tracking-tui-wide">updated:</span>
+        {new Date(page.updatedAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}
+      </span>
+    </div>
+  {/if}
 </div>
