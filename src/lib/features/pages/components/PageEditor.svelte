@@ -3,11 +3,24 @@
   import { EditorState } from '@codemirror/state';
   import { createEditorExtensions } from '../editor/index';
   import type { Page } from '../types/page';
-  import { marked } from 'marked';
+  import { marked, type Renderer } from 'marked';
+  import hljs from 'highlight.js';
   import { Button } from '$lib/shared/components/ui/button';
 
-  // Register marked extension to support ==highlight== syntax in markdown preview
+  // Custom renderer: syntax-highlighted code blocks + ==highlight== support
+  const customRenderer: Partial<Renderer> = {
+    code({ text, lang }) {
+      const language = lang && hljs.getLanguage(lang) ? lang : null;
+      const highlighted = language
+        ? hljs.highlight(text, { language }).value
+        : hljs.highlightAuto(text).value;
+      const langLabel = lang ? `<span class="hljs-lang-label">${lang}</span>` : '';
+      return `<pre><code class="hljs language-${lang ?? 'plaintext'}">${langLabel}${highlighted}</code></pre>`;
+    },
+  };
+
   marked.use({
+    renderer: customRenderer,
     extensions: [
       {
         name: 'highlight',

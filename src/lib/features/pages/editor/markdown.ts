@@ -1,4 +1,4 @@
-import { HighlightStyle, syntaxHighlighting } from '@codemirror/language';
+import { HighlightStyle, syntaxHighlighting, defaultHighlightStyle } from '@codemirror/language';
 import { tags, Tag, styleTags } from '@lezer/highlight';
 import { Decoration, MatchDecorator, ViewPlugin, type ViewUpdate } from '@codemirror/view';
 
@@ -81,6 +81,7 @@ export const tuiHighlightStyle = HighlightStyle.define([
 ]);
 
 export const tuiMarkdownHighlight = syntaxHighlighting(tuiHighlightStyle);
+export const tuiCodeFallbackHighlight = syntaxHighlighting(defaultHighlightStyle);
 
 const highlightDecorator = new MatchDecorator({
   regexp: /==([^=]+)==/g,
