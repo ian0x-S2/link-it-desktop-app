@@ -66,6 +66,128 @@
     categoryStore.active?.type ?? null,
   );
 
+  // ── Right panel: single reactive instance ──────────────────────────────────
+  // Instead of conditionally mounting/unmounting GenericSidePanels per category
+  // (which destroys/creates the heavy layerchart inside each time), we compute
+  // the items and callbacks reactively and feed them to a single persistent instance.
+
+  type TagRenamer = (old: string, next: string) => Promise<void>;
+  type TagDeleter = (tag: string) => Promise<void>;
+
+  const rightPanelVisible = $derived(
+    activeCategoryType !== null ||
+      viewStore.specialView === 'favorites' ||
+      viewStore.specialView === 'trash' ||
+      viewStore.specialView === 'settings',
+  );
+
+  const rightPanelItems = $derived.by(() => {
+    const sv = viewStore.specialView;
+    if (sv === 'favorites' || sv === 'trash' || sv === 'settings') return bookmarkStore.activeItems;
+    if (activeCategoryType === 'links') return bookmarkStore.activeItems;
+    if (activeCategoryType === 'ideas') return ideaStore.activeItems;
+    if (activeCategoryType === 'pages') return pageStore.activeItems;
+    if (activeCategoryType === 'books') return bookStore.activeItems;
+    if (activeCategoryType === 'media') return mediaStore.activeItems;
+    if (activeCategoryType === 'audio') return audioStore.activeItems;
+    if (activeCategoryType === 'documents') return documentStore.activeItems;
+    if (activeCategoryType === 'images') return imageStore.activeItems;
+    if (activeCategoryType === 'custom') return customStore.activeItems;
+    return [];
+  });
+
+  const rightPanelLabel = $derived.by(() => {
+    const sv = viewStore.specialView;
+    if (sv === 'favorites' || sv === 'trash' || sv === 'settings') return 'bookmarks';
+    if (activeCategoryType === 'links') return 'bookmarks';
+    if (activeCategoryType === 'ideas') return 'ideas';
+    if (activeCategoryType === 'pages') return 'notes';
+    if (activeCategoryType === 'books') return 'books';
+    if (activeCategoryType === 'media') return 'media items';
+    if (activeCategoryType === 'audio') return 'audio files';
+    if (activeCategoryType === 'documents') return 'documents';
+    if (activeCategoryType === 'images') return 'images';
+    if (activeCategoryType === 'custom') return 'items';
+    return 'items';
+  });
+
+  const rightPanelRenameTag = $derived.by((): TagRenamer => {
+    const sv = viewStore.specialView;
+    if (sv === 'favorites' || sv === 'trash' || sv === 'settings')
+      return (o, n) => bookmarkStore.renameTagGlobally(o, n);
+    if (activeCategoryType === 'links') return (o, n) => bookmarkStore.renameTagGlobally(o, n);
+    if (activeCategoryType === 'ideas') return (o, n) => ideaStore.renameTagGlobally(o, n);
+    if (activeCategoryType === 'pages') return (o, n) => pageStore.renameTagGlobally(o, n);
+    if (activeCategoryType === 'books') return (o, n) => bookStore.renameTagGlobally(o, n);
+    if (activeCategoryType === 'media') return (o, n) => mediaStore.renameTagGlobally(o, n);
+    if (activeCategoryType === 'audio') return (o, n) => audioStore.renameTagGlobally(o, n);
+    if (activeCategoryType === 'documents') return (o, n) => documentStore.renameTagGlobally(o, n);
+    if (activeCategoryType === 'images') return (o, n) => imageStore.renameTagGlobally(o, n);
+    if (activeCategoryType === 'custom') return (o, n) => customStore.renameTagGlobally(o, n);
+    return async () => {};
+  });
+
+  const rightPanelDeleteTag = $derived.by((): TagDeleter => {
+    const sv = viewStore.specialView;
+    if (sv === 'favorites' || sv === 'trash' || sv === 'settings')
+      return (t) => bookmarkStore.deleteTagGlobally(t);
+    if (activeCategoryType === 'links') return (t) => bookmarkStore.deleteTagGlobally(t);
+    if (activeCategoryType === 'ideas') return (t) => ideaStore.deleteTagGlobally(t);
+    if (activeCategoryType === 'pages') return (t) => pageStore.deleteTagGlobally(t);
+    if (activeCategoryType === 'books') return (t) => bookStore.deleteTagGlobally(t);
+    if (activeCategoryType === 'media') return (t) => mediaStore.deleteTagGlobally(t);
+    if (activeCategoryType === 'audio') return (t) => audioStore.deleteTagGlobally(t);
+    if (activeCategoryType === 'documents') return (t) => documentStore.deleteTagGlobally(t);
+    if (activeCategoryType === 'images') return (t) => imageStore.deleteTagGlobally(t);
+    if (activeCategoryType === 'custom') return (t) => customStore.deleteTagGlobally(t);
+    return async () => {};
+  });
+
+  // The center panel to show — computed eagerly so Svelte renders synchronously
+  type CenterView =
+    | 'settings'
+    | 'favorites'
+    | 'trash'
+    | 'links'
+    | 'pages'
+    | 'ideas'
+    | 'books'
+    | 'media'
+    | 'audio'
+    | 'documents'
+    | 'images'
+    | 'custom'
+    | 'empty';
+
+  const centerView = $derived.by((): CenterView => {
+    if (viewStore.specialView === 'settings') return 'settings';
+    if (viewStore.specialView === 'favorites') return 'favorites';
+    if (viewStore.specialView === 'trash') return 'trash';
+    if (activeCategoryType === 'links') return 'links';
+    if (
+      activeCategoryType === 'pages' &&
+      viewStore.activeCategoryId &&
+      workspaceStore.activeId
+    )
+      return 'pages';
+    if (activeCategoryType === 'ideas') return 'ideas';
+    if (activeCategoryType === 'books') return 'books';
+    if (activeCategoryType === 'media') return 'media';
+    if (activeCategoryType === 'audio') return 'audio';
+    if (activeCategoryType === 'documents') return 'documents';
+    if (activeCategoryType === 'images') return 'images';
+    if (activeCategoryType === 'custom') return 'custom';
+    return 'empty';
+  });
+
+  // Bookmark panel category string (reused for settings/favorites/trash/links)
+  const bookmarkCategory = $derived.by(() => {
+    if (centerView === 'settings') return 'settings';
+    if (centerView === 'favorites') return 'favorites';
+    if (centerView === 'trash') return 'trash';
+    return 'inbox';
+  });
+
   // ── Bookmark handlers ──────────────────────────────────────────────────────
 
   async function handleAddLink(
@@ -216,37 +338,18 @@
       />
     </div>
 
-    <!-- Center Column: Main Content (routes by category type or special view) -->
+    <!-- Center Column: Main Content (persistent panels, shown/hidden via CSS) -->
     <div class="flex-1 min-w-0 min-h-0 overflow-hidden flex flex-col pt-2">
       <div class="flex-1 flex flex-col overflow-hidden border border-border bg-box-bg relative">
-        {#if viewStore.specialView === 'settings'}
-          <!-- Settings — delegate to BookmarkPanel which has SettingsView embedded -->
+        <!-- Bookmark panel — covers settings / favorites / trash / links.
+             Kept mounted and shown reactively to avoid remounting cost. -->
+        <div
+          class="contents"
+          style:display={centerView === 'settings' || centerView === 'favorites' || centerView === 'trash' || centerView === 'links' ? 'contents' : 'none'}
+        >
           <BookmarkPanel
             bookmarks={filteredBookmarksStore.items}
-            category="settings"
-            mode={viewStore.mode}
-            searchActive={viewStore.searchActive}
-            bind:searchQuery={viewStore.searchQuery}
-            selectedTag={viewStore.selectedTag}
-            bind:promptInput
-            onModeChange={(m) => viewStore.setMode(m)}
-            onSearchToggle={(active) => viewStore.setSearchActive(active)}
-            onSearchChange={(q) => { viewStore.searchQuery = q; }}
-            onClearTag={() => viewStore.clearTag()}
-            onEdit={handleEdit}
-            onDelete={(id) => bookmarkStore.softDelete(id)}
-            onToggleFavorite={(id) => bookmarkStore.toggleFavorite(id)}
-            onAddTag={(id, tag) => bookmarkStore.addTag(id, tag)}
-            onRemoveTag={(id, tag) => bookmarkStore.removeTag(id, tag)}
-            onAddLink={handleAddLink}
-            stats={workspaceStore.stats}
-            onCloseSettings={() => viewStore.selectCategory(categoryStore.items[0]?.id ?? '')}
-          />
-        {:else if viewStore.specialView === 'favorites' || viewStore.specialView === 'trash'}
-          <!-- Special views: Favorites / Trash — show bookmarks panel -->
-          <BookmarkPanel
-            bookmarks={filteredBookmarksStore.items}
-            category={viewStore.specialView}
+            category={bookmarkCategory}
             mode={viewStore.mode}
             searchActive={viewStore.searchActive}
             bind:searchQuery={viewStore.searchQuery}
@@ -258,7 +361,7 @@
             onClearTag={() => viewStore.clearTag()}
             onEdit={handleEdit}
             onDelete={(id) =>
-              viewStore.specialView === 'trash'
+              centerView === 'trash'
                 ? bookmarkStore.deletePermanently(id)
                 : bookmarkStore.softDelete(id)}
             onToggleFavorite={(id) => bookmarkStore.toggleFavorite(id)}
@@ -266,127 +369,109 @@
             onRemoveTag={(id, tag) => bookmarkStore.removeTag(id, tag)}
             onAddLink={handleAddLink}
             stats={workspaceStore.stats}
-            onCloseSettings={() => viewStore.selectCategory(categoryStore.items[0]?.id ?? '')}
+            onCloseSettings={() =>
+              centerView === 'links'
+                ? viewStore.selectSpecialView('settings')
+                : viewStore.selectCategory(categoryStore.items[0]?.id ?? '')}
           />
-        {:else if activeCategoryType === 'links'}
-          <!-- Links — existing bookmark panel -->
-          <BookmarkPanel
-            bookmarks={filteredBookmarksStore.items}
-            category="inbox"
-            mode={viewStore.mode}
-            searchActive={viewStore.searchActive}
-            bind:searchQuery={viewStore.searchQuery}
-            selectedTag={viewStore.selectedTag}
-            bind:promptInput
-            onModeChange={(m) => viewStore.setMode(m)}
-            onSearchToggle={(active) => viewStore.setSearchActive(active)}
-            onSearchChange={(q) => { viewStore.searchQuery = q; }}
-            onClearTag={() => viewStore.clearTag()}
-            onEdit={handleEdit}
-            onDelete={(id) => bookmarkStore.softDelete(id)}
-            onToggleFavorite={(id) => bookmarkStore.toggleFavorite(id)}
-            onAddTag={(id, tag) => bookmarkStore.addTag(id, tag)}
-            onRemoveTag={(id, tag) => bookmarkStore.removeTag(id, tag)}
-            onAddLink={handleAddLink}
-            stats={workspaceStore.stats}
-            onCloseSettings={() => viewStore.selectSpecialView('settings')}
-          />
-        {:else if activeCategoryType === 'pages' && viewStore.activeCategoryId && workspaceStore.activeId}
-          <!-- Pages — CodeMirror editor -->
-          <PageList />
-        {:else if activeCategoryType === 'ideas'}
-          <!-- Ideas — quick capture -->
-          <IdeaList />
-        {:else if activeCategoryType === 'books'}
-          <BookPanel bind:promptInput />
-        {:else if activeCategoryType === 'media'}
-          <MediaPanel bind:promptInput />
-        {:else if activeCategoryType === 'audio'}
-          <AudioPanel bind:promptInput />
-        {:else if activeCategoryType === 'documents'}
-          <DocumentPanel bind:promptInput />
-        {:else if activeCategoryType === 'images'}
-          <ImagePanel bind:promptInput />
-        {:else if activeCategoryType === 'custom'}
-          <CustomItemPanel bind:promptInput />
-        {:else}
+        </div>
+
+        <!-- Pages — CodeMirror editor -->
+        <div
+          class="contents"
+          style:display={centerView === 'pages' ? 'contents' : 'none'}
+        >
+          {#if centerView === 'pages' || pageStore.items.length > 0 || pageStore.activePage !== null}
+            <PageList />
+          {/if}
+        </div>
+
+        <!-- Ideas -->
+        <div
+          class="contents"
+          style:display={centerView === 'ideas' ? 'contents' : 'none'}
+        >
+          {#if centerView === 'ideas' || ideaStore.items.length > 0}
+            <IdeaList />
+          {/if}
+        </div>
+
+        <!-- Books -->
+        <div
+          class="contents"
+          style:display={centerView === 'books' ? 'contents' : 'none'}
+        >
+          {#if centerView === 'books' || bookStore.items.length > 0}
+            <BookPanel bind:promptInput />
+          {/if}
+        </div>
+
+        <!-- Media -->
+        <div
+          class="contents"
+          style:display={centerView === 'media' ? 'contents' : 'none'}
+        >
+          {#if centerView === 'media' || mediaStore.items.length > 0}
+            <MediaPanel bind:promptInput />
+          {/if}
+        </div>
+
+        <!-- Audio -->
+        <div
+          class="contents"
+          style:display={centerView === 'audio' ? 'contents' : 'none'}
+        >
+          {#if centerView === 'audio' || audioStore.items.length > 0}
+            <AudioPanel bind:promptInput />
+          {/if}
+        </div>
+
+        <!-- Documents -->
+        <div
+          class="contents"
+          style:display={centerView === 'documents' ? 'contents' : 'none'}
+        >
+          {#if centerView === 'documents' || documentStore.items.length > 0}
+            <DocumentPanel bind:promptInput />
+          {/if}
+        </div>
+
+        <!-- Images -->
+        <div
+          class="contents"
+          style:display={centerView === 'images' ? 'contents' : 'none'}
+        >
+          {#if centerView === 'images' || imageStore.items.length > 0}
+            <ImagePanel bind:promptInput />
+          {/if}
+        </div>
+
+        <!-- Custom -->
+        <div
+          class="contents"
+          style:display={centerView === 'custom' ? 'contents' : 'none'}
+        >
+          {#if centerView === 'custom' || customStore.items.length > 0}
+            <CustomItemPanel bind:promptInput />
+          {/if}
+        </div>
+
+        <!-- Empty fallback -->
+        {#if centerView === 'empty'}
           <div class="flex-1"></div>
         {/if}
       </div>
     </div>
 
-    <!-- Right Column: Stats + Tags + Logo -->
-    {#if activeCategoryType === 'links' || viewStore.specialView === 'favorites' || viewStore.specialView === 'trash' || viewStore.specialView === 'settings'}
+    <!-- Right Column: single persistent GenericSidePanels instance.
+         Data is fed reactively via derived stores — no destroy/mount cycle on navigation. -->
+    {#if rightPanelVisible}
       <GenericSidePanels
-        items={bookmarkStore.activeItems}
+        items={rightPanelItems}
         bind:selectedTag={viewStore.selectedTag}
-        onRenameTag={(oldTag, newTag) => bookmarkStore.renameTagGlobally(oldTag, newTag)}
-        onDeleteTag={(tag) => bookmarkStore.deleteTagGlobally(tag)}
-        entityPluralLabel="bookmarks"
-      />
-    {:else if activeCategoryType === 'ideas'}
-      <GenericSidePanels
-        items={ideaStore.activeItems}
-        bind:selectedTag={viewStore.selectedTag}
-        onRenameTag={(oldTag, newTag) => ideaStore.renameTagGlobally(oldTag, newTag)}
-        onDeleteTag={(tag) => ideaStore.deleteTagGlobally(tag)}
-        entityPluralLabel="ideas"
-      />
-    {:else if activeCategoryType === 'pages'}
-      <GenericSidePanels
-        items={pageStore.activeItems}
-        bind:selectedTag={viewStore.selectedTag}
-        onRenameTag={(oldTag, newTag) => pageStore.renameTagGlobally(oldTag, newTag)}
-        onDeleteTag={(tag) => pageStore.deleteTagGlobally(tag)}
-        entityPluralLabel="notes"
-      />
-    {:else if activeCategoryType === 'books'}
-      <GenericSidePanels
-        items={bookStore.activeItems}
-        bind:selectedTag={viewStore.selectedTag}
-        onRenameTag={(oldTag, newTag) => bookStore.renameTagGlobally(oldTag, newTag)}
-        onDeleteTag={(tag) => bookStore.deleteTagGlobally(tag)}
-        entityPluralLabel="books"
-      />
-    {:else if activeCategoryType === 'media'}
-      <GenericSidePanels
-        items={mediaStore.activeItems}
-        bind:selectedTag={viewStore.selectedTag}
-        onRenameTag={(oldTag, newTag) => mediaStore.renameTagGlobally(oldTag, newTag)}
-        onDeleteTag={(tag) => mediaStore.deleteTagGlobally(tag)}
-        entityPluralLabel="media items"
-      />
-    {:else if activeCategoryType === 'audio'}
-      <GenericSidePanels
-        items={audioStore.activeItems}
-        bind:selectedTag={viewStore.selectedTag}
-        onRenameTag={(oldTag, newTag) => audioStore.renameTagGlobally(oldTag, newTag)}
-        onDeleteTag={(tag) => audioStore.deleteTagGlobally(tag)}
-        entityPluralLabel="audio files"
-      />
-    {:else if activeCategoryType === 'documents'}
-      <GenericSidePanels
-        items={documentStore.activeItems}
-        bind:selectedTag={viewStore.selectedTag}
-        onRenameTag={(oldTag, newTag) => documentStore.renameTagGlobally(oldTag, newTag)}
-        onDeleteTag={(tag) => documentStore.deleteTagGlobally(tag)}
-        entityPluralLabel="documents"
-      />
-    {:else if activeCategoryType === 'images'}
-      <GenericSidePanels
-        items={imageStore.activeItems}
-        bind:selectedTag={viewStore.selectedTag}
-        onRenameTag={(oldTag, newTag) => imageStore.renameTagGlobally(oldTag, newTag)}
-        onDeleteTag={(tag) => imageStore.deleteTagGlobally(tag)}
-        entityPluralLabel="images"
-      />
-    {:else if activeCategoryType === 'custom'}
-      <GenericSidePanels
-        items={customStore.activeItems}
-        bind:selectedTag={viewStore.selectedTag}
-        onRenameTag={(oldTag, newTag) => customStore.renameTagGlobally(oldTag, newTag)}
-        onDeleteTag={(tag) => customStore.deleteTagGlobally(tag)}
-        entityPluralLabel="items"
+        onRenameTag={rightPanelRenameTag}
+        onDeleteTag={rightPanelDeleteTag}
+        entityPluralLabel={rightPanelLabel}
       />
     {/if}
   </div>
