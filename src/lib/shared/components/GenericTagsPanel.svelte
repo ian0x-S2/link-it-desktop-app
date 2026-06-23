@@ -136,11 +136,17 @@
   >
     {#each filteredTags as tag (tag.name)}
       <div
-        class="flex items-center justify-between text-xs py-0.5 px-1.5 group border border-transparent transition-colors {selectedTag ===
+        class="relative flex items-center justify-between text-xs py-0.5 px-1.5 group border border-transparent transition-colors {selectedTag ===
         tag.name
           ? 'bg-primary text-background font-bold'
-          : 'hover:bg-accent/40'}"
+          : ''}"
       >
+        <!-- Corner brackets on hover -->
+        <span class="absolute top-0 left-0 size-2 border-t border-l border-primary opacity-0 group-hover:opacity-100 transition-opacity duration-150"></span>
+        <span class="absolute top-0 right-0 size-2 border-t border-r border-primary opacity-0 group-hover:opacity-100 transition-opacity duration-150"></span>
+        <span class="absolute bottom-0 left-0 size-2 border-b border-l border-primary opacity-0 group-hover:opacity-100 transition-opacity duration-150"></span>
+        <span class="absolute bottom-0 right-0 size-2 border-b border-r border-primary opacity-0 group-hover:opacity-100 transition-opacity duration-150"></span>
+
         <!-- Click tag to filter -->
         <!-- svelte-ignore a11y_click_events_have_key_events -->
         <!-- svelte-ignore a11y_no_static_element_interactions -->
