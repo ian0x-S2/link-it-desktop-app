@@ -108,12 +108,9 @@
             descHtml = `<div style="color: var(--color-muted-foreground); font-size: 9px; font-style: italic; margin-top: 2px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; line-height: 1.3;">${description}</div>`;
           }
 
-          let coverHtml = '';
-          if (imageUrl) {
-            coverHtml = `<img src="${imageUrl}" alt="cover" style="width: 52px; aspect-ratio: 3/4; object-fit: cover; border: 1px solid var(--color-border); flex-shrink: 0; align-self: flex-start; margin-top: 6px;" />`;
-          } else {
-            coverHtml = `<div style="width: 52px; aspect-ratio: 3/4; border: 1px dashed var(--color-border); display: flex; align-items: center; justify-content: center; font-size: 8px; color: var(--color-muted-foreground); font-weight: bold; flex-shrink: 0; align-self: flex-start; margin-top: 6px; text-align: center; padding: 2px; line-height: 1.2;">[NO<br/>COVER]</div>`;
-          }
+          const coverHtml = imageUrl
+            ? `<img src="${imageUrl}" alt="cover" style="width: 52px; aspect-ratio: 3/4; object-fit: cover; border: 1px solid var(--color-border); flex-shrink: 0; align-self: flex-start; margin-top: 6px;" />`
+            : `<div style="width: 52px; aspect-ratio: 3/4; border: 1px dashed var(--color-border); display: flex; align-items: center; justify-content: center; font-size: 8px; color: var(--color-muted-foreground); font-weight: bold; flex-shrink: 0; align-self: flex-start; margin-top: 6px; text-align: center; padding: 2px; line-height: 1.2;">[NO<br/>COVER]</div>`;
 
           let progressHtml = '';
           if (pagesTotal > 0) {

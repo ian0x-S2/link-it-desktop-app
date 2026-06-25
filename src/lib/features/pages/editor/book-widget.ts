@@ -1,5 +1,5 @@
 import { Decoration, type DecorationSet, EditorView, WidgetType } from '@codemirror/view';
-import { RangeSetBuilder, StateField, EditorState } from '@codemirror/state';
+import { RangeSetBuilder, StateField, type EditorState } from '@codemirror/state';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

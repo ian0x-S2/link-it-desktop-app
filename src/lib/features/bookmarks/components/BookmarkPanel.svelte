@@ -6,6 +6,7 @@
   import PromptInput from './PromptInput.svelte';
   import SettingsView from '$lib/features/workspaces/components/SettingsView.svelte';
   import type { Bookmark } from '../types/bookmark';
+  import type { WorkspaceStats } from '$lib/features/workspaces/types/workspace';
 
   interface Props {
     bookmarks: Bookmark[];
@@ -15,7 +16,7 @@
     searchQuery: string;
     selectedTag: string | null;
     promptInput: HTMLInputElement | null;
-    stats: any;
+    stats: WorkspaceStats[];
     // Callbacks
     onModeChange: (mode: 'list' | 'grid') => void;
     onSearchToggle: (active: boolean) => void;
@@ -26,7 +27,15 @@
     onToggleFavorite: (id: string) => void;
     onAddTag: (id: string, tag: string) => void;
     onRemoveTag: (id: string, tag: string) => void;
-    onAddLink: (url: string, metadata?: any) => Promise<void>;
+    onAddLink: (
+      url: string,
+      metadata?: {
+        title: string;
+        description: string;
+        imageUrl: string;
+        faviconUrl: string;
+      } | null,
+    ) => Promise<void>;
     onCloseSettings: () => void;
   }
 

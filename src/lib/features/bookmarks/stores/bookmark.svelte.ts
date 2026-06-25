@@ -3,7 +3,7 @@ import type { Bookmark } from '../types/bookmark';
 import { workspaceStore } from '$lib/features/workspaces/stores/workspace.svelte';
 import { renameTagGloballyHelper, deleteTagGloballyHelper } from '$lib/utils/tag';
 
-class BookmarkStore {
+export class BookmarkStore {
   items = $state<Bookmark[]>([]);
 
   /** All bookmarks currently in the trash (soft-deleted). */
@@ -73,7 +73,7 @@ class BookmarkStore {
     if (index >= 0) {
       this.items[index] = {
         ...this.items[index],
-        deletedAt: new Date().toISOString(),
+        deletedAt: new Date().toISOString(), // eslint-disable-line svelte/prefer-svelte-reactivity
       };
     }
   }

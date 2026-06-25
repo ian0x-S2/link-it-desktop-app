@@ -191,7 +191,6 @@
    * Builds the :::book-ref block content for CodeMirror widget rendering.
    */
   function buildBookRefBlock(): string {
-    const stars = ratingValue > 0 ? '★'.repeat(ratingValue) + `(${ratingValue}/5)` : 'No Rating';
     const cleanDesc = descriptionValue ? descriptionValue.replace(/\r?\n/g, ' ').trim() : '';
     return [
       ':::book-ref',

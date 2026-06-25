@@ -12,11 +12,12 @@
     normaliseTag,
   } from '$lib/features/bookmarks/utils/tag-popover-utils';
   import type { Bookmark } from '../types/bookmark';
+  import type { BookmarkStore } from '../stores/bookmark.svelte';
 
   interface Props {
     open: boolean;
     bookmarkId: string | null;
-    bookmarkStore: any;
+    bookmarkStore: BookmarkStore;
     onSave: (
       id: string,
       data: {
