@@ -26,7 +26,8 @@
       );
     }
 
-    return list;
+    // Sort by updatedAt DESC (newest first)
+    return [...list].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
   });
 
   async function handleCreate() {
