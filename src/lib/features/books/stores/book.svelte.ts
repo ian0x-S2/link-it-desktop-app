@@ -5,6 +5,7 @@ import { renameTagGloballyHelper, deleteTagGloballyHelper } from '$lib/utils/tag
 
 class BookStore {
   items = $state<Book[]>([]);
+  activeBook = $state<Book | null>(null);
   isLoading = $state(false);
   error = $state<string | null>(null);
 
@@ -33,6 +34,17 @@ class BookStore {
     }
   }
 
+  openBook(id: string): void {
+    const item = this.items.find((i) => i.id === id);
+    if (item) {
+      this.activeBook = item;
+    }
+  }
+
+  closeBook(): void {
+    this.activeBook = null;
+  }
+
   async create(input: CreateBookInput): Promise<Book | null> {
     try {
       const item = await bookActions.createBook(input);
@@ -48,6 +60,9 @@ class BookStore {
     try {
       await bookActions.updateBook(id, data);
       this.items = this.items.map((i) => (i.id === id ? { ...i, ...data, updatedAt: new Date().toISOString() } : i));
+      if (this.activeBook?.id === id) {
+        this.activeBook = { ...this.activeBook, ...data, updatedAt: new Date().toISOString() };
+      }
     } catch (e) {
       this.error = e instanceof Error ? e.message : 'Failed to save book.';
     }
@@ -57,6 +72,9 @@ class BookStore {
     try {
       await bookActions.softDeleteBook(id);
       this.items = this.items.map((i) => (i.id === id ? { ...i, deletedAt: new Date().toISOString() } : i));
+      if (this.activeBook?.id === id) {
+        this.closeBook();
+      }
     } catch (e) {
       this.error = e instanceof Error ? e.message : 'Failed to delete book.';
     }
@@ -75,6 +93,9 @@ class BookStore {
     try {
       await bookActions.permanentlyDeleteBook(id);
       this.items = this.items.filter((i) => i.id !== id);
+      if (this.activeBook?.id === id) {
+        this.closeBook();
+      }
     } catch (e) {
       this.error = e instanceof Error ? e.message : 'Failed to permanently delete book.';
     }
@@ -84,6 +105,9 @@ class BookStore {
     try {
       await bookActions.toggleFavorite(id);
       this.items = this.items.map((i) => (i.id === id ? { ...i, isFavorite: !i.isFavorite } : i));
+      if (this.activeBook?.id === id) {
+        this.activeBook = { ...this.activeBook, isFavorite: !this.activeBook.isFavorite };
+      }
     } catch (e) {
       this.error = e instanceof Error ? e.message : 'Failed to toggle favorite.';
     }
@@ -101,6 +125,12 @@ class BookStore {
         }
         return i;
       });
+      if (this.activeBook?.id === bookId) {
+        const existing = this.activeBook.tags || [];
+        if (!existing.includes(tag)) {
+          this.activeBook = { ...this.activeBook, tags: [...existing, tag] };
+        }
+      }
     } catch (e) {
       this.error = e instanceof Error ? e.message : 'Failed to add tag.';
     }
@@ -116,6 +146,10 @@ class BookStore {
         }
         return i;
       });
+      if (this.activeBook?.id === bookId) {
+        const existing = this.activeBook.tags || [];
+        this.activeBook = { ...this.activeBook, tags: existing.filter((t) => t !== tag) };
+      }
     } catch (e) {
       this.error = e instanceof Error ? e.message : 'Failed to remove tag.';
     }
@@ -130,6 +164,13 @@ class BookStore {
         (id, t) => bookActions.addTag(id, t),
         (id, t) => bookActions.removeTag(id, t)
       );
+      if (this.activeBook?.tags?.includes(oldTag)) {
+        if (this.activeBook.tags.includes(newTag)) {
+          this.activeBook = { ...this.activeBook, tags: this.activeBook.tags.filter((t) => t !== oldTag) };
+        } else {
+          this.activeBook = { ...this.activeBook, tags: [...this.activeBook.tags.filter((t) => t !== oldTag), newTag] };
+        }
+      }
     } catch (e) {
       this.error = e instanceof Error ? e.message : 'Failed to rename tag globally.';
     }
@@ -142,6 +183,9 @@ class BookStore {
         tag,
         (id, t) => bookActions.removeTag(id, t)
       );
+      if (this.activeBook?.tags?.includes(tag)) {
+        this.activeBook = { ...this.activeBook, tags: this.activeBook.tags.filter((t) => t !== tag) };
+      }
     } catch (e) {
       this.error = e instanceof Error ? e.message : 'Failed to delete tag globally.';
     }

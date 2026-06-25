@@ -7,6 +7,7 @@ import { EditorState } from '@codemirror/state';
 
 import { tuiEditorTheme } from './theme';
 import { tuiMarkdownHighlight, tuiCodeFallbackHighlight, markdownMarkStyling, tuiHighlightPlugin } from './markdown';
+import { bookRefPlugin } from './book-widget';
 
 /**
  * Composes all CodeMirror extensions for the TUI markdown editor.
@@ -27,6 +28,9 @@ export function createEditorExtensions(onSave?: () => void) {
     tuiMarkdownHighlight,
     tuiCodeFallbackHighlight,
     tuiHighlightPlugin,
+
+    // Book reference widget
+    bookRefPlugin,
 
     // History (undo/redo)
     history(),

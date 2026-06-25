@@ -131,11 +131,16 @@ async function initDatabase(database: Database): Promise<void> {
       workspace_id TEXT NOT NULL,
       title        TEXT NOT NULL DEFAULT '',
       content      TEXT NOT NULL DEFAULT '',
+      description  TEXT NOT NULL DEFAULT '',
       url          TEXT,
       image_url    TEXT,
       author       TEXT NOT NULL DEFAULT '',
       rating       INTEGER NOT NULL DEFAULT 0,
-      status       TEXT NOT NULL DEFAULT 'Backlog',
+      status       TEXT NOT NULL DEFAULT 'Want to Read',
+      started_at   TEXT,
+      finished_at  TEXT,
+      pages_read   INTEGER NOT NULL DEFAULT 0,
+      pages_total  INTEGER NOT NULL DEFAULT 0,
       is_favorite  INTEGER NOT NULL DEFAULT 0,
       deleted_at   TEXT,
       created_at   TEXT NOT NULL,
@@ -143,6 +148,21 @@ async function initDatabase(database: Database): Promise<void> {
       FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE
     )
   `);
+
+  // Migrations for existing databases to support new book metadata
+  try { await database.execute('ALTER TABLE books ADD COLUMN description TEXT NOT NULL DEFAULT ""'); } catch { /* ignore */ }
+  try { await database.execute('ALTER TABLE books ADD COLUMN started_at TEXT'); } catch { /* ignore */ }
+  try { await database.execute('ALTER TABLE books ADD COLUMN finished_at TEXT'); } catch { /* ignore */ }
+  try { await database.execute('ALTER TABLE books ADD COLUMN pages_read INTEGER NOT NULL DEFAULT 0'); } catch { /* ignore */ }
+  try { await database.execute('ALTER TABLE books ADD COLUMN pages_total INTEGER NOT NULL DEFAULT 0'); } catch { /* ignore */ }
+
+  // Migrate status values from Portuguese to English
+  try { await database.execute("UPDATE books SET status = 'Want to Read' WHERE status = 'Quero Ler'"); } catch { /* ignore */ }
+  try { await database.execute("UPDATE books SET status = 'Reading' WHERE status = 'Lendo'"); } catch { /* ignore */ }
+  try { await database.execute("UPDATE books SET status = 'Paused' WHERE status = 'Pausado'"); } catch { /* ignore */ }
+  try { await database.execute("UPDATE books SET status = 'Completed' WHERE status = 'Concluído'"); } catch { /* ignore */ }
+  try { await database.execute("UPDATE books SET status = 'Abandoned' WHERE status = 'Abandonado'"); } catch { /* ignore */ }
+
 
   await database.execute(`
     CREATE TABLE IF NOT EXISTS book_tags (

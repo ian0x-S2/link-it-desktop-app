@@ -114,11 +114,3 @@
     </div>
   {/if}
 </div>
-
-<style>
-  /* Prevent text selection across the titlebar */
-  div {
-    user-select: none;
-    -webkit-user-select: none;
-  }
-</style>

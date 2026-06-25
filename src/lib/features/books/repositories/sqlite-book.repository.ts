@@ -8,11 +8,16 @@ interface BookRow {
   workspaceId: string;
   title: string;
   content: string;
+  description: string;
   url: string | null;
   imageUrl: string | null;
   author: string;
   rating: number;
   status: string;
+  startedAt: string | null;
+  finishedAt: string | null;
+  pagesRead: number;
+  pagesTotal: number;
   isFavorite: number;
   deletedAt: string | null;
   createdAt: string;
@@ -32,11 +37,16 @@ export class SqliteBookRepository implements BookRepository {
          workspace_id  AS workspaceId,
          title,
          content,
+         description,
          url,
          image_url     AS imageUrl,
          author,
          rating,
          status,
+         started_at    AS startedAt,
+         finished_at   AS finishedAt,
+         pages_read    AS pagesRead,
+         pages_total   AS pagesTotal,
          is_favorite   AS isFavorite,
          deleted_at    AS deletedAt,
          created_at    AS createdAt,
@@ -58,11 +68,16 @@ export class SqliteBookRepository implements BookRepository {
           workspaceId: r.workspaceId,
           title: r.title,
           content: r.content,
+          description: r.description,
           url: r.url,
           imageUrl: r.imageUrl,
           author: r.author,
           rating: r.rating,
           status: r.status,
+          startedAt: r.startedAt,
+          finishedAt: r.finishedAt,
+          pagesRead: r.pagesRead,
+          pagesTotal: r.pagesTotal,
           isFavorite: r.isFavorite === 1,
           deletedAt: r.deletedAt,
           createdAt: r.createdAt,
@@ -83,11 +98,16 @@ export class SqliteBookRepository implements BookRepository {
          workspace_id  AS workspaceId,
          title,
          content,
+         description,
          url,
          image_url     AS imageUrl,
          author,
          rating,
          status,
+         started_at    AS startedAt,
+         finished_at   AS finishedAt,
+         pages_read    AS pagesRead,
+         pages_total   AS pagesTotal,
          is_favorite   AS isFavorite,
          deleted_at    AS deletedAt,
          created_at    AS createdAt,
@@ -110,11 +130,16 @@ export class SqliteBookRepository implements BookRepository {
       workspaceId: r.workspaceId,
       title: r.title,
       content: r.content,
+      description: r.description,
       url: r.url,
       imageUrl: r.imageUrl,
       author: r.author,
       rating: r.rating,
       status: r.status,
+      startedAt: r.startedAt,
+      finishedAt: r.finishedAt,
+      pagesRead: r.pagesRead,
+      pagesTotal: r.pagesTotal,
       isFavorite: r.isFavorite === 1,
       deletedAt: r.deletedAt,
       createdAt: r.createdAt,
@@ -129,17 +154,22 @@ export class SqliteBookRepository implements BookRepository {
     const now = new Date().toISOString();
     const title = input.title;
     const content = input.content ?? '';
+    const description = input.description ?? '';
     const url = input.url ?? null;
     const imageUrl = input.imageUrl ?? null;
     const author = input.author ?? '';
     const rating = input.rating ?? 0;
-    const status = input.status ?? 'Backlog';
+    const status = input.status ?? 'Want to Read';
+    const startedAt = input.startedAt ?? null;
+    const finishedAt = input.finishedAt ?? null;
+    const pagesRead = input.pagesRead ?? 0;
+    const pagesTotal = input.pagesTotal ?? 0;
 
     await db.execute(
       `INSERT INTO books
-         (id, workspace_id, title, content, url, image_url, author, rating, status, is_favorite, created_at, updated_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 0, $10, $10)`,
-      [id, input.workspaceId, title, content, url, imageUrl, author, rating, status, now],
+         (id, workspace_id, title, content, description, url, image_url, author, rating, status, started_at, finished_at, pages_read, pages_total, is_favorite, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, 0, $15, $15)`,
+      [id, input.workspaceId, title, content, description, url, imageUrl, author, rating, status, startedAt, finishedAt, pagesRead, pagesTotal, now],
     );
 
     if (input.tags && input.tags.length > 0) {
@@ -156,11 +186,16 @@ export class SqliteBookRepository implements BookRepository {
       workspaceId: input.workspaceId,
       title,
       content,
+      description,
       url,
       imageUrl,
       author,
       rating,
       status,
+      startedAt,
+      finishedAt,
+      pagesRead,
+      pagesTotal,
       isFavorite: false,
       deletedAt: null,
       createdAt: now,
@@ -178,11 +213,16 @@ export class SqliteBookRepository implements BookRepository {
 
     if (data.title !== undefined) { sets.push(`title = $${i++}`); params.push(data.title); }
     if (data.content !== undefined) { sets.push(`content = $${i++}`); params.push(data.content); }
+    if (data.description !== undefined) { sets.push(`description = $${i++}`); params.push(data.description); }
     if (data.url !== undefined) { sets.push(`url = $${i++}`); params.push(data.url); }
     if (data.imageUrl !== undefined) { sets.push(`image_url = $${i++}`); params.push(data.imageUrl); }
     if (data.author !== undefined) { sets.push(`author = $${i++}`); params.push(data.author); }
     if (data.rating !== undefined) { sets.push(`rating = $${i++}`); params.push(data.rating); }
     if (data.status !== undefined) { sets.push(`status = $${i++}`); params.push(data.status); }
+    if (data.startedAt !== undefined) { sets.push(`started_at = $${i++}`); params.push(data.startedAt); }
+    if (data.finishedAt !== undefined) { sets.push(`finished_at = $${i++}`); params.push(data.finishedAt); }
+    if (data.pagesRead !== undefined) { sets.push(`pages_read = $${i++}`); params.push(data.pagesRead); }
+    if (data.pagesTotal !== undefined) { sets.push(`pages_total = $${i++}`); params.push(data.pagesTotal); }
     if (data.isFavorite !== undefined) { sets.push(`is_favorite = $${i++}`); params.push(data.isFavorite ? 1 : 0); }
 
     params.push(id);

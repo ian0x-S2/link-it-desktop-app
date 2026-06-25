@@ -44,6 +44,114 @@
           return `<mark>${this.parser.parseInline(token.tokens || [])}</mark>`;
         },
       },
+      {
+        name: 'bookRef',
+        level: 'block',
+        start(src) {
+          return src.indexOf(':::book-ref');
+        },
+        tokenizer(src) {
+          const rule = /^:::book-ref\r?\n([\s\S]*?)\r?\n:::/;
+          const match = rule.exec(src);
+          if (match) {
+            return {
+              type: 'bookRef',
+              raw: match[0],
+              content: match[1],
+            };
+          }
+        },
+        renderer(token) {
+          const lines = token.content.split('\n');
+          const data: Record<string, string> = {};
+          for (const line of lines) {
+            const colonIdx = line.indexOf(':');
+            if (colonIdx === -1) continue;
+            const key = line.slice(0, colonIdx).trim();
+            const value = line.slice(colonIdx + 1).trim();
+            if (key) data[key] = value;
+          }
+
+          const title = data['title'] ?? 'Unknown Title';
+          const author = data['author'] ?? '';
+          const status = data['status'] ?? '';
+          const rating = parseInt(data['rating'] ?? '0', 10) || 0;
+          const pagesRead = parseInt(data['pagesRead'] ?? '0', 10) || 0;
+          const pagesTotal = parseInt(data['pagesTotal'] ?? '0', 10) || 0;
+          const imageUrl = data['imageUrl'] ?? '';
+          const startedAt = data['startedAt'] ?? '';
+          const finishedAt = data['finishedAt'] ?? '';
+          const description = data['description'] ?? '';
+
+          const stars = rating > 0 ? '★'.repeat(rating) + '☆'.repeat(5 - rating) : '—';
+          const progress = pagesTotal > 0
+            ? Math.min(100, Math.round((pagesRead / pagesTotal) * 100))
+            : 0;
+
+          const progressBar = (() => {
+            const total = 16;
+            const filled = Math.round((progress / 100) * total);
+            return `[${'█'.repeat(filled)}${'░'.repeat(total - filled)}] ${progress}%`;
+          })();
+
+          const statusColors: Record<string, string> = {
+            'Reading': 'var(--color-primary)',
+            'Completed': 'var(--color-chart-2, #7ec8a0)',
+            'Paused': 'var(--color-chart-4, #e5c07b)',
+            'Abandoned': 'var(--color-destructive)',
+            'Want to Read': 'var(--color-muted-foreground)',
+          };
+          const statusColor = statusColors[status] ?? 'var(--color-muted-foreground)';
+
+          let descHtml = '';
+          if (description) {
+            descHtml = `<div style="color: var(--color-muted-foreground); font-size: 9px; font-style: italic; margin-top: 2px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; line-height: 1.3;">${description}</div>`;
+          }
+
+          let coverHtml = '';
+          if (imageUrl) {
+            coverHtml = `<img src="${imageUrl}" alt="cover" style="width: 52px; aspect-ratio: 3/4; object-fit: cover; border: 1px solid var(--color-border); flex-shrink: 0; align-self: flex-start; margin-top: 6px;" />`;
+          } else {
+            coverHtml = `<div style="width: 52px; aspect-ratio: 3/4; border: 1px dashed var(--color-border); display: flex; align-items: center; justify-content: center; font-size: 8px; color: var(--color-muted-foreground); font-weight: bold; flex-shrink: 0; align-self: flex-start; margin-top: 6px; text-align: center; padding: 2px; line-height: 1.2;">[NO<br/>COVER]</div>`;
+          }
+
+          let progressHtml = '';
+          if (pagesTotal > 0) {
+            progressHtml = `
+              <div style="margin-top: 4px; color: var(--color-primary); font-size: 10px; font-weight: bold; white-space: pre;">${progressBar}</div>
+              <div style="color: var(--color-muted-foreground); font-size: 9px; margin-top: 1px;">${pagesRead} / ${pagesTotal} pages</div>
+            `;
+          }
+
+          let datesHtml = '';
+          if (startedAt || finishedAt) {
+            datesHtml = `<div style="display: flex; gap: 10px; margin-top: 4px; color: var(--color-muted-foreground); font-size: 9px;">`;
+            if (startedAt) datesHtml += `<span>started: ${startedAt}</span>`;
+            if (finishedAt) datesHtml += `<span>finished: ${finishedAt}</span>`;
+            datesHtml += `</div>`;
+          }
+
+          return `
+            <div class="book-ref-preview-widget" style="display: flex; align-items: stretch; gap: 12px; border: 1px solid var(--color-border); background: var(--color-box-bg, var(--color-background)); padding: 12px; margin: 12px 0; font-family: var(--font-mono, monospace); font-size: 11px; user-select: none; position: relative;">
+              <div style="position: absolute; top: 0; left: 10px; transform: translateY(-50%); background: var(--color-box-bg, var(--color-background)); border-left: 1px solid var(--color-border); border-right: 1px solid var(--color-border); padding: 0 6px; font-size: 9px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-primary);">// book ref</div>
+              ${coverHtml}
+              <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; margin-top: 6px; text-align: left;">
+                <div style="font-weight: bold; font-size: 12px; color: var(--color-foreground); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${title}</div>
+                ${author ? `<div style="color: var(--color-muted-foreground); font-size: 10px;">by ${author}</div>` : ''}
+                ${descHtml}
+                <div style="border-top: 1px dashed var(--color-border); margin: 4px 0 3px 0;"></div>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: ${statusColor}; flex-shrink: 0;"></span>
+                  <span style="color: ${statusColor}; font-weight: bold; text-transform: uppercase; font-size: 9px; letter-spacing: 0.08em;">${status || 'No Status'}</span>
+                </div>
+                <div style="color: var(--color-primary); font-size: 11px; letter-spacing: 1px;">${stars}</div>
+                ${progressHtml}
+                ${datesHtml}
+              </div>
+            </div>
+          `;
+        }
+      },
     ],
   });
   import { browser } from '$app/environment';
@@ -68,8 +176,13 @@
   let customUrl = $state('');
 
   let readOnly = $state(
-    browser && localStorage.getItem('editor-readonly') === 'true',
+    browser && localStorage.getItem('editor-readonly') === 'true' && !pageStore.forceEditModeNext
   );
+
+  // Reset the force edit mode flag
+  if (pageStore.forceEditModeNext) {
+    pageStore.forceEditModeNext = false;
+  }
   let currentContent = $state((() => props.page.content)());
 
   // Compile markdown safely

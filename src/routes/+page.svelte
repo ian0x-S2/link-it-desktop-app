@@ -259,16 +259,27 @@
   $effect(() => {
     viewStore.onNavigate = () => {
       pageStore.closePage();
+      bookStore.closeBook();
     };
     return () => {
       viewStore.onNavigate = undefined;
     };
   });
 
+  // Open pending page when navigating to pages category
+  $effect(() => {
+    if (centerView === 'pages' && pageStore.pendingOpenPageId) {
+      const pageId = pageStore.pendingOpenPageId;
+      pageStore.pendingOpenPageId = null;
+      pageStore.openPage(pageId);
+    }
+  });
+
   $effect(() => {
     if (workspaceStore.activeId) {
       untrack(() => {
         pageStore.closePage();
+        bookStore.closeBook();
       });
     }
   });

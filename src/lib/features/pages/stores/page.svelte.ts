@@ -10,6 +10,12 @@ class PageStore {
   /** The page currently open in the editor (full content). */
   activePage = $state<Page | null>(null);
 
+  /** A page ID queued to be opened when the pages category becomes active. */
+  pendingOpenPageId = $state<string | null>(null);
+
+  /** If true, the next opened page will force readOnly to false. */
+  forceEditModeNext = $state(false);
+
   isLoading = $state(false);
   isSaving = $state(false);
   error = $state<string | null>(null);
@@ -68,6 +74,7 @@ class PageStore {
       const { content: _, ...meta } = page;
       this.items = [meta, ...this.items];
       this.activePage = page;
+      this.forceEditModeNext = true;
       return page;
     } catch (e) {
       this.error = e instanceof Error ? e.message : 'Failed to create page.';

@@ -3,23 +3,63 @@
   import { bookStore } from '../stores/book.svelte';
   import { viewStore } from '$lib/shared/stores/view.svelte';
   import { categoryStore } from '$lib/features/categories/stores/category.svelte';
+  import { pageStore } from '$lib/features/pages/stores/page.svelte';
   import BookGrid from './BookGrid.svelte';
   import BookList from './BookList.svelte';
+  import BookEditor from './BookEditor.svelte';
   import EditBookDialog from './EditBookDialog.svelte';
+  import * as DropdownMenu from '$lib/shared/components/ui/dropdown-menu';
+  import { Skeleton } from '$lib/shared/components/ui/skeleton';
 
   let { promptInput = $bindable(null) } = $props();
-  let promptValue = $state('');
+
+  /**
+   * Navigate to the first 'pages' category after creating a note from a book.
+   * Sets pageStore.pendingOpenPageId so it is opened once navigation finishes.
+   */
+  function handleOpenNote(pageId: string) {
+    const pagesCategory = categoryStore.items.find((c) => c.type === 'pages');
+    if (pagesCategory) {
+      pageStore.pendingOpenPageId = pageId;
+      viewStore.selectCategory(pagesCategory.id); // triggers onNavigate → closePage()
+    }
+  }
+
+  const sortLabels: Record<string, string> = {
+    'date-desc': 'DATE ADDED (NEWEST)',
+    'date-asc': 'DATE ADDED (OLDEST)',
+    'title-asc': 'TITLE (A-Z)',
+    'title-desc': 'TITLE (Z-A)',
+    'author-asc': 'AUTHOR (A-Z)',
+    'author-desc': 'AUTHOR (Z-A)',
+    'rating-desc': 'RATING (HIGH TO LOW)',
+  };
 
   let editDialogOpen = $state(false);
   let editId = $state<string | null>(null);
 
+  // Status Filter and Sort state
+  let statusFilter = $state('all');
+  let sortBy = $state('date-desc');
+  let showStats = $state(false);
+
   const activeCategory = $derived(categoryStore.active);
 
+  // Filter and sort books reactively
   const displayedItems = $derived.by(() => {
-    let list = bookStore.activeItemsFiltered;
+    let list = bookStore.activeItems;
+
+    // 1. Tag filter
     if (viewStore.selectedTag) {
       list = list.filter((item) => item.tags?.includes(viewStore.selectedTag!));
     }
+
+    // 2. Status filter
+    if (statusFilter !== 'all') {
+      list = list.filter((item) => item.status === statusFilter);
+    }
+
+    // 3. Search query filter
     if (viewStore.searchActive && viewStore.searchQuery.trim()) {
       const q = viewStore.searchQuery.toLowerCase();
       list = list.filter(
@@ -27,30 +67,93 @@
           item.title.toLowerCase().includes(q) ||
           item.content.toLowerCase().includes(q) ||
           item.author.toLowerCase().includes(q) ||
-          item.tags?.some((t) => t.toLowerCase().includes(q))
+          item.description?.toLowerCase().includes(q) ||
+          item.tags?.some((t) => t.toLowerCase().includes(q)),
       );
     }
-    return list;
+
+    // 4. Sorting
+    const sorted = [...list];
+    if (sortBy === 'title-asc') {
+      sorted.sort((a, b) => a.title.localeCompare(b.title));
+    } else if (sortBy === 'title-desc') {
+      sorted.sort((a, b) => b.title.localeCompare(a.title));
+    } else if (sortBy === 'author-asc') {
+      sorted.sort((a, b) => (a.author || '').localeCompare(b.author || ''));
+    } else if (sortBy === 'author-desc') {
+      sorted.sort((a, b) => (b.author || '').localeCompare(a.author || ''));
+    } else if (sortBy === 'rating-desc') {
+      sorted.sort((a, b) => b.rating - a.rating);
+    } else if (sortBy === 'rating-asc') {
+      sorted.sort((a, b) => a.rating - b.rating);
+    } else if (sortBy === 'date-desc') {
+      sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    } else if (sortBy === 'date-asc') {
+      sorted.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    }
+
+    return sorted;
+  });
+
+  // Calculate statistics
+  const totalBooks = $derived(bookStore.activeItems.length);
+  const readingBooks = $derived(bookStore.activeItems.filter((b) => b.status === 'Reading').length);
+  const wantToReadBooks = $derived(
+    bookStore.activeItems.filter((b) => b.status === 'Want to Read').length,
+  );
+  const completedBooks = $derived(
+    bookStore.activeItems.filter((b) => b.status === 'Completed').length,
+  );
+  const pausedBooks = $derived(bookStore.activeItems.filter((b) => b.status === 'Paused').length);
+  const abandonedBooks = $derived(
+    bookStore.activeItems.filter((b) => b.status === 'Abandoned').length,
+  );
+
+  const totalPagesRead = $derived(
+    bookStore.activeItems.reduce((acc, b) => acc + (b.pagesRead || 0), 0),
+  );
+  const totalPages = $derived(
+    bookStore.activeItems.reduce((acc, b) => acc + (b.pagesTotal || 0), 0),
+  );
+
+  const averageRating = $derived.by(() => {
+    const rated = bookStore.activeItems.filter((b) => b.rating > 0);
+    if (rated.length === 0) return 0;
+    const sum = rated.reduce((acc, b) => acc + b.rating, 0);
+    return Math.round((sum / rated.length) * 10) / 10;
+  });
+
+  const overallProgressPercent = $derived(
+    totalPages > 0
+      ? Math.min(100, Math.max(0, Math.round((totalPagesRead / totalPages) * 100)))
+      : 0,
+  );
+
+  const overallProgressBar = $derived.by(() => {
+    const totalBlocks = 20;
+    const filledBlocks = Math.round((overallProgressPercent / 100) * totalBlocks);
+    const emptyBlocks = totalBlocks - filledBlocks;
+    return `[${'█'.repeat(filledBlocks)}${'░'.repeat(emptyBlocks)}] ${overallProgressPercent}%`;
   });
 
   async function handleAdd() {
-    if (!promptValue.trim()) return;
-
-    await bookStore.create({
+    const newBook = await bookStore.create({
       workspaceId: activeCategory?.workspaceId ?? '',
-      title: promptValue.trim(),
+      title: 'Untitled Book',
       content: '',
-      author: '', rating: 0, status: 'Backlog',
-      tags: []
+      description: '',
+      author: '',
+      rating: 0,
+      status: 'Want to Read',
+      startedAt: null,
+      finishedAt: null,
+      pagesRead: 0,
+      pagesTotal: 0,
+      tags: [],
     });
 
-    promptValue = '';
-  }
-
-  function handleKeydown(e: KeyboardEvent) {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleAdd();
+    if (newBook) {
+      bookStore.openBook(newBook.id);
     }
   }
 
@@ -60,63 +163,257 @@
   }
 </script>
 
-<div class="flex items-center justify-between px-4 py-1.5 border-b border-border bg-box-bg text-xs text-muted-foreground shrink-0 select-none">
-  <span class="font-bold uppercase tracking-widest text-foreground">
-    [{activeCategory?.icon ?? '?'}] {activeCategory?.name ?? 'Books'}
-  </span>
-  <div class="flex items-center gap-1.5">
-    <!-- svelte-ignore a11y_click_events_have_key_events -->
-    <!-- svelte-ignore a11y_no_static_element_interactions -->
-    <span onclick={() => viewStore.setMode('list')} class="px-1.5 py-0.5 cursor-pointer transition-colors uppercase tracking-tui-wide text-tui-xs {viewStore.mode === 'list' ? 'bg-primary text-background font-bold' : 'hover:text-foreground'}">[l]ist</span>
-    <!-- svelte-ignore a11y_click_events_have_key_events -->
-    <!-- svelte-ignore a11y_no_static_element_interactions -->
-    <span onclick={() => viewStore.setMode('grid')} class="px-1.5 py-0.5 cursor-pointer transition-colors uppercase tracking-tui-wide text-tui-xs {viewStore.mode === 'grid' ? 'bg-primary text-background font-bold' : 'hover:text-foreground'}">[g]rid</span>
-    <!-- svelte-ignore a11y_click_events_have_key_events -->
-    <!-- svelte-ignore a11y_no_static_element_interactions -->
-    <span onclick={() => {
-      const nextActive = !viewStore.searchActive;
-      viewStore.setSearchActive(nextActive);
-      if (nextActive) setTimeout(() => promptInput?.focus(), 50);
-    }} class="px-1.5 py-0.5 cursor-pointer transition-colors uppercase tracking-tui-wide text-tui-xs {viewStore.searchActive ? 'bg-primary text-background font-bold' : 'hover:text-foreground'}">[s]earch</span>
+{#if bookStore.activeBook}
+  <BookEditor
+    book={bookStore.activeBook}
+    onClose={() => bookStore.closeBook()}
+    onOpenNote={handleOpenNote}
+  />
+{:else}
+  <!-- Toolbar -->
+  <div
+    class="flex items-center justify-between px-4 py-1.5 border-b border-border bg-box-bg text-xs text-muted-foreground shrink-0 select-none font-mono"
+  >
+    <span class="font-bold uppercase tracking-widest text-foreground">
+      [{activeCategory?.icon ?? '?'}] {activeCategory?.name ?? 'Books'}
+    </span>
+    <div class="flex items-center gap-1.5">
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
+      <span
+        onclick={() => (showStats = !showStats)}
+        class="px-1.5 py-0.5 cursor-pointer transition-colors uppercase tracking-tui-wide text-tui-xs {showStats
+          ? 'bg-primary text-background font-bold'
+          : 'hover:text-foreground'}">[t]ats</span
+      >
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
+      <span
+        onclick={() => viewStore.setMode('list')}
+        class="px-1.5 py-0.5 cursor-pointer transition-colors uppercase tracking-tui-wide text-tui-xs {viewStore.mode ===
+        'list'
+          ? 'bg-primary text-background font-bold'
+          : 'hover:text-foreground'}">[l]ist</span
+      >
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
+      <span
+        onclick={() => viewStore.setMode('grid')}
+        class="px-1.5 py-0.5 cursor-pointer transition-colors uppercase tracking-tui-wide text-tui-xs {viewStore.mode ===
+        'grid'
+          ? 'bg-primary text-background font-bold'
+          : 'hover:text-foreground'}">[g]rid</span
+      >
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
+      <span
+        onclick={() => {
+          const nextActive = !viewStore.searchActive;
+          viewStore.setSearchActive(nextActive);
+          if (nextActive) setTimeout(() => promptInput?.focus(), 50);
+        }}
+        class="px-1.5 py-0.5 cursor-pointer transition-colors uppercase tracking-tui-wide text-tui-xs {viewStore.searchActive
+          ? 'bg-primary text-background font-bold'
+          : 'hover:text-foreground'}">[s]earch</span
+      >
+    </div>
   </div>
-</div>
 
-<div class="px-4 pt-4 shrink-0">
+  <!-- Tag Filter Indicator Badge if a tag is active -->
+  {#if viewStore.selectedTag}
+    <div
+      class="flex items-center justify-between px-4 py-1 border-b border-border bg-accent/25 text-tui-xs text-primary shrink-0 select-none font-bold font-mono"
+    >
+      <div class="flex items-center gap-1">
+        <span>FILTERED BY:</span>
+        <span class="underline">#{viewStore.selectedTag}</span>
+      </div>
+      <button
+        onclick={() => viewStore.clearTag()}
+        class="text-destructive hover:text-red-400 font-bold tracking-tui-wide cursor-pointer bg-transparent hover:bg-transparent border-none p-0 h-auto font-mono text-tui-xs"
+      >
+        [x] CLEAR
+      </button>
+    </div>
+  {/if}
+
+  <!-- Stats Dashboard Section -->
+  {#if showStats}
+    <div class="px-4 pt-4 shrink-0 font-mono text-xs">
+      <div class="border border-border p-4 bg-background relative flex flex-col gap-2">
+        <span
+          class="absolute top-0 right-3 -translate-y-1/2 bg-box-bg px-2 text-tui-2xs text-muted-foreground font-bold uppercase tracking-widest border-x border-border select-none"
+        >
+          // Reading Statistics
+        </span>
+        <div class="grid grid-cols-2 md:grid-cols-6 gap-2 text-muted-foreground">
+          <div>TOTAL: <span class="text-foreground font-bold">{totalBooks}</span></div>
+          <div>READING: <span class="text-primary font-bold">{readingBooks}</span></div>
+          <div>WANT TO READ: <span class="text-foreground font-bold">{wantToReadBooks}</span></div>
+          <div>COMPLETED: <span class="text-foreground font-bold">{completedBooks}</span></div>
+          <div>PAUSED: <span class="text-foreground font-bold">{pausedBooks}</span></div>
+          <div>ABANDONED: <span class="text-foreground font-bold">{abandonedBooks}</span></div>
+        </div>
+        <div
+          class="grid grid-cols-1 md:grid-cols-2 gap-2 text-muted-foreground border-t border-dashed border-border-dim pt-2 mt-1"
+        >
+          <div class="flex items-center gap-2">
+            <span>PAGES READ:</span>
+            <span class="text-foreground font-bold"
+              >{totalPagesRead.toLocaleString()} / {totalPages.toLocaleString()}</span
+            >
+            {#if totalPages > 0}
+              <span class="text-primary font-bold">{overallProgressBar}</span>
+            {/if}
+          </div>
+          <div>
+            AVG RATING: <span class="text-foreground font-bold"
+              >{averageRating > 0
+                ? '★'.repeat(Math.round(averageRating)) + ` (${averageRating})`
+                : 'N/A'}</span
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+  {/if}
+
+  <!-- Search bar (only visible when search is active) -->
   {#if viewStore.searchActive}
-    <div class="flex flex-col mb-4 shrink-0">
-      <div class="flex items-center gap-2 px-3 py-1.5 border border-border bg-transparent text-sm">
-        <span class="text-primary font-bold select-none">?</span>
-        <Input bind:ref={promptInput} bind:value={viewStore.searchQuery} type="text" placeholder="Search books..." class="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-muted-foreground font-mono text-xs h-auto py-0 focus-visible:border-none focus-visible:ring-0 focus-visible:ring-offset-0" />
-      </div>
-    </div>
-  {:else}
-    <div class="flex flex-col mb-4 shrink-0">
-      <div class="flex items-center gap-2 px-3 py-1.5 border border-border bg-transparent text-sm">
-        <span class="text-primary font-bold select-none">$</span>
-        <Input bind:ref={promptInput} bind:value={promptValue} onkeydown={handleKeydown} type="text" placeholder="Type title and press Enter to add..." class="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-muted-foreground font-mono text-xs h-auto py-0 focus-visible:border-none focus-visible:ring-0 focus-visible:ring-offset-0" />
+    <div class="px-4 pt-4 shrink-0 font-mono">
+      <div class="flex flex-col mb-2 shrink-0">
+        <div
+          class="flex items-center gap-2 px-3 py-1.5 border border-border bg-transparent text-sm"
+        >
+          <span class="text-primary font-bold select-none">?</span>
+          <Input
+            bind:ref={promptInput}
+            bind:value={viewStore.searchQuery}
+            type="text"
+            placeholder="Search books..."
+            class="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-muted-foreground font-mono text-xs h-auto py-0 focus-visible:border-none focus-visible:ring-0 focus-visible:ring-offset-0"
+          />
+        </div>
       </div>
     </div>
   {/if}
-</div>
 
-<div class="flex-1 overflow-y-auto p-4 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-box-bg [&::-webkit-scrollbar-thumb]:bg-border hover:[&::-webkit-scrollbar-thumb]:bg-primary min-h-0">
-  {#if displayedItems.length > 0}
-    {#if viewStore.mode === 'list'}
-      <BookList books={displayedItems} onToggleFavorite={(id) => bookStore.toggleFavorite(id)} onDelete={(id) => bookStore.softDelete(id)} onAddTag={(id, tag) => bookStore.addTag(id, tag)} onRemoveTag={(id, tag) => bookStore.removeTag(id, tag)} onEdit={handleEdit} />
+  <!-- Status Filters & Sorting Row -->
+  <div
+    class="flex flex-wrap items-center justify-between gap-2 border-b border-border bg-box-bg/50 px-4 py-2 text-tui-2xs font-mono select-none shrink-0"
+  >
+    <div class="flex items-center gap-1.5 flex-wrap">
+      <span class="text-dim-foreground font-bold">STATUS:</span>
+      {#each ['all', 'Want to Read', 'Reading', 'Paused', 'Completed', 'Abandoned'] as statusOption (statusOption)}
+        <button
+          onclick={() => (statusFilter = statusOption)}
+          class="px-1.5 py-0.5 border border-border hover:border-primary transition-colors text-tui-2xs font-bold uppercase font-mono cursor-pointer {statusFilter ===
+          statusOption
+            ? 'bg-primary text-background font-bold border-primary'
+            : 'text-muted-foreground'}"
+        >
+          {statusOption}
+        </button>
+      {/each}
+    </div>
+
+    <div class="flex items-center gap-1.5">
+      <span class="text-dim-foreground font-bold">SORT BY:</span>
+      <DropdownMenu.Root>
+        <DropdownMenu.Trigger>
+          {#snippet child({ props })}
+            <button
+              {...props}
+              class="bg-box-bg border border-border text-foreground hover:border-primary text-tui-xs px-2 py-0.5 outline-none font-mono cursor-pointer font-bold uppercase select-none flex items-center gap-1"
+            >
+              {sortLabels[sortBy] || sortBy} <span class="text-primary font-bold">▼</span>
+            </button>
+          {/snippet}
+        </DropdownMenu.Trigger>
+        <DropdownMenu.Content
+          class="bg-box-bg border border-border rounded-none font-mono text-tui-xs w-52 max-w-xs shadow-lg"
+        >
+          <DropdownMenu.RadioGroup bind:value={sortBy}>
+            <DropdownMenu.RadioItem value="date-desc">DATE ADDED (NEWEST)</DropdownMenu.RadioItem>
+            <DropdownMenu.RadioItem value="date-asc">DATE ADDED (OLDEST)</DropdownMenu.RadioItem>
+            <DropdownMenu.RadioItem value="title-asc">TITLE (A-Z)</DropdownMenu.RadioItem>
+            <DropdownMenu.RadioItem value="title-desc">TITLE (Z-A)</DropdownMenu.RadioItem>
+            <DropdownMenu.RadioItem value="author-asc">AUTHOR (A-Z)</DropdownMenu.RadioItem>
+            <DropdownMenu.RadioItem value="author-desc">AUTHOR (Z-A)</DropdownMenu.RadioItem>
+            <DropdownMenu.RadioItem value="rating-desc">RATING (HIGH TO LOW)</DropdownMenu.RadioItem
+            >
+          </DropdownMenu.RadioGroup>
+        </DropdownMenu.Content>
+      </DropdownMenu.Root>
+    </div>
+  </div>
+
+  <!-- Grid/List layout container -->
+  <div
+    class="flex-1 overflow-y-auto p-4 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-box-bg [&::-webkit-scrollbar-thumb]:bg-border hover:[&::-webkit-scrollbar-thumb]:bg-primary min-h-0"
+  >
+    {#if bookStore.isLoading}
+      {#if viewStore.mode === 'list'}
+        <div class="flex flex-col gap-3 font-mono">
+          {#each Array(4) as _, i (i)}
+            <div
+              class="border border-border p-3 bg-background flex flex-col md:flex-row gap-3 h-18 justify-between items-center select-none"
+            >
+              <div class="flex-1 flex flex-col gap-2 w-full">
+                <Skeleton class="h-4 w-1/3 bg-muted/20" />
+                <Skeleton class="h-3 w-1/2 bg-muted/20" />
+              </div>
+              <Skeleton class="h-6 w-24 bg-muted/20 shrink-0" />
+            </div>
+          {/each}
+        </div>
+      {:else}
+        <div
+          class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 font-mono select-none"
+        >
+          {#each Array(4) as _, i (i)}
+            <div class="border border-border p-4 bg-background flex flex-col gap-3 h-75">
+              <Skeleton class="w-full aspect-3/4 bg-muted/20 shrink-0" />
+              <Skeleton class="h-4 w-3/4 bg-muted/20" />
+              <Skeleton class="h-3 w-1/2 bg-muted/20" />
+              <Skeleton class="h-3 w-full bg-muted/20 mt-auto" />
+            </div>
+          {/each}
+        </div>
+      {/if}
     {:else}
-      <BookGrid books={displayedItems} onToggleFavorite={(id) => bookStore.toggleFavorite(id)} onDelete={(id) => bookStore.softDelete(id)} onAddTag={(id, tag) => bookStore.addTag(id, tag)} onRemoveTag={(id, tag) => bookStore.removeTag(id, tag)} onEdit={handleEdit} />
+      {#if viewStore.mode === 'list'}
+        <BookList
+          books={displayedItems}
+          onToggleFavorite={(id) => bookStore.toggleFavorite(id)}
+          onDelete={(id) => bookStore.softDelete(id)}
+          onAddTag={(id, tag) => bookStore.addTag(id, tag)}
+          onRemoveTag={(id, tag) => bookStore.removeTag(id, tag)}
+          onEdit={handleEdit}
+          onOpen={(id) => bookStore.openBook(id)}
+          onAddBook={handleAdd}
+        />
+      {:else}
+        <BookGrid
+          books={displayedItems}
+          onToggleFavorite={(id) => bookStore.toggleFavorite(id)}
+          onDelete={(id) => bookStore.softDelete(id)}
+          onAddTag={(id, tag) => bookStore.addTag(id, tag)}
+          onRemoveTag={(id, tag) => bookStore.removeTag(id, tag)}
+          onEdit={handleEdit}
+          onOpen={(id) => bookStore.openBook(id)}
+          onAddBook={handleAdd}
+        />
+      {/if}
     {/if}
-  {:else}
-    <div class="flex flex-col items-center justify-center h-full text-center select-none gap-2 py-8">
-      <p class="text-xs uppercase tracking-wider text-destructive">✗ No records found</p>
-      <p class="text-tui-xs text-dim-foreground">{viewStore.searchActive ? '> Refine your search query' : `> Type above to add a new record`}</p>
-    </div>
-  {/if}
-</div>
+  </div>
 
-<div class="flex items-center justify-end px-4 py-1 border-t border-border bg-box-bg text-tui-xs text-muted-foreground select-none shrink-0 font-bold">
-  {displayedItems.length} item{displayedItems.length === 1 ? '' : 's'}
-</div>
+  <div
+    class="flex items-center justify-end px-4 py-1 border-t border-border bg-box-bg text-tui-xs text-muted-foreground select-none shrink-0 font-bold font-mono"
+  >
+    {displayedItems.length} book{displayedItems.length === 1 ? '' : 's'}
+  </div>
+{/if}
 
 {#if editDialogOpen && editId}
   <EditBookDialog bind:open={editDialogOpen} bookId={editId} />
