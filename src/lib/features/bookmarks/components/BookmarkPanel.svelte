@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { Button } from '$lib/shared/components/ui/button';
   import { Input } from '$lib/shared/components/ui/input';
   import BookmarkGrid from './BookmarkGrid.svelte';
   import BookmarkList from './BookmarkList.svelte';
@@ -14,14 +13,12 @@
     mode: 'list' | 'grid';
     searchActive: boolean;
     searchQuery: string;
-    selectedTag: string | null;
     promptInput: HTMLInputElement | null;
     stats: WorkspaceStats[];
     // Callbacks
     onModeChange: (mode: 'list' | 'grid') => void;
     onSearchToggle: (active: boolean) => void;
     onSearchChange: (query: string) => void;
-    onClearTag: () => void;
     onEdit: (id: string) => void;
     onDelete: (id: string) => void;
     onToggleFavorite: (id: string) => void;
@@ -45,13 +42,11 @@
     mode,
     searchActive,
     searchQuery = $bindable(''),
-    selectedTag,
     promptInput = $bindable(null),
     stats,
     onModeChange,
     onSearchToggle,
     onSearchChange,
-    onClearTag,
     onEdit,
     onDelete,
     onToggleFavorite,
@@ -114,26 +109,6 @@
     </div>
   {/if}
 </div>
-
-<!-- Tag Filter Indicator Badge if a tag is active -->
-{#if selectedTag}
-  <div
-    class="flex items-center justify-between px-4 py-1 border-b border-border bg-accent/25 text-tui-xs text-primary shrink-0 select-none font-bold"
-  >
-    <div class="flex items-center gap-1">
-      <span>FILTERED BY:</span>
-      <span class="underline">#{selectedTag}</span>
-    </div>
-    <Button
-      variant="ghost"
-      size="xs"
-      onclick={onClearTag}
-      class="text-destructive hover:text-red-400 font-bold tracking-tui-wide cursor-pointer bg-transparent hover:bg-transparent border-none p-0 h-auto font-mono text-tui-xs"
-    >
-      [x] CLEAR
-    </Button>
-  </div>
-{/if}
 
 <!-- Input Container (prevents layout shift) -->
 {#if category !== 'settings'}

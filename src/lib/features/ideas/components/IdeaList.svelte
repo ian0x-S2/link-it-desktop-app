@@ -6,7 +6,6 @@
   import IdeaCard from './IdeaCard.svelte';
   import IdeaInputBar from './IdeaInputBar.svelte';
   import { Input } from '$lib/shared/components/ui/input';
-  import { Button } from '$lib/shared/components/ui/button';
 
   let activeTab = $state<'all' | 'starred'>('all');
   let searchActive = $state(false);
@@ -113,26 +112,6 @@
     </span>
   </div>
 </div>
-
-<!-- Tag Filter Indicator Badge if a tag is active -->
-{#if viewStore.selectedTag}
-  <div
-    class="flex items-center justify-between px-4 py-1 border-b border-border bg-accent/25 text-tui-xs text-primary shrink-0 select-none font-bold"
-  >
-    <div class="flex items-center gap-1 font-mono">
-      <span>FILTERED BY:</span>
-      <span class="underline">#{viewStore.selectedTag}</span>
-    </div>
-    <Button
-      variant="ghost"
-      size="xs"
-      onclick={() => viewStore.clearTag()}
-      class="text-destructive hover:text-red-400 font-bold tracking-tui-wide cursor-pointer bg-transparent hover:bg-transparent border-none p-0 h-auto font-mono text-tui-xs"
-    >
-      [x] CLEAR
-    </Button>
-  </div>
-{/if}
 
 {#if searchActive}
   <div class="shrink-0 border-b border-border bg-box-bg px-3 py-2 h-15.5 flex items-center">

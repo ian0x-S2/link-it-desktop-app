@@ -364,12 +364,10 @@
             mode={viewStore.mode}
             searchActive={viewStore.searchActive}
             bind:searchQuery={viewStore.searchQuery}
-            selectedTag={viewStore.selectedTag}
             bind:promptInput
             onModeChange={(m) => viewStore.setMode(m)}
             onSearchToggle={(active) => viewStore.setSearchActive(active)}
             onSearchChange={(q) => { viewStore.searchQuery = q; }}
-            onClearTag={() => viewStore.clearTag()}
             onEdit={handleEdit}
             onDelete={(id) =>
               centerView === 'trash'

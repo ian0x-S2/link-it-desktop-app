@@ -175,24 +175,6 @@
     </div>
   </div>
 
-  <!-- Tag Filter Indicator Badge if a tag is active -->
-  {#if viewStore.selectedTag}
-    <div
-      class="flex items-center justify-between px-4 py-1 border-b border-border bg-accent/25 text-tui-xs text-primary shrink-0 select-none font-bold font-mono"
-    >
-      <div class="flex items-center gap-1">
-        <span>FILTERED BY:</span>
-        <span class="underline">#{viewStore.selectedTag}</span>
-      </div>
-      <button
-        onclick={() => viewStore.clearTag()}
-        class="text-destructive hover:text-red-400 font-bold tracking-tui-wide cursor-pointer bg-transparent hover:bg-transparent border-none p-0 h-auto font-mono text-tui-xs"
-      >
-        [x] CLEAR
-      </button>
-    </div>
-  {/if}
-
 
 
   <!-- Search bar (only visible when search is active) -->
