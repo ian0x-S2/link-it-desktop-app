@@ -321,7 +321,13 @@
           <span class="text-destructive font-bold text-tui-xs">[{bookStore.error}]</span>
         {/if}
       </Dialog.Title>
-      <Button variant="ghost" size="xs" onclick={props.onClose} class="text-muted-foreground hover:text-foreground font-mono text-tui-xs cursor-pointer bg-transparent hover:bg-transparent border-none p-0 h-auto font-bold uppercase select-none shadow-none">[CLOSE]</Button>
+      <Button
+        variant="ghost"
+        size="xs"
+        onclick={props.onClose}
+        class="text-muted-foreground hover:text-foreground font-mono text-tui-xs cursor-pointer bg-transparent hover:bg-transparent border-none p-0 h-auto font-bold uppercase select-none shadow-none"
+        >[CLOSE]</Button
+      >
     </Dialog.Header>
 
     <div class="px-4 py-4 flex flex-col gap-4 overflow-y-auto flex-1 select-text">
@@ -613,7 +619,7 @@
               onblur={saveMetadata}
               rows={4}
               placeholder="Write your personal notes, summaries, or quotes..."
-              class="w-full bg-transparent border border-border text-foreground font-mono text-xs px-2 py-1 focus-visible:ring-0 focus-visible:ring-offset-0 resize-none h-auto font-mono"
+              class="w-full bg-transparent border border-border text-foreground font-mono text-xs px-2 py-1 focus-visible:ring-0 focus-visible:ring-offset-0 resize-none h-auto  "
             />
           </div>
         </div>
