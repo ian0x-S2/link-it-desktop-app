@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { Book } from '../types/book';
   import { Input } from '$lib/shared/components/ui/input';
   import { bookStore } from '../stores/book.svelte';
   import { viewStore } from '$lib/shared/stores/view.svelte';
@@ -6,8 +7,7 @@
   import { pageStore } from '$lib/features/pages/stores/page.svelte';
   import BookGrid from './BookGrid.svelte';
   import BookList from './BookList.svelte';
-  import BookEditor from './BookEditor.svelte';
-  import EditBookDialog from './EditBookDialog.svelte';
+  import BookEditorDialog from './BookEditorDialog.svelte';
   import * as DropdownMenu from '$lib/shared/components/ui/dropdown-menu';
   import { Skeleton } from '$lib/shared/components/ui/skeleton';
 
@@ -35,15 +35,36 @@
     'rating-desc': 'RATING (HIGH TO LOW)',
   };
 
-  let editDialogOpen = $state(false);
-  let editId = $state<string | null>(null);
+
 
   // Status Filter and Sort state
   let statusFilter = $state('all');
   let sortBy = $state('date-desc');
-  let showStats = $state(false);
+  let isCreatingNew = $state(false);
 
   const activeCategory = $derived(categoryStore.active);
+
+  const draftBook = $derived<Book>({
+    id: 'draft',
+    workspaceId: activeCategory?.workspaceId ?? '',
+    title: '',
+    author: '',
+    content: '',
+    description: '',
+    rating: 0,
+    status: 'Want to Read',
+    startedAt: null,
+    finishedAt: null,
+    pagesRead: 0,
+    pagesTotal: 0,
+    tags: [],
+    isFavorite: false,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    deletedAt: null,
+    url: null,
+    imageUrl: null,
+  });
 
   // Filter and sort books reactively
   const displayedItems = $derived.by(() => {
@@ -95,81 +116,24 @@
     return sorted;
   });
 
-  // Calculate statistics
-  const totalBooks = $derived(bookStore.activeItems.length);
-  const readingBooks = $derived(bookStore.activeItems.filter((b) => b.status === 'Reading').length);
-  const wantToReadBooks = $derived(
-    bookStore.activeItems.filter((b) => b.status === 'Want to Read').length,
-  );
-  const completedBooks = $derived(
-    bookStore.activeItems.filter((b) => b.status === 'Completed').length,
-  );
-  const pausedBooks = $derived(bookStore.activeItems.filter((b) => b.status === 'Paused').length);
-  const abandonedBooks = $derived(
-    bookStore.activeItems.filter((b) => b.status === 'Abandoned').length,
-  );
+  function handleAdd() {
+    isCreatingNew = true;
+  }
 
-  const totalPagesRead = $derived(
-    bookStore.activeItems.reduce((acc, b) => acc + (b.pagesRead || 0), 0),
-  );
-  const totalPages = $derived(
-    bookStore.activeItems.reduce((acc, b) => acc + (b.pagesTotal || 0), 0),
-  );
-
-  const averageRating = $derived.by(() => {
-    const rated = bookStore.activeItems.filter((b) => b.rating > 0);
-    if (rated.length === 0) return 0;
-    const sum = rated.reduce((acc, b) => acc + b.rating, 0);
-    return Math.round((sum / rated.length) * 10) / 10;
-  });
-
-  const overallProgressPercent = $derived(
-    totalPages > 0
-      ? Math.min(100, Math.max(0, Math.round((totalPagesRead / totalPages) * 100)))
-      : 0,
-  );
-
-  const overallProgressBar = $derived.by(() => {
-    const totalBlocks = 20;
-    const filledBlocks = Math.round((overallProgressPercent / 100) * totalBlocks);
-    const emptyBlocks = totalBlocks - filledBlocks;
-    return `[${'█'.repeat(filledBlocks)}${'░'.repeat(emptyBlocks)}] ${overallProgressPercent}%`;
-  });
-
-  async function handleAdd() {
-    const newBook = await bookStore.create({
+  async function handleCreateBook(bookData: Omit<Book, 'id' | 'createdAt' | 'updatedAt' | 'workspaceId' | 'isFavorite' | 'deletedAt'>) {
+    await bookStore.create({
       workspaceId: activeCategory?.workspaceId ?? '',
-      title: 'Untitled Book',
-      content: '',
-      description: '',
-      author: '',
-      rating: 0,
-      status: 'Want to Read',
-      startedAt: null,
-      finishedAt: null,
-      pagesRead: 0,
-      pagesTotal: 0,
-      tags: [],
+      ...bookData,
     });
-
-    if (newBook) {
-      bookStore.openBook(newBook.id);
-    }
+    isCreatingNew = false;
   }
 
   function handleEdit(id: string) {
-    editId = id;
-    editDialogOpen = true;
+    bookStore.openBook(id);
   }
 </script>
 
-{#if bookStore.activeBook}
-  <BookEditor
-    book={bookStore.activeBook}
-    onClose={() => bookStore.closeBook()}
-    onOpenNote={handleOpenNote}
-  />
-{:else}
+
   <!-- Toolbar -->
   <div
     class="flex items-center justify-between px-4 py-1.5 border-b border-border bg-box-bg text-xs text-muted-foreground shrink-0 select-none font-mono"
@@ -178,14 +142,6 @@
       [{activeCategory?.icon ?? '?'}] {activeCategory?.name ?? 'Books'}
     </span>
     <div class="flex items-center gap-1.5">
-      <!-- svelte-ignore a11y_click_events_have_key_events -->
-      <!-- svelte-ignore a11y_no_static_element_interactions -->
-      <span
-        onclick={() => (showStats = !showStats)}
-        class="px-1.5 py-0.5 cursor-pointer transition-colors uppercase tracking-tui-wide text-tui-xs {showStats
-          ? 'bg-primary text-background font-bold'
-          : 'hover:text-foreground'}">[t]ats</span
-      >
       <!-- svelte-ignore a11y_click_events_have_key_events -->
       <!-- svelte-ignore a11y_no_static_element_interactions -->
       <span
@@ -237,46 +193,7 @@
     </div>
   {/if}
 
-  <!-- Stats Dashboard Section -->
-  {#if showStats}
-    <div class="px-4 pt-4 shrink-0 font-mono text-xs">
-      <div class="border border-border p-4 bg-background relative flex flex-col gap-2">
-        <span
-          class="absolute top-0 right-3 -translate-y-1/2 bg-box-bg px-2 text-tui-2xs text-muted-foreground font-bold uppercase tracking-widest border-x border-border select-none"
-        >
-          // Reading Statistics
-        </span>
-        <div class="grid grid-cols-2 md:grid-cols-6 gap-2 text-muted-foreground">
-          <div>TOTAL: <span class="text-foreground font-bold">{totalBooks}</span></div>
-          <div>READING: <span class="text-primary font-bold">{readingBooks}</span></div>
-          <div>WANT TO READ: <span class="text-foreground font-bold">{wantToReadBooks}</span></div>
-          <div>COMPLETED: <span class="text-foreground font-bold">{completedBooks}</span></div>
-          <div>PAUSED: <span class="text-foreground font-bold">{pausedBooks}</span></div>
-          <div>ABANDONED: <span class="text-foreground font-bold">{abandonedBooks}</span></div>
-        </div>
-        <div
-          class="grid grid-cols-1 md:grid-cols-2 gap-2 text-muted-foreground border-t border-dashed border-border-dim pt-2 mt-1"
-        >
-          <div class="flex items-center gap-2">
-            <span>PAGES READ:</span>
-            <span class="text-foreground font-bold"
-              >{totalPagesRead.toLocaleString()} / {totalPages.toLocaleString()}</span
-            >
-            {#if totalPages > 0}
-              <span class="text-primary font-bold">{overallProgressBar}</span>
-            {/if}
-          </div>
-          <div>
-            AVG RATING: <span class="text-foreground font-bold"
-              >{averageRating > 0
-                ? '★'.repeat(Math.round(averageRating)) + ` (${averageRating})`
-                : 'N/A'}</span
-            >
-          </div>
-        </div>
-      </div>
-    </div>
-  {/if}
+
 
   <!-- Search bar (only visible when search is active) -->
   {#if viewStore.searchActive}
@@ -413,8 +330,23 @@
   >
     {displayedItems.length} book{displayedItems.length === 1 ? '' : 's'}
   </div>
+
+{#if bookStore.activeBook}
+  <BookEditorDialog
+    book={bookStore.activeBook}
+    onClose={() => bookStore.closeBook()}
+    onOpenNote={handleOpenNote}
+  />
 {/if}
 
-{#if editDialogOpen && editId}
-  <EditBookDialog bind:open={editDialogOpen} bookId={editId} />
+{#if isCreatingNew}
+  <BookEditorDialog
+    book={draftBook}
+    isNew={true}
+    onClose={() => { isCreatingNew = false; }}
+    onSaveNew={handleCreateBook}
+    onOpenNote={handleOpenNote}
+  />
 {/if}
+
+

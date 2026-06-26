@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Book } from '../types/book';
   import { Button } from '$lib/shared/components/ui/button';
+  import * as Dialog from '$lib/shared/components/ui/dialog';
   import { Input } from '$lib/shared/components/ui/input';
   import { Textarea } from '$lib/shared/components/ui/textarea';
   import { Badge } from '$lib/shared/components/ui/badge';
@@ -23,6 +24,13 @@
     book: Book;
     onClose: () => void;
     onOpenNote: (pageId: string) => void;
+    isNew?: boolean;
+    onSaveNew?: (
+      bookData: Omit<
+        Book,
+        'id' | 'createdAt' | 'updatedAt' | 'workspaceId' | 'isFavorite' | 'deletedAt'
+      >,
+    ) => void;
   }>();
 
   // Metadata local states
@@ -36,10 +44,30 @@
   let pagesTotalValue = $state((() => props.book.pagesTotal)());
   let imageUrlValue = $state((() => props.book.imageUrl || '')());
   let descriptionValue = $state((() => props.book.description)());
+  let contentValue = $state((() => props.book.content || '')());
+  let urlValue = $state((() => props.book.url || '')());
   let tagsList = $state((() => (props.book.tags ? [...props.book.tags] : []))());
 
   let startedAtDate = $state<DateValue | undefined>(undefined);
   let finishedAtDate = $state<DateValue | undefined>(undefined);
+
+  $effect(() => {
+    // Reset/sync local state if the book reference or ID changes
+    const currentBook = props.book;
+    titleValue = currentBook.title;
+    authorValue = currentBook.author;
+    ratingValue = currentBook.rating;
+    statusValue = currentBook.status;
+    startedAtValue = currentBook.startedAt || '';
+    finishedAtValue = currentBook.finishedAt || '';
+    pagesReadValue = currentBook.pagesRead;
+    pagesTotalValue = currentBook.pagesTotal;
+    imageUrlValue = currentBook.imageUrl || '';
+    descriptionValue = currentBook.description;
+    contentValue = currentBook.content || '';
+    urlValue = currentBook.url || '';
+    tagsList = currentBook.tags ? [...currentBook.tags] : [];
+  });
 
   $effect(() => {
     if (startedAtValue) {
@@ -151,6 +179,7 @@
   });
 
   function saveMetadata() {
+    if (props.isNew) return;
     bookStore.save(props.book.id, {
       title: titleValue.trim(),
       author: authorValue.trim(),
@@ -162,6 +191,8 @@
       pagesTotal: Number(pagesTotalValue),
       imageUrl: imageUrlValue.trim() || null,
       description: descriptionValue.trim(),
+      content: contentValue.trim(),
+      url: urlValue.trim() || null,
     });
   }
 
@@ -169,7 +200,9 @@
     const clean = normaliseTag(tag);
     if (clean && !tagsList.includes(clean)) {
       tagsList = [...tagsList, clean];
-      await bookStore.addTag(props.book.id, clean);
+      if (!props.isNew) {
+        await bookStore.addTag(props.book.id, clean);
+      }
     }
     newTagValue = '';
     addTagOpen = false;
@@ -177,7 +210,29 @@
 
   async function handleRemoveTag(tag: string) {
     tagsList = tagsList.filter((t) => t !== tag);
-    await bookStore.removeTag(props.book.id, tag);
+    if (!props.isNew) {
+      await bookStore.removeTag(props.book.id, tag);
+    }
+  }
+
+  async function handleSaveNewBook() {
+    if (props.onSaveNew) {
+      props.onSaveNew({
+        title: titleValue.trim() || 'Untitled Book',
+        author: authorValue.trim(),
+        rating: Number(ratingValue),
+        status: statusValue,
+        startedAt: startedAtValue || null,
+        finishedAt: finishedAtValue || null,
+        pagesRead: Number(pagesReadValue),
+        pagesTotal: Number(pagesTotalValue),
+        imageUrl: imageUrlValue.trim() || null,
+        description: descriptionValue.trim(),
+        content: contentValue.trim(),
+        url: urlValue.trim() || null,
+        tags: tagsList,
+      });
+    }
   }
 
   function handleTagKeydown(e: KeyboardEvent) {
@@ -241,49 +296,42 @@
   }
 </script>
 
-<div class="flex flex-col h-full min-h-0 bg-box-bg font-mono">
-  <!-- Top Toolbar -->
-  <div
-    class="flex items-center justify-between px-3 py-1.5 border-b border-border bg-box-bg shrink-0 z-10 select-none"
+<Dialog.Root
+  open={true}
+  onOpenChange={(val) => {
+    if (!val) props.onClose();
+  }}
+>
+  <Dialog.Content
+    showCloseButton={false}
+    class="rounded-none border border-border bg-box-bg font-mono text-foreground p-0 gap-0 w-full max-w-[95vw] md:max-w-6xl h-[70vh] flex flex-col shadow-xl animate-in fade-in zoom-in-95 duration-150"
   >
-    <div class="flex items-center gap-3">
-      <!-- svelte-ignore a11y_click_events_have_key_events -->
-      <!-- svelte-ignore a11y_no_static_element_interactions -->
-      <span
-        class="text-tui-xs text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
-        onclick={props.onClose}
+    <Dialog.Header
+      class="px-4 pt-4 pb-3 border-b border-border flex flex-row items-center justify-between shrink-0"
+    >
+      <Dialog.Title
+        class="text-xs font-bold uppercase tracking-widest text-primary flex items-center gap-1.5"
       >
-        ← BACK
-      </span>
-      <span class="text-tui-xs text-muted-foreground">|</span>
-      <span class="text-tui-xs text-foreground font-bold truncate max-w-xs">
-        {titleValue || 'Untitled Book'}
-      </span>
-    </div>
-    <div class="flex items-center gap-2">
-      {#if bookStore.error}
-        <span class="text-destructive font-bold text-tui-xs">[{bookStore.error}]</span>
-      {/if}
-    </div>
-  </div>
+        {#if props.isNew}
+          <span>📖 New Book: {titleValue || 'Untitled Book'}</span>
+        {:else}
+          <span>📖 Book Details: {titleValue || 'Untitled Book'}</span>
+        {/if}
+        {#if bookStore.error}
+          <span class="text-destructive font-bold text-tui-xs">[{bookStore.error}]</span>
+        {/if}
+      </Dialog.Title>
+      <Button variant="ghost" size="xs" onclick={props.onClose} class="text-muted-foreground hover:text-foreground font-mono text-tui-xs cursor-pointer bg-transparent hover:bg-transparent border-none p-0 h-auto font-bold uppercase select-none shadow-none">[CLOSE]</Button>
+    </Dialog.Header>
 
-  <!-- Main Workspace: Scrollable Metadata Dashboard -->
-  <div class="flex-1 min-h-0 overflow-y-auto flex flex-col p-4 gap-4 select-text">
-    <!-- Metadata Dashboard Card -->
-    <div class="border border-border p-4 bg-background relative flex flex-col gap-4 text-xs">
-      <span
-        class="absolute top-0 right-3 -translate-y-1/2 bg-box-bg px-2 text-tui-2xs text-muted-foreground font-bold uppercase tracking-widest border-x border-border select-none"
-      >
-        // Book Metadata
-      </span>
-
+    <div class="px-4 py-4 flex flex-col gap-4 overflow-y-auto flex-1 select-text">
       <!-- Open Library Metadata Import Row -->
       <div class="flex flex-col gap-2 border-b border-dashed border-border-dim pb-3">
         <div class="flex flex-wrap items-center gap-2">
           <span class="text-tui-2xs font-bold text-primary select-none uppercase tracking-widest"
             >// Import Metadata:</span
           >
-          <input
+          <Input
             type="text"
             bind:value={autofillSearchQuery}
             onkeydown={(e) => {
@@ -293,15 +341,17 @@
               }
             }}
             placeholder="Search title, author, or ISBN..."
-            class="bg-transparent border border-border text-foreground font-mono text-xs px-2 py-0.5 outline-none focus:border-primary flex-1 max-w-md"
+            class="bg-transparent border border-border text-foreground font-mono text-xs px-2 py-0.5 outline-none focus:border-primary flex-1 max-w-md h-auto"
           />
-          <button
+          <Button
+            variant="outline"
+            size="xs"
             onclick={handleOpenLibrarySearch}
             disabled={isSearchingOL}
-            class="px-2 py-0.5 border border-primary text-primary hover:bg-primary hover:text-background transition-colors text-tui-xs font-bold disabled:opacity-50 disabled:cursor-not-allowed uppercase font-mono cursor-pointer"
+            class="px-2 py-0.5 border border-primary text-primary hover:bg-primary hover:text-background transition-colors text-tui-xs font-bold disabled:opacity-50 disabled:cursor-not-allowed uppercase font-mono cursor-pointer h-auto"
           >
             {isSearchingOL ? '[searching...]' : '[search open library]'}
-          </button>
+          </Button>
         </div>
 
         {#if isSearchingOL}
@@ -331,15 +381,20 @@
               class="text-tui-xs text-muted-foreground font-bold select-none border-b border-border pb-1 flex justify-between uppercase"
             >
               <span>Select a match to autofill metadata:</span>
-              <button
+              <Button
+                variant="ghost"
+                size="xs"
                 onclick={() => (openLibraryResults = [])}
-                class="text-destructive font-bold hover:underline cursor-pointer">[close]</button
+                class="text-destructive font-bold hover:underline cursor-pointer p-0 h-auto hover:bg-transparent bg-transparent shadow-none"
+                >[close]</Button
               >
             </div>
             {#each openLibraryResults as result, index (result.title + result.author + (result.isbn || '') + index)}
-              <button
+              <Button
+                variant="ghost"
+                size="xs"
                 onclick={() => applyOpenLibraryMetadata(result)}
-                class="text-left w-full hover:bg-primary/10 p-1.5 flex gap-3 items-center text-tui-xs transition-colors border-b border-border/30 last:border-none cursor-pointer"
+                class="text-left w-full hover:bg-primary/10 p-1.5 flex gap-3 items-center text-tui-xs transition-colors border-b border-border/30 last:border-none cursor-pointer h-auto rounded-none justify-start shadow-none"
               >
                 {#if result.imageUrl}
                   <img
@@ -365,7 +420,7 @@
                     </div>
                   {/if}
                 </div>
-              </button>
+              </Button>
             {/each}
           </div>
         {/if}
@@ -393,12 +448,26 @@
               class="text-tui-2xs uppercase text-muted-foreground font-bold tracking-wider select-none"
               >Cover Image URL</span
             >
-            <input
+            <Input
               type="text"
               bind:value={imageUrlValue}
               onblur={saveMetadata}
               placeholder="https://..."
-              class="w-full bg-transparent border border-border text-foreground font-mono text-tui-xs px-1.5 py-0.5 outline-none focus:border-primary"
+              class="w-full bg-transparent border border-border text-foreground font-mono text-tui-xs px-1.5 py-0.5 outline-none focus:border-primary h-auto"
+            />
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <span
+              class="text-tui-2xs uppercase text-muted-foreground font-bold tracking-wider select-none"
+              >URL / Link</span
+            >
+            <Input
+              type="text"
+              bind:value={urlValue}
+              onblur={saveMetadata}
+              placeholder="https://..."
+              class="w-full bg-transparent border border-border text-foreground font-mono text-tui-xs px-1.5 py-0.5 outline-none focus:border-primary h-auto"
             />
           </div>
         </div>
@@ -411,11 +480,11 @@
                 class="text-tui-2xs uppercase text-muted-foreground font-bold tracking-wider select-none"
                 >Book Title</span
               >
-              <input
+              <Input
                 type="text"
                 bind:value={titleValue}
                 onblur={saveMetadata}
-                class="w-full bg-transparent border border-border text-foreground font-mono text-xs px-2 py-1 outline-none focus:border-primary font-bold"
+                class="w-full bg-transparent border border-border text-foreground font-mono text-xs px-2 py-1 outline-none focus:border-primary font-bold h-auto"
               />
             </div>
 
@@ -424,11 +493,11 @@
                 class="text-tui-2xs uppercase text-muted-foreground font-bold tracking-wider select-none"
                 >Author</span
               >
-              <input
+              <Input
                 type="text"
                 bind:value={authorValue}
                 onblur={saveMetadata}
-                class="w-full bg-transparent border border-border text-foreground font-mono text-xs px-2 py-1 outline-none focus:border-primary"
+                class="w-full bg-transparent border border-border text-foreground font-mono text-xs px-2 py-1 outline-none focus:border-primary h-auto"
               />
             </div>
           </div>
@@ -442,13 +511,15 @@
               <DropdownMenu.Root>
                 <DropdownMenu.Trigger>
                   {#snippet child({ props })}
-                    <button
+                    <Button
+                      variant="outline"
+                      size="xs"
                       {...props}
-                      class="w-full text-left bg-box-bg border border-border text-foreground font-mono text-xs px-2 py-1.5 outline-none focus:border-primary flex justify-between items-center cursor-pointer select-none font-bold"
+                      class="w-full text-left bg-box-bg border border-border text-foreground font-mono text-xs px-2 py-1.5 outline-none focus:border-primary flex justify-between items-center cursor-pointer select-none font-bold h-auto shadow-none"
                     >
                       <span>{statusValue}</span>
                       <span class="text-primary font-bold">▼</span>
-                    </button>
+                    </Button>
                   {/snippet}
                 </DropdownMenu.Trigger>
                 <DropdownMenu.Content
@@ -481,9 +552,11 @@
               <DropdownMenu.Root>
                 <DropdownMenu.Trigger>
                   {#snippet child({ props })}
-                    <button
+                    <Button
+                      variant="outline"
+                      size="xs"
                       {...props}
-                      class="w-full text-left bg-box-bg border border-border text-foreground font-mono text-xs px-2 py-1.5 outline-none focus:border-primary flex justify-between items-center cursor-pointer select-none font-bold"
+                      class="w-full text-left bg-box-bg border border-border text-foreground font-mono text-xs px-2 py-1.5 outline-none focus:border-primary flex justify-between items-center cursor-pointer select-none font-bold h-auto shadow-none"
                     >
                       <span
                         >{ratingValue > 0
@@ -491,7 +564,7 @@
                           : 'No Rating'}</span
                       >
                       <span class="text-primary font-bold">▼</span>
-                    </button>
+                    </Button>
                   {/snippet}
                 </DropdownMenu.Trigger>
                 <DropdownMenu.Content
@@ -529,6 +602,20 @@
               class="w-full bg-transparent border border-border text-foreground font-mono text-xs px-2 py-1 focus-visible:ring-0 focus-visible:ring-offset-0 resize-none h-auto"
             />
           </div>
+
+          <div class="flex flex-col gap-1">
+            <span
+              class="text-tui-2xs uppercase text-muted-foreground font-bold tracking-wider select-none"
+              >Personal Notes / Summary (Markdown)</span
+            >
+            <Textarea
+              bind:value={contentValue}
+              onblur={saveMetadata}
+              rows={4}
+              placeholder="Write your personal notes, summaries, or quotes..."
+              class="w-full bg-transparent border border-border text-foreground font-mono text-xs px-2 py-1 focus-visible:ring-0 focus-visible:ring-offset-0 resize-none h-auto font-mono"
+            />
+          </div>
         </div>
 
         <!-- Right: Progress & Dates -->
@@ -546,24 +633,24 @@
                 <span class="text-tui-2xs text-dim-foreground font-bold uppercase select-none"
                   >Pages Read</span
                 >
-                <input
+                <Input
                   type="number"
                   bind:value={pagesReadValue}
                   onblur={saveMetadata}
                   min={0}
-                  class="w-full bg-transparent border border-border text-foreground font-mono text-xs px-2 py-1 outline-none focus:border-primary"
+                  class="w-full bg-transparent border border-border text-foreground font-mono text-xs px-2 py-1 outline-none focus:border-primary h-auto"
                 />
               </div>
               <div class="flex flex-col gap-0.5">
                 <span class="text-tui-2xs text-dim-foreground font-bold uppercase select-none"
                   >Total Pages</span
                 >
-                <input
+                <Input
                   type="number"
                   bind:value={pagesTotalValue}
                   onblur={saveMetadata}
                   min={0}
-                  class="w-full bg-transparent border border-border text-foreground font-mono text-xs px-2 py-1 outline-none focus:border-primary"
+                  class="w-full bg-transparent border border-border text-foreground font-mono text-xs px-2 py-1 outline-none focus:border-primary h-auto"
                 />
               </div>
             </div>
@@ -583,18 +670,20 @@
                 <Popover.Root>
                   <Popover.Trigger>
                     {#snippet child({ props })}
-                      <button
+                      <Button
+                        variant="outline"
+                        size="xs"
                         {...props}
-                        class="w-full text-left bg-transparent border border-border text-foreground font-mono text-tui-xs px-2 py-1 outline-none focus:border-primary flex justify-between items-center cursor-pointer select-none font-bold"
+                        class="w-full text-left bg-transparent border border-border text-foreground font-mono text-tui-xs px-2 py-1 outline-none focus:border-primary flex justify-between items-center cursor-pointer select-none font-bold h-auto shadow-none"
                       >
                         <span>{startedAtValue ? startedAtValue : 'Select Date'}</span>
                         <span class="text-primary font-bold">📅</span>
-                      </button>
+                      </Button>
                     {/snippet}
                   </Popover.Trigger>
                   <Popover.Content
                     class="p-0 border border-border bg-box-bg rounded-none shadow-lg w-auto"
-                    align="start"
+                    align="center"
                   >
                     <Calendar
                       type="single"
@@ -623,13 +712,15 @@
                 <Popover.Root>
                   <Popover.Trigger>
                     {#snippet child({ props })}
-                      <button
+                      <Button
+                        variant="outline"
+                        size="xs"
                         {...props}
-                        class="w-full text-left bg-transparent border border-border text-foreground font-mono text-tui-xs px-2 py-1 outline-none focus:border-primary flex justify-between items-center cursor-pointer select-none font-bold"
+                        class="w-full text-left bg-transparent border border-border text-foreground font-mono text-tui-xs px-2 py-1 outline-none focus:border-primary flex justify-between items-center cursor-pointer select-none font-bold h-auto shadow-none"
                       >
                         <span>{finishedAtValue ? finishedAtValue : 'Select Date'}</span>
                         <span class="text-primary font-bold">📅</span>
-                      </button>
+                      </Button>
                     {/snippet}
                   </Popover.Trigger>
                   <Popover.Content
@@ -744,19 +835,46 @@
       </div>
 
       <!-- New Note button row -->
-      <div class="border-t border-dashed border-border-dim pt-2 mt-1 flex justify-end">
-        <button
-          onclick={handleNewNote}
-          disabled={isCreatingNote}
-          class="px-3 py-1 border border-border text-muted-foreground hover:border-primary hover:text-primary transition-colors text-tui-xs font-bold disabled:opacity-50 disabled:cursor-not-allowed uppercase font-mono cursor-pointer flex items-center gap-1.5"
-        >
-          {#if isCreatingNote}
-            <span class="animate-pulse">creating note...</span>
-          {:else}
-            <span>◆ New Note from this Book</span>
-          {/if}
-        </button>
-      </div>
+      {#if !props.isNew}
+        <div class="border-t border-dashed border-border-dim pt-2 mt-1 flex justify-end">
+          <Button
+            variant="outline"
+            size="xs"
+            onclick={handleNewNote}
+            disabled={isCreatingNote}
+            class="px-3 py-1 border border-border text-muted-foreground hover:border-primary hover:text-primary transition-colors text-tui-xs font-bold disabled:opacity-50 disabled:cursor-not-allowed uppercase font-mono cursor-pointer flex items-center gap-1.5 h-auto"
+          >
+            {#if isCreatingNote}
+              <span class="animate-pulse">creating note...</span>
+            {:else}
+              <span>◆ New Note from this Book</span>
+            {/if}
+          </Button>
+        </div>
+      {/if}
     </div>
-  </div>
-</div>
+
+    {#if props.isNew}
+      <Dialog.Footer
+        class="px-4 pb-4 pt-3 flex gap-3 justify-end border-t border-border bg-box-bg shrink-0 select-none"
+      >
+        <Button
+          variant="outline"
+          size="xs"
+          onclick={props.onClose}
+          class="px-3 py-1 border border-border text-muted-foreground hover:border-destructive hover:text-destructive transition-colors text-tui-xs font-mono font-bold uppercase cursor-pointer h-auto"
+        >
+          [Cancel]
+        </Button>
+        <Button
+          variant="outline"
+          size="xs"
+          onclick={handleSaveNewBook}
+          class="px-3 py-1 border border-primary text-primary hover:bg-primary hover:text-background transition-colors text-tui-xs font-mono font-bold uppercase cursor-pointer h-auto"
+        >
+          [Save]
+        </Button>
+      </Dialog.Footer>
+    {/if}
+  </Dialog.Content>
+</Dialog.Root>

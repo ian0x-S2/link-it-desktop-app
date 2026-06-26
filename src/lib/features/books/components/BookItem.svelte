@@ -210,13 +210,6 @@
     <Button
       variant="ghost"
       size="xs"
-      onclick={() => onOpen?.(book.id)}
-      class="text-muted-foreground hover:text-primary transition-colors uppercase h-auto p-0 bg-transparent hover:bg-transparent font-mono text-tui-2xs font-bold"
-      >[open]</Button
-    >
-    <Button
-      variant="ghost"
-      size="xs"
       onclick={() => onEdit(book.id)}
       class="text-muted-foreground hover:text-primary transition-colors uppercase h-auto p-0 bg-transparent hover:bg-transparent font-mono text-tui-2xs font-bold"
       >[edit]</Button
