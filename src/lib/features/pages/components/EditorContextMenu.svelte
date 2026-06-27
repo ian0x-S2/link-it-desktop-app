@@ -137,10 +137,10 @@
     {:else if item.type}
       <button
         onclick={() => onSelect(item.type)}
-        class="group flex items-center justify-between px-2.5 py-1 text-left hover:bg-primary hover:text-background text-foreground transition-colors cursor-pointer w-full rounded-none border-none bg-transparent"
+        class="group flex items-center justify-between px-2.5 py-1 text-left hover:bg-primary hover:text-primary-foreground text-foreground transition-colors cursor-pointer w-full rounded-none border-none bg-transparent"
       >
         <span>{item.label}</span>
-        <span class="text-muted-foreground group-hover:text-background text-tui-xs"
+        <span class="text-muted-foreground group-hover:text-primary-foreground text-tui-xs"
           >[{item.key}]</span
         >
       </button>

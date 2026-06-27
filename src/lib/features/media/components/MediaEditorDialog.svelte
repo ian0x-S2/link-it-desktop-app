@@ -377,7 +377,6 @@
                     <DropdownMenu.RadioItem value="Movie">Movie</DropdownMenu.RadioItem>
                     <DropdownMenu.RadioItem value="Series">Series</DropdownMenu.RadioItem>
                     <DropdownMenu.RadioItem value="YouTube">YouTube Video</DropdownMenu.RadioItem>
-                    <DropdownMenu.RadioItem value="Other">Other</DropdownMenu.RadioItem>
                   </DropdownMenu.RadioGroup>
                 </DropdownMenu.Content>
               </DropdownMenu.Root>
@@ -495,8 +494,8 @@
           </div>
         </div>
 
-        <!-- Right Column: Progress & Dates (hidden for YouTube) -->
-        {#if typeValue !== 'YouTube'}
+        <!-- Right Column: Progress & Dates (hidden for YouTube & Movie) -->
+        {#if typeValue !== 'YouTube' && typeValue !== 'Movie'}
           <MediaProgressTracker
             typeValue={typeValue}
             bind:progressValue={progressValue}
@@ -545,7 +544,7 @@
         variant="outline"
         size="xs"
         onclick={handleSave}
-        class="px-3 py-1 border border-primary text-primary hover:bg-primary hover:text-background transition-colors text-tui-xs font-mono font-bold uppercase cursor-pointer h-auto"
+        class="px-3 py-1 border border-primary text-primary hover:bg-primary hover:text-primary-foreground dark:hover:bg-primary dark:hover:text-primary-foreground transition-colors text-tui-xs font-mono font-bold uppercase cursor-pointer h-auto"
       >
         [Save]
       </Button>

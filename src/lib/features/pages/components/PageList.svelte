@@ -145,7 +145,7 @@
           <!-- svelte-ignore a11y_click_events_have_key_events -->
           <!-- svelte-ignore a11y_no_static_element_interactions -->
           <span
-            class="text-tui-xs border border-primary text-primary px-3 py-1 cursor-pointer hover:bg-primary hover:text-background transition-colors"
+            class="text-tui-xs border border-primary text-primary px-3 py-1 cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
             onclick={handleCreate}
           >[+ new page]</span>
         {/if}

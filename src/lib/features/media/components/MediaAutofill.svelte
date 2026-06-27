@@ -252,7 +252,7 @@
       size="xs"
       onclick={handleSearchMedia}
       disabled={isSearching}
-      class="px-2 py-0.5 border border-primary text-primary hover:bg-primary hover:text-background transition-colors text-tui-xs font-bold disabled:opacity-50 disabled:cursor-not-allowed uppercase font-mono cursor-pointer h-auto"
+      class="px-2 py-0.5 border border-primary text-primary hover:bg-primary hover:text-primary-foreground dark:hover:bg-primary dark:hover:text-primary-foreground transition-colors text-tui-xs font-bold disabled:opacity-50 disabled:cursor-not-allowed uppercase font-mono cursor-pointer h-auto"
     >
       {isSearching ? '[searching...]' : '[search / autofill]'}
     </Button>

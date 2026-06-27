@@ -391,7 +391,7 @@
             size="xs"
             onclick={handleOpenLibrarySearch}
             disabled={isSearchingOL}
-            class="px-2 py-0.5 border border-primary text-primary hover:bg-primary hover:text-background transition-colors text-tui-xs font-bold disabled:opacity-50 disabled:cursor-not-allowed uppercase font-mono cursor-pointer h-auto"
+            class="px-2 py-0.5 border border-primary text-primary hover:bg-primary hover:text-primary-foreground dark:hover:bg-primary dark:hover:text-primary-foreground transition-colors text-tui-xs font-bold disabled:opacity-50 disabled:cursor-not-allowed uppercase font-mono cursor-pointer h-auto"
           >
             {isSearchingOL ? '[searching...]' : '[search open library]'}
           </Button>
@@ -904,7 +904,7 @@
         variant="outline"
         size="xs"
         onclick={handleSave}
-        class="px-3 py-1 border border-primary text-primary hover:bg-primary hover:text-background transition-colors text-tui-xs font-mono font-bold uppercase cursor-pointer h-auto"
+        class="px-3 py-1 border border-primary text-primary hover:bg-primary hover:text-primary-foreground dark:hover:bg-primary dark:hover:text-primary-foreground transition-colors text-tui-xs font-mono font-bold uppercase cursor-pointer h-auto"
       >
         [Save]
       </Button>

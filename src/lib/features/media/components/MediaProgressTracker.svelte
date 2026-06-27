@@ -127,8 +127,6 @@
             >
               <DropdownMenu.RadioItem value="episodes">episodes</DropdownMenu.RadioItem>
               <DropdownMenu.RadioItem value="seasons">seasons</DropdownMenu.RadioItem>
-              <DropdownMenu.RadioItem value="minutes">minutes</DropdownMenu.RadioItem>
-              <DropdownMenu.RadioItem value="percent">percent</DropdownMenu.RadioItem>
             </DropdownMenu.RadioGroup>
           </DropdownMenu.Content>
         </DropdownMenu.Root>
@@ -167,7 +165,7 @@
     <div
       class="flex-1 flex items-center justify-center p-4 border border-border border-dashed text-center min-h-35 select-none text-dim-foreground font-mono text-tui-2xs uppercase font-bold"
     >
-      // Progress tracking<br />not applicable for<br />movies / other
+      // Progress tracking<br />not applicable for<br />other
     </div>
   {/if}
 
