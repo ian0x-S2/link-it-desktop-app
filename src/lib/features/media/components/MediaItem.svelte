@@ -6,7 +6,6 @@
   import type { Media } from '../types/media';
   import { mediaStore } from '../stores/media.svelte';
   import {
-    getAllUniqueTags,
     getTagSuggestions,
     isNewTagValue,
     normaliseTag,
@@ -31,7 +30,7 @@
   let addTagOpen = $state(false);
   let newTagValue = $state('');
 
-  const allTags = $derived(getAllUniqueTags(mediaStore.items));
+  const allTags = $derived(mediaStore.allTags);
   const tagSuggestions = $derived(getTagSuggestions(allTags, media.tags, newTagValue));
   const isNewTag = $derived(isNewTagValue(allTags, newTagValue));
 
@@ -53,82 +52,184 @@
 
   const metaString = $derived.by(() => {
     const parts = [];
+    parts.push(`[${media.type || 'Movie'}]`);
+    if (media.creator) parts.push(`by ${media.creator}`);
     if (media.rating) parts.push('★'.repeat(media.rating));
     if (media.status) parts.push(`[${media.status}]`);
     return parts.join(' │ ');
   });
+
+  const isProgressSupported = $derived(media.type === 'Series');
+
+  const progressPercent = $derived(
+    media.progressTotal > 0
+      ? Math.min(100, Math.max(0, Math.round((media.progressValue / media.progressTotal) * 100)))
+      : 0,
+  );
+
+  const progressBar = $derived.by(() => {
+    if (!isProgressSupported || media.progressTotal <= 0) return '';
+    const totalBlocks = 12;
+    const filledBlocks = Math.round((progressPercent / 100) * totalBlocks);
+    const emptyBlocks = totalBlocks - filledBlocks;
+    return `[${'█'.repeat(filledBlocks)}${'░'.repeat(emptyBlocks)}] ${progressPercent}%`;
+  });
 </script>
 
-<div class="group relative flex flex-col md:flex-row md:items-center justify-between p-3 border border-border bg-background gap-3 font-mono text-xs hover:border-primary transition-colors rounded-none">
+<div
+  class="group relative flex flex-col md:flex-row md:items-center justify-between p-3 border border-border bg-background gap-3 font-mono text-xs hover:border-primary transition-colors rounded-none"
+>
   <div class="flex items-start gap-3 min-w-0 flex-1">
     <div class="flex items-center gap-1.5 shrink-0 select-none text-muted-foreground mt-0.5">
       <!-- svelte-ignore a11y_click_events_have_key_events -->
       <!-- svelte-ignore a11y_no_static_element_interactions -->
-      <span onclick={() => onToggleFavorite(media.id)} class="cursor-pointer hover:text-primary transition-colors font-bold select-none">{ media.isFavorite ? '★' : '☆'}</span>
+      <span
+        onclick={() => onToggleFavorite(media.id)}
+        class="cursor-pointer hover:text-primary transition-colors font-bold select-none"
+        >{media.isFavorite ? '★' : '☆'}</span
+      >
     </div>
 
     <div class="flex-1 min-w-0">
       <div class="flex flex-col md:flex-row md:items-baseline gap-x-2 gap-y-0.5">
         <!-- svelte-ignore a11y_click_events_have_key_events -->
         <!-- svelte-ignore a11y_no_static_element_interactions -->
-        <span onclick={() => onEdit(media.id)} class="font-bold text-foreground hover:text-primary transition-colors cursor-pointer truncate">{ media.title }</span>
+        <span
+          onclick={() => onEdit(media.id)}
+          class="font-bold text-foreground hover:text-primary transition-colors cursor-pointer truncate"
+          >{media.title}</span
+        >
         {#if media.url}
-          <a href={ media.url } target="_blank" rel="noopener noreferrer" class="text-tui-2xs text-muted-foreground hover:text-primary truncate font-normal">({ media.url })</a>
+          <a
+            href={media.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-tui-2xs text-muted-foreground hover:text-primary truncate font-normal"
+            >({media.url})</a
+          >
         {/if}
       </div>
 
       {#if metaString}
-        <div class="text-[9px] text-primary/80 font-bold uppercase tracking-wider mt-0.5">{metaString}</div>
+        <div class="text-tui-2xs text-primary/80 font-bold uppercase tracking-wider mt-0.5">
+          {metaString}
+        </div>
       {/if}
 
-      {#if media.content}
-        <p class="text-tui-xs text-muted-foreground line-clamp-2 mt-1 leading-tight">{ media.content }</p>
+      {#if isProgressSupported && media.progressTotal > 0}
+        <div class="text-tui-2xs font-mono font-bold text-primary select-none mt-0.5">
+          {progressBar}
+          <span class="text-dim-foreground ml-1"
+            >({media.progressValue}/{media.progressTotal} {media.progressUnit})</span
+          >
+        </div>
+      {/if}
+
+      {#if media.description}
+        <p class="text-tui-xs text-muted-foreground line-clamp-2 mt-1 leading-tight">
+          {media.description}
+        </p>
+      {:else if media.content}
+        <p class="text-tui-xs text-muted-foreground line-clamp-2 mt-1 leading-tight">
+          {media.content}
+        </p>
       {/if}
 
       <div class="flex flex-wrap gap-1 items-center mt-2">
         {#each media.tags as tag (tag)}
-          <Badge variant="outline" class="text-tui-2xs px-1.5 border border-border-dim text-muted-foreground flex items-center gap-1 select-none font-mono py-0">
+          <Badge
+            variant="outline"
+            class="text-tui-2xs px-1.5 border border-border-dim text-muted-foreground flex items-center gap-1 select-none font-mono py-0"
+          >
             *{tag}
             <!-- svelte-ignore a11y_click_events_have_key_events -->
             <!-- svelte-ignore a11y_no_static_element_interactions -->
-            <span onclick={() => onRemoveTag(media.id, tag)} class="text-destructive hover:text-red-400 cursor-pointer font-bold text-[8px] ml-0.5" title="Remove tag">x</span>
+            <span
+              onclick={() => onRemoveTag(media.id, tag)}
+              class="text-destructive hover:text-red-400 cursor-pointer font-bold text-[8px] ml-0.5"
+              title="Remove tag">x</span
+            >
           </Badge>
         {/each}
 
         <Popover.Root bind:open={addTagOpen}>
           <Popover.Trigger>
             {#snippet child({ props })}
-              <Button {...props} variant="ghost" size="xs" class="text-tui-2xs text-dim-foreground hover:text-primary transition-colors select-none font-bold h-auto p-0 bg-transparent hover:bg-transparent font-mono">+ tag</Button>
+              <Button
+                {...props}
+                variant="ghost"
+                size="xs"
+                class="text-tui-2xs text-dim-foreground hover:text-primary transition-colors select-none font-bold h-auto p-0 bg-transparent hover:bg-transparent font-mono shadow-none"
+                >+ tag</Button
+              >
             {/snippet}
           </Popover.Trigger>
-          <Popover.Content class="w-52 p-0 rounded-none border border-border bg-box-bg font-mono shadow-lg" align="start" sideOffset={4}>
-            <div class="flex items-center gap-1 px-2 py-1.5 border-b border-border">
-              <span class="text-primary font-bold text-tui-xs select-none">#</span>
-              <Input bind:value={newTagValue} onkeydown={handleTagKeydown} placeholder="tag name..." autofocus class="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-dim-foreground font-mono text-tui-xs h-auto py-0 focus-visible:border-none focus-visible:ring-0 focus-visible:ring-offset-0" />
-            </div>
-            <div class="flex flex-col py-0.5 max-h-40 overflow-y-auto">
-              {#if isNewTag}
-                <!-- svelte-ignore a11y_click_events_have_key_events -->
-                <!-- svelte-ignore a11y_no_static_element_interactions -->
-                <div onclick={() => submitTag(newTagValue)} class="px-2 py-1 text-tui-xs text-primary cursor-pointer hover:bg-accent/30 select-none">[Create: "{newTagValue.trim().toLowerCase()}"]</div>
-              {/if}
-              {#each tagSuggestions as suggestion (suggestion)}
-                <!-- svelte-ignore a11y_click_events_have_key_events -->
-                <!-- svelte-ignore a11y_no_static_element_interactions -->
-                <div onclick={() => submitTag(suggestion)} class="px-2 py-1 text-tui-xs text-muted-foreground cursor-pointer hover:bg-accent/30 hover:text-foreground select-none">* {suggestion}</div>
-              {/each}
-              {#if tagSuggestions.length === 0 && !isNewTag}
-                <div class="px-2 py-1 text-tui-xs text-dim-foreground italic select-none">No tags yet</div>
-              {/if}
-            </div>
+          <Popover.Content
+            class="w-52 p-0 rounded-none border border-border bg-box-bg font-mono shadow-lg"
+            align="start"
+            sideOffset={4}
+          >
+            {#if addTagOpen}
+              <div class="flex items-center gap-1 px-2 py-1.5 border-b border-border">
+                <span class="text-primary font-bold text-tui-xs select-none">#</span>
+                <Input
+                  bind:value={newTagValue}
+                  onkeydown={handleTagKeydown}
+                  placeholder="tag name..."
+                  autofocus
+                  class="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-dim-foreground font-mono text-tui-xs h-auto py-0 focus-visible:border-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                />
+              </div>
+              <div class="flex flex-col py-0.5 max-h-40 overflow-y-auto">
+                {#if isNewTag}
+                  <!-- svelte-ignore a11y_click_events_have_key_events -->
+                  <!-- svelte-ignore a11y_no_static_element_interactions -->
+                  <div
+                    onclick={() => submitTag(newTagValue)}
+                    class="px-2 py-1 text-tui-xs text-primary cursor-pointer hover:bg-accent/30 select-none"
+                  >
+                    [Create: "{newTagValue.trim().toLowerCase()}"]
+                  </div>
+                {/if}
+                {#each tagSuggestions as suggestion (suggestion)}
+                  <!-- svelte-ignore a11y_click_events_have_key_events -->
+                  <!-- svelte-ignore a11y_no_static_element_interactions -->
+                  <div
+                    onclick={() => submitTag(suggestion)}
+                    class="px-2 py-1 text-tui-xs text-muted-foreground cursor-pointer hover:bg-accent/30 hover:text-foreground select-none"
+                  >
+                    * {suggestion}
+                  </div>
+                {/each}
+                {#if tagSuggestions.length === 0 && !isNewTag}
+                  <div class="px-2 py-1 text-tui-xs text-dim-foreground italic select-none">
+                    No tags yet
+                  </div>
+                {/if}
+              </div>
+            {/if}
           </Popover.Content>
         </Popover.Root>
       </div>
     </div>
   </div>
 
-  <div class="flex items-center gap-2.5 shrink-0 self-end md:self-center border-t md:border-t-0 border-dashed border-border-dim pt-2 md:pt-0">
-    <Button variant="ghost" size="xs" onclick={() => onEdit(media.id)} class="text-muted-foreground hover:text-primary transition-colors uppercase h-auto p-0 bg-transparent hover:bg-transparent font-mono text-tui-2xs font-bold">[edit]</Button>
-    <Button variant="ghost" size="xs" onclick={() => onDelete(media.id)} class="text-destructive hover:text-red-400 transition-colors uppercase h-auto p-0 bg-transparent hover:bg-transparent font-mono text-tui-2xs font-bold">[del]</Button>
+  <div
+    class="flex items-center gap-2.5 shrink-0 self-end md:self-center border-t md:border-t-0 border-dashed border-border-dim pt-2 md:pt-0"
+  >
+    <Button
+      variant="ghost"
+      size="xs"
+      onclick={() => onEdit(media.id)}
+      class="text-muted-foreground hover:text-primary transition-colors uppercase h-auto p-0 bg-transparent hover:bg-transparent font-mono text-tui-2xs font-bold shadow-none"
+      >[edit]</Button
+    >
+    <Button
+      variant="ghost"
+      size="xs"
+      onclick={() => onDelete(media.id)}
+      class="text-destructive hover:text-red-400 transition-colors uppercase h-auto p-0 bg-transparent hover:bg-transparent font-mono text-tui-2xs font-bold shadow-none"
+      >[del]</Button
+    >
   </div>
 </div>

@@ -3,10 +3,18 @@ export type Media = {
   workspaceId: string;
   title: string;
   content: string;
+  type: string; // 'Movie' | 'Series' | 'YouTube' | 'Other'
+  creator: string;
+  description: string;
   url: string | null;
   imageUrl: string | null;
   rating: number;
-  status: string; // 'Plan to Watch' | 'Watching' | 'Completed'
+  status: string; // 'Plan to Watch' | 'Watching' | 'Completed' | 'Paused' | 'Abandoned'
+  startedAt: string | null;
+  finishedAt: string | null;
+  progressValue: number;
+  progressTotal: number;
+  progressUnit: string; // 'episodes' | 'seasons' | 'minutes' | 'percent'
   isFavorite: boolean;
   deletedAt: string | null;
   createdAt: string;
@@ -18,10 +26,18 @@ export type CreateMediaInput = {
   workspaceId: string;
   title: string;
   content?: string;
+  type?: string;
+  creator?: string;
+  description?: string;
   url?: string | null;
   imageUrl?: string | null;
   rating?: number;
   status?: string;
+  startedAt?: string | null;
+  finishedAt?: string | null;
+  progressValue?: number;
+  progressTotal?: number;
+  progressUnit?: string;
   tags?: string[];
 };
 

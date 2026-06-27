@@ -7,7 +7,6 @@
   import type { Book } from '../types/book';
   import { bookStore } from '../stores/book.svelte';
   import {
-    getAllUniqueTags,
     getTagSuggestions,
     isNewTagValue,
     normaliseTag,
@@ -34,7 +33,7 @@
   let addTagOpen = $state(false);
   let newTagValue = $state('');
 
-  const allTags = $derived(getAllUniqueTags(bookStore.items));
+  const allTags = $derived(bookStore.allTags);
   const tagSuggestions = $derived(getTagSuggestions(allTags, book.tags, newTagValue));
   const isNewTag = $derived(isNewTagValue(allTags, newTagValue));
 
@@ -76,7 +75,13 @@
     return `[${'█'.repeat(filledBlocks)}${'░'.repeat(emptyBlocks)}] ${progressPercent}%`;
   });
 
-  const previewImage = $derived(book.imageUrl);
+  const previewImage = $derived.by(() => {
+    let url = book.imageUrl;
+    if (url && url.includes('covers.openlibrary.org')) {
+      url = url.replace(/-L\.jpg$/, '-M.jpg');
+    }
+    return url;
+  });
 </script>
 
 <Card.Root
@@ -120,6 +125,7 @@
       <img
         src={previewImage}
         alt={book.title}
+        loading="lazy"
         class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
       />
     </div>
@@ -199,43 +205,45 @@
           align="start"
           sideOffset={4}
         >
-          <div class="flex items-center gap-1 px-2 py-1.5 border-b border-border">
-            <span class="text-primary font-bold text-tui-xs select-none">#</span>
-            <Input
-              bind:value={newTagValue}
-              onkeydown={handleTagKeydown}
-              placeholder="tag name..."
-              autofocus
-              class="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-dim-foreground font-mono text-tui-xs h-auto py-0 focus-visible:border-none focus-visible:ring-0 focus-visible:ring-offset-0"
-            />
-          </div>
-          <div class="flex flex-col py-0.5 max-h-40 overflow-y-auto">
-            {#if isNewTag}
-              <!-- svelte-ignore a11y_click_events_have_key_events -->
-              <!-- svelte-ignore a11y_no_static_element_interactions -->
-              <div
-                onclick={() => submitTag(newTagValue)}
-                class="px-2 py-1 text-tui-xs text-primary cursor-pointer hover:bg-accent/30 select-none"
-              >
-                [Create: "{newTagValue.trim().toLowerCase()}"]
-              </div>
-            {/if}
-            {#each tagSuggestions as suggestion (suggestion)}
-              <!-- svelte-ignore a11y_click_events_have_key_events -->
-              <!-- svelte-ignore a11y_no_static_element_interactions -->
-              <div
-                onclick={() => submitTag(suggestion)}
-                class="px-2 py-1 text-tui-xs text-muted-foreground cursor-pointer hover:bg-accent/30 hover:text-foreground select-none"
-              >
-                * {suggestion}
-              </div>
-            {/each}
-            {#if tagSuggestions.length === 0 && !isNewTag}
-              <div class="px-2 py-1 text-tui-xs text-dim-foreground italic select-none">
-                No tags yet
-              </div>
-            {/if}
-          </div>
+          {#if addTagOpen}
+            <div class="flex items-center gap-1 px-2 py-1.5 border-b border-border">
+              <span class="text-primary font-bold text-tui-xs select-none">#</span>
+              <Input
+                bind:value={newTagValue}
+                onkeydown={handleTagKeydown}
+                placeholder="tag name..."
+                autofocus
+                class="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-dim-foreground font-mono text-tui-xs h-auto py-0 focus-visible:border-none focus-visible:ring-0 focus-visible:ring-offset-0"
+              />
+            </div>
+            <div class="flex flex-col py-0.5 max-h-40 overflow-y-auto">
+              {#if isNewTag}
+                <!-- svelte-ignore a11y_click_events_have_key_events -->
+                <!-- svelte-ignore a11y_no_static_element_interactions -->
+                <div
+                  onclick={() => submitTag(newTagValue)}
+                  class="px-2 py-1 text-tui-xs text-primary cursor-pointer hover:bg-accent/30 select-none"
+                >
+                  [Create: "{newTagValue.trim().toLowerCase()}"]
+                </div>
+              {/if}
+              {#each tagSuggestions as suggestion (suggestion)}
+                <!-- svelte-ignore a11y_click_events_have_key_events -->
+                <!-- svelte-ignore a11y_no_static_element_interactions -->
+                <div
+                  onclick={() => submitTag(suggestion)}
+                  class="px-2 py-1 text-tui-xs text-muted-foreground cursor-pointer hover:bg-accent/30 hover:text-foreground select-none"
+                >
+                  * {suggestion}
+                </div>
+              {/each}
+              {#if tagSuggestions.length === 0 && !isNewTag}
+                <div class="px-2 py-1 text-tui-xs text-dim-foreground italic select-none">
+                  No tags yet
+                </div>
+              {/if}
+            </div>
+          {/if}
         </Popover.Content>
       </Popover.Root>
     </div>

@@ -2,23 +2,20 @@ import { audioActions } from '../actions/audio';
 import type { Audio, CreateAudioInput, UpdateAudioInput } from '../types/audio';
 import { workspaceStore } from '$lib/features/workspaces/stores/workspace.svelte';
 import { renameTagGloballyHelper, deleteTagGloballyHelper } from '$lib/utils/tag';
+import { getAllUniqueTags } from '$lib/features/bookmarks/utils/tag-popover-utils';
 
 class AudioStore {
   items = $state<Audio[]>([]);
   isLoading = $state(false);
   error = $state<string | null>(null);
 
-  get activeItems(): Audio[] {
-    return this.items.filter((i) => i.deletedAt === null);
-  }
+  activeItems = $derived.by(() => this.items.filter((i) => i.deletedAt === null));
 
-  get activeItemsFiltered(): Audio[] {
-    return this.items.filter((i) => i.deletedAt === null);
-  }
+  activeItemsFiltered = $derived.by(() => this.items.filter((i) => i.deletedAt === null));
 
-  get trashedItems(): Audio[] {
-    return this.items.filter((i) => i.deletedAt !== null);
-  }
+  trashedItems = $derived.by(() => this.items.filter((i) => i.deletedAt !== null));
+
+  allTags = $derived.by(() => getAllUniqueTags(this.items));
 
   async load(): Promise<void> {
     if (!workspaceStore.activeId) return;

@@ -175,21 +175,39 @@ async function initDatabase(database: Database): Promise<void> {
 
   await database.execute(`
     CREATE TABLE IF NOT EXISTS media (
-      id           TEXT PRIMARY KEY,
-      workspace_id TEXT NOT NULL,
-      title        TEXT NOT NULL DEFAULT '',
-      content      TEXT NOT NULL DEFAULT '',
-      url          TEXT,
-      image_url    TEXT,
-      rating       INTEGER NOT NULL DEFAULT 0,
-      status       TEXT NOT NULL DEFAULT 'Plan to Watch',
-      is_favorite  INTEGER NOT NULL DEFAULT 0,
-      deleted_at   TEXT,
-      created_at   TEXT NOT NULL,
-      updated_at   TEXT NOT NULL,
+      id             TEXT PRIMARY KEY,
+      workspace_id   TEXT NOT NULL,
+      title          TEXT NOT NULL DEFAULT '',
+      content        TEXT NOT NULL DEFAULT '',
+      type           TEXT NOT NULL DEFAULT 'Movie',
+      creator        TEXT NOT NULL DEFAULT '',
+      description    TEXT NOT NULL DEFAULT '',
+      url            TEXT,
+      image_url      TEXT,
+      rating         INTEGER NOT NULL DEFAULT 0,
+      status         TEXT NOT NULL DEFAULT 'Plan to Watch',
+      started_at     TEXT,
+      finished_at    TEXT,
+      progress_value INTEGER NOT NULL DEFAULT 0,
+      progress_total INTEGER NOT NULL DEFAULT 0,
+      progress_unit  TEXT NOT NULL DEFAULT 'episodes',
+      is_favorite    INTEGER NOT NULL DEFAULT 0,
+      deleted_at     TEXT,
+      created_at     TEXT NOT NULL,
+      updated_at     TEXT NOT NULL,
       FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE
     )
   `);
+
+  // Migrations for existing databases to support new media metadata
+  try { await database.execute("ALTER TABLE media ADD COLUMN type TEXT NOT NULL DEFAULT 'Movie'"); } catch { /* ignore */ }
+  try { await database.execute("ALTER TABLE media ADD COLUMN creator TEXT NOT NULL DEFAULT ''"); } catch { /* ignore */ }
+  try { await database.execute("ALTER TABLE media ADD COLUMN description TEXT NOT NULL DEFAULT ''"); } catch { /* ignore */ }
+  try { await database.execute("ALTER TABLE media ADD COLUMN started_at TEXT"); } catch { /* ignore */ }
+  try { await database.execute("ALTER TABLE media ADD COLUMN finished_at TEXT"); } catch { /* ignore */ }
+  try { await database.execute("ALTER TABLE media ADD COLUMN progress_value INTEGER NOT NULL DEFAULT 0"); } catch { /* ignore */ }
+  try { await database.execute("ALTER TABLE media ADD COLUMN progress_total INTEGER NOT NULL DEFAULT 0"); } catch { /* ignore */ }
+  try { await database.execute("ALTER TABLE media ADD COLUMN progress_unit TEXT NOT NULL DEFAULT 'episodes'"); } catch { /* ignore */ }
 
   await database.execute(`
     CREATE TABLE IF NOT EXISTS media_tags (

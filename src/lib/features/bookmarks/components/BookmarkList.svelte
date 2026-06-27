@@ -5,7 +5,6 @@
   import * as Popover from '$lib/shared/components/ui/popover';
   import { bookmarkStore } from '$lib/features/bookmarks/stores/bookmark.svelte';
   import {
-    getAllUniqueTags,
     getTagSuggestions,
     isNewTagValue,
     normaliseTag,
@@ -34,7 +33,7 @@
   let tagInputValue = $state('');
 
   // All unique tags across all bookmarks for autocomplete
-  const allTags = $derived(getAllUniqueTags(bookmarkStore.items));
+  const allTags = $derived(bookmarkStore.allTags);
 
   function getTagSuggestionsForBookmark(bookmark: Bookmark) {
     return getTagSuggestions(allTags, bookmark.tags, tagInputValue);
@@ -168,45 +167,47 @@
                 align="start"
                 sideOffset={4}
               >
-                <!-- Input -->
-                <div class="flex items-center gap-1 px-2 py-1.5 border-b border-border">
-                  <span class="text-primary font-bold text-tui-xs select-none">#</span>
-                  <Input
-                    bind:value={tagInputValue}
-                    onkeydown={(e) => handleTagKeydown(e, bookmark.id)}
-                    placeholder="tag name..."
-                    autofocus
-                    class="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-dim-foreground font-mono text-tui-xs h-auto py-0 focus-visible:border-none focus-visible:ring-0 focus-visible:ring-offset-0"
-                  />
-                </div>
-                <!-- Suggestions -->
-                <div class="flex flex-col py-0.5 max-h-40 overflow-y-auto">
-                  {#if isNewTagForBookmark(bookmark)}
-                    <!-- svelte-ignore a11y_click_events_have_key_events -->
-                    <!-- svelte-ignore a11y_no_static_element_interactions -->
-                    <div
-                      onclick={() => submitTag(bookmark.id, tagInputValue)}
-                      class="px-2 py-1 text-tui-xs text-primary cursor-pointer hover:bg-accent/30 select-none"
-                    >
-                      [Create: "{tagInputValue.trim().toLowerCase()}"]
-                    </div>
-                  {/if}
-                  {#each getTagSuggestionsForBookmark(bookmark) as suggestion (suggestion)}
-                    <!-- svelte-ignore a11y_click_events_have_key_events -->
-                    <!-- svelte-ignore a11y_no_static_element_interactions -->
-                    <div
-                      onclick={() => submitTag(bookmark.id, suggestion)}
-                      class="px-2 py-1 text-tui-xs text-muted-foreground cursor-pointer hover:bg-accent/30 hover:text-foreground select-none"
-                    >
-                      * {suggestion}
-                    </div>
-                  {/each}
-                  {#if getTagSuggestionsForBookmark(bookmark).length === 0 && !isNewTagForBookmark(bookmark)}
-                    <div class="px-2 py-1 text-tui-xs text-dim-foreground italic select-none">
-                      No tags yet
-                    </div>
-                  {/if}
-                </div>
+                {#if openPopoverId === bookmark.id}
+                  <!-- Input -->
+                  <div class="flex items-center gap-1 px-2 py-1.5 border-b border-border">
+                    <span class="text-primary font-bold text-tui-xs select-none">#</span>
+                    <Input
+                      bind:value={tagInputValue}
+                      onkeydown={(e) => handleTagKeydown(e, bookmark.id)}
+                      placeholder="tag name..."
+                      autofocus
+                      class="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-dim-foreground font-mono text-tui-xs h-auto py-0 focus-visible:border-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                    />
+                  </div>
+                  <!-- Suggestions -->
+                  <div class="flex flex-col py-0.5 max-h-40 overflow-y-auto">
+                    {#if isNewTagForBookmark(bookmark)}
+                      <!-- svelte-ignore a11y_click_events_have_key_events -->
+                      <!-- svelte-ignore a11y_no_static_element_interactions -->
+                      <div
+                        onclick={() => submitTag(bookmark.id, tagInputValue)}
+                        class="px-2 py-1 text-tui-xs text-primary cursor-pointer hover:bg-accent/30 select-none"
+                      >
+                        [Create: "{tagInputValue.trim().toLowerCase()}"]
+                      </div>
+                    {/if}
+                    {#each getTagSuggestionsForBookmark(bookmark) as suggestion (suggestion)}
+                      <!-- svelte-ignore a11y_click_events_have_key_events -->
+                      <!-- svelte-ignore a11y_no_static_element_interactions -->
+                      <div
+                        onclick={() => submitTag(bookmark.id, suggestion)}
+                        class="px-2 py-1 text-tui-xs text-muted-foreground cursor-pointer hover:bg-accent/30 hover:text-foreground select-none"
+                      >
+                        * {suggestion}
+                      </div>
+                    {/each}
+                    {#if getTagSuggestionsForBookmark(bookmark).length === 0 && !isNewTagForBookmark(bookmark)}
+                      <div class="px-2 py-1 text-tui-xs text-dim-foreground italic select-none">
+                        No tags yet
+                      </div>
+                    {/if}
+                  </div>
+                {/if}
               </Popover.Content>
             </Popover.Root>
           </div>

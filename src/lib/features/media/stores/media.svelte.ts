@@ -2,23 +2,21 @@ import { mediaActions } from '../actions/media';
 import type { Media, CreateMediaInput, UpdateMediaInput } from '../types/media';
 import { workspaceStore } from '$lib/features/workspaces/stores/workspace.svelte';
 import { renameTagGloballyHelper, deleteTagGloballyHelper } from '$lib/utils/tag';
+import { getAllUniqueTags } from '$lib/features/bookmarks/utils/tag-popover-utils';
 
 class MediaStore {
   items = $state<Media[]>([]);
+  activeMedia = $state<Media | null>(null);
   isLoading = $state(false);
   error = $state<string | null>(null);
 
-  get activeItems(): Media[] {
-    return this.items.filter((i) => i.deletedAt === null);
-  }
+  activeItems = $derived.by(() => this.items.filter((i) => i.deletedAt === null));
 
-  get activeItemsFiltered(): Media[] {
-    return this.items.filter((i) => i.deletedAt === null);
-  }
+  activeItemsFiltered = $derived.by(() => this.items.filter((i) => i.deletedAt === null));
 
-  get trashedItems(): Media[] {
-    return this.items.filter((i) => i.deletedAt !== null);
-  }
+  trashedItems = $derived.by(() => this.items.filter((i) => i.deletedAt !== null));
+
+  allTags = $derived.by(() => getAllUniqueTags(this.items));
 
   async load(): Promise<void> {
     if (!workspaceStore.activeId) return;
@@ -31,6 +29,17 @@ class MediaStore {
     } finally {
       this.isLoading = false;
     }
+  }
+
+  openMedia(id: string): void {
+    const item = this.items.find((i) => i.id === id);
+    if (item) {
+      this.activeMedia = item;
+    }
+  }
+
+  closeMedia(): void {
+    this.activeMedia = null;
   }
 
   async create(input: CreateMediaInput): Promise<Media | null> {
@@ -47,7 +56,11 @@ class MediaStore {
   async save(id: string, data: UpdateMediaInput): Promise<void> {
     try {
       await mediaActions.updateMedia(id, data);
-      this.items = this.items.map((i) => (i.id === id ? { ...i, ...data, updatedAt: new Date().toISOString() } : i));
+      const updatedTime = new Date().toISOString();
+      this.items = this.items.map((i) => (i.id === id ? { ...i, ...data, updatedAt: updatedTime } : i));
+      if (this.activeMedia?.id === id) {
+        this.activeMedia = { ...this.activeMedia, ...data, updatedAt: updatedTime };
+      }
     } catch (e) {
       this.error = e instanceof Error ? e.message : 'Failed to save media.';
     }
@@ -57,6 +70,9 @@ class MediaStore {
     try {
       await mediaActions.softDeleteMedia(id);
       this.items = this.items.map((i) => (i.id === id ? { ...i, deletedAt: new Date().toISOString() } : i));
+      if (this.activeMedia?.id === id) {
+        this.closeMedia();
+      }
     } catch (e) {
       this.error = e instanceof Error ? e.message : 'Failed to delete media.';
     }

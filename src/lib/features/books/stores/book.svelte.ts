@@ -2,6 +2,7 @@ import { bookActions } from '../actions/book';
 import type { Book, CreateBookInput, UpdateBookInput } from '../types/book';
 import { workspaceStore } from '$lib/features/workspaces/stores/workspace.svelte';
 import { renameTagGloballyHelper, deleteTagGloballyHelper } from '$lib/utils/tag';
+import { getAllUniqueTags } from '$lib/features/bookmarks/utils/tag-popover-utils';
 
 class BookStore {
   items = $state<Book[]>([]);
@@ -9,17 +10,13 @@ class BookStore {
   isLoading = $state(false);
   error = $state<string | null>(null);
 
-  get activeItems(): Book[] {
-    return this.items.filter((i) => i.deletedAt === null);
-  }
+  activeItems = $derived.by(() => this.items.filter((i) => i.deletedAt === null));
 
-  get activeItemsFiltered(): Book[] {
-    return this.items.filter((i) => i.deletedAt === null);
-  }
+  activeItemsFiltered = $derived.by(() => this.items.filter((i) => i.deletedAt === null));
 
-  get trashedItems(): Book[] {
-    return this.items.filter((i) => i.deletedAt !== null);
-  }
+  trashedItems = $derived.by(() => this.items.filter((i) => i.deletedAt !== null));
+
+  allTags = $derived.by(() => getAllUniqueTags(this.items));
 
   async load(): Promise<void> {
     if (!workspaceStore.activeId) return;

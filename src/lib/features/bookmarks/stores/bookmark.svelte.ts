@@ -2,19 +2,19 @@ import { bookmarkActions } from '../actions/bookmark';
 import type { Bookmark } from '../types/bookmark';
 import { workspaceStore } from '$lib/features/workspaces/stores/workspace.svelte';
 import { renameTagGloballyHelper, deleteTagGloballyHelper } from '$lib/utils/tag';
+import { getAllUniqueTags } from '../utils/tag-popover-utils';
 
 export class BookmarkStore {
   items = $state<Bookmark[]>([]);
 
   /** All bookmarks currently in the trash (soft-deleted). */
-  get trashedItems(): Bookmark[] {
-    return this.items.filter((b) => b.deletedAt !== null);
-  }
+  trashedItems = $derived.by(() => this.items.filter((b) => b.deletedAt !== null));
 
   /** Active bookmarks (not in trash). */
-  get activeItems(): Bookmark[] {
-    return this.items.filter((b) => b.deletedAt === null);
-  }
+  activeItems = $derived.by(() => this.items.filter((b) => b.deletedAt === null));
+
+  /** All unique tags across all bookmarks. */
+  allTags = $derived.by(() => getAllUniqueTags(this.items));
 
   async load(): Promise<void> {
     if (!workspaceStore.activeId) {

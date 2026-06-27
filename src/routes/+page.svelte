@@ -390,7 +390,7 @@
           class="contents"
           style:display={centerView === 'pages' ? 'contents' : 'none'}
         >
-          {#if centerView === 'pages' || pageStore.items.length > 0 || pageStore.activePage !== null}
+          {#if centerView === 'pages'}
             <PageList />
           {/if}
         </div>
@@ -400,7 +400,7 @@
           class="contents"
           style:display={centerView === 'ideas' ? 'contents' : 'none'}
         >
-          {#if centerView === 'ideas' || ideaStore.items.length > 0}
+          {#if centerView === 'ideas'}
             <IdeaList />
           {/if}
         </div>
@@ -410,7 +410,7 @@
           class="contents"
           style:display={centerView === 'books' ? 'contents' : 'none'}
         >
-          {#if centerView === 'books' || bookStore.items.length > 0}
+          {#if centerView === 'books'}
             <BookPanel bind:promptInput />
           {/if}
         </div>
@@ -420,7 +420,7 @@
           class="contents"
           style:display={centerView === 'media' ? 'contents' : 'none'}
         >
-          {#if centerView === 'media' || mediaStore.items.length > 0}
+          {#if centerView === 'media'}
             <MediaPanel bind:promptInput />
           {/if}
         </div>
@@ -430,7 +430,7 @@
           class="contents"
           style:display={centerView === 'audio' ? 'contents' : 'none'}
         >
-          {#if centerView === 'audio' || audioStore.items.length > 0}
+          {#if centerView === 'audio'}
             <AudioPanel bind:promptInput />
           {/if}
         </div>
@@ -440,7 +440,7 @@
           class="contents"
           style:display={centerView === 'documents' ? 'contents' : 'none'}
         >
-          {#if centerView === 'documents' || documentStore.items.length > 0}
+          {#if centerView === 'documents'}
             <DocumentPanel bind:promptInput />
           {/if}
         </div>
@@ -450,7 +450,7 @@
           class="contents"
           style:display={centerView === 'images' ? 'contents' : 'none'}
         >
-          {#if centerView === 'images' || imageStore.items.length > 0}
+          {#if centerView === 'images'}
             <ImagePanel bind:promptInput />
           {/if}
         </div>
@@ -460,7 +460,7 @@
           class="contents"
           style:display={centerView === 'custom' ? 'contents' : 'none'}
         >
-          {#if centerView === 'custom' || customStore.items.length > 0}
+          {#if centerView === 'custom'}
             <CustomItemPanel bind:promptInput />
           {/if}
         </div>

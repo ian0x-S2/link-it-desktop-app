@@ -2,23 +2,20 @@ import { ideaActions } from '../actions/idea';
 import type { Idea } from '../types/idea';
 import { workspaceStore } from '$lib/features/workspaces/stores/workspace.svelte';
 import { renameTagGloballyHelper, deleteTagGloballyHelper } from '$lib/utils/tag';
+import { getAllUniqueTags } from '$lib/features/bookmarks/utils/tag-popover-utils';
 
 class IdeaStore {
   items = $state<Idea[]>([]);
   isLoading = $state(false);
   error = $state<string | null>(null);
 
-  get activeItems(): Idea[] {
-    return this.items.filter((i) => i.deletedAt === null);
-  }
+  activeItems = $derived.by(() => this.items.filter((i) => i.deletedAt === null));
 
-  get activeItemsFiltered(): Idea[] {
-    return this.items.filter((i) => i.deletedAt === null);
-  }
+  activeItemsFiltered = $derived.by(() => this.items.filter((i) => i.deletedAt === null));
 
-  get trashedItems(): Idea[] {
-    return this.items.filter((i) => i.deletedAt !== null);
-  }
+  trashedItems = $derived.by(() => this.items.filter((i) => i.deletedAt !== null));
+
+  allTags = $derived.by(() => getAllUniqueTags(this.items));
 
   async load(): Promise<void> {
     if (!workspaceStore.activeId) return;

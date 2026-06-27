@@ -3,25 +3,24 @@ import type { CustomItem, CreateCustomInput, UpdateCustomInput } from '../types/
 import { workspaceStore } from '$lib/features/workspaces/stores/workspace.svelte';
 import { renameTagGloballyHelper, deleteTagGloballyHelper } from '$lib/utils/tag';
 import { viewStore } from '$lib/shared/stores/view.svelte';
+import { getAllUniqueTags } from '$lib/features/bookmarks/utils/tag-popover-utils';
 
 class CustomStore {
   items = $state<CustomItem[]>([]);
   isLoading = $state(false);
   error = $state<string | null>(null);
 
-  get activeItems(): CustomItem[] {
-    return this.items.filter((i) => i.deletedAt === null);
-  }
+  activeItems = $derived.by(() => this.items.filter((i) => i.deletedAt === null));
 
-  get activeItemsFiltered(): CustomItem[] {
+  activeItemsFiltered = $derived.by(() => {
     const activeCategoryId = viewStore.activeCategoryId;
     if (!activeCategoryId) return [];
     return this.items.filter((i) => i.deletedAt === null && i.categoryId === activeCategoryId);
-  }
+  });
 
-  get trashedItems(): CustomItem[] {
-    return this.items.filter((i) => i.deletedAt !== null);
-  }
+  trashedItems = $derived.by(() => this.items.filter((i) => i.deletedAt !== null));
+
+  allTags = $derived.by(() => getAllUniqueTags(this.items));
 
   async load(): Promise<void> {
     if (!workspaceStore.activeId) return;

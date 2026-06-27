@@ -20,17 +20,11 @@ class PageStore {
   isSaving = $state(false);
   error = $state<string | null>(null);
 
-  get activeItems(): PageMetadata[] {
-    return this.items.filter((p) => p.deletedAt === null);
-  }
+  activeItems = $derived.by(() => this.items.filter((p) => p.deletedAt === null));
 
-  get activeItemsFiltered(): PageMetadata[] {
-    return this.items.filter((p) => p.deletedAt === null);
-  }
+  activeItemsFiltered = $derived.by(() => this.items.filter((p) => p.deletedAt === null));
 
-  get trashedItems(): PageMetadata[] {
-    return this.items.filter((p) => p.deletedAt !== null);
-  }
+  trashedItems = $derived.by(() => this.items.filter((p) => p.deletedAt !== null));
 
   async load(): Promise<void> {
     if (!workspaceStore.activeId) return;
