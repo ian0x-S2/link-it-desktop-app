@@ -110,6 +110,14 @@
   let addTagOpen = $state(false);
   let newTagValue = $state('');
   let isCreatingNote = $state(false);
+  let dialogMounted = $state(false);
+
+  $effect(() => {
+    dialogMounted = true;
+    return () => {
+      dialogMounted = false;
+    };
+  });
 
   // Open Library metadata search
   let autofillSearchQuery = $state('');
@@ -341,7 +349,7 @@
 >
   <Dialog.Content
     showCloseButton={false}
-    class="rounded-none border border-border bg-box-bg font-mono text-foreground p-0 gap-0 w-full max-w-[95vw] md:max-w-6xl h-[70vh] flex flex-col shadow-xl animate-in fade-in zoom-in-95 duration-150"
+    class="rounded-none border border-border bg-box-bg font-mono text-foreground p-0 gap-0 w-full max-w-[95vw] md:max-w-6xl h-[70vh] flex flex-col shadow-xl animate-in fade-in zoom-in-95 duration-100"
   >
     <Dialog.Header
       class="px-4 pt-4 pb-3 border-b border-border flex flex-row items-center justify-between shrink-0"
@@ -444,6 +452,8 @@
                     src={result.imageUrl}
                     alt="cover"
                     class="w-7 h-10 object-cover border border-border shrink-0"
+                    loading="lazy"
+                    decoding="async"
                   />
                 {:else}
                   <div
@@ -472,11 +482,17 @@
       <div class="flex flex-col md:flex-row gap-6">
         <!-- Left: Cover / Image & URL -->
         <div class="flex flex-col gap-3 w-full md:w-44 shrink-0">
-          {#if imageUrlValue}
+          {#if imageUrlValue && dialogMounted}
             <div
               class="aspect-3/4 w-full border border-border bg-box-bg overflow-hidden flex items-center justify-center"
             >
-              <img src={imageUrlValue} alt="Cover Preview" class="w-full h-full object-cover" />
+              <img
+                src={imageUrlValue}
+                alt="Cover Preview"
+                class="w-full h-full object-cover"
+                loading="lazy"
+                decoding="async"
+              />
             </div>
           {:else}
             <div

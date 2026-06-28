@@ -305,6 +305,8 @@
               src={result.imageUrl}
               alt="poster"
               class="w-7 h-10 object-cover border border-border shrink-0"
+              loading="lazy"
+              decoding="async"
             />
           {:else}
             <div

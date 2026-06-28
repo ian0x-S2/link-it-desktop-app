@@ -28,6 +28,8 @@
 
   let startedAtDate = $state<DateValue | undefined>(undefined);
   let finishedAtDate = $state<DateValue | undefined>(undefined);
+  let startedAtOpen = $state(false);
+  let finishedAtOpen = $state(false);
 
   $effect(() => {
     if (startedAtValue) {
@@ -175,7 +177,7 @@
         <span class="text-tui-2xs text-dim-foreground font-bold uppercase select-none"
           >Date Started</span
         >
-        <Popover.Root>
+        <Popover.Root bind:open={startedAtOpen}>
           <Popover.Trigger>
             {#snippet child({ props })}
               <Button
@@ -193,19 +195,21 @@
             class="p-0 border border-border bg-box-bg rounded-none shadow-lg w-auto"
             align="center"
           >
-            <Calendar type="single" bind:value={startedAtDate} class="bg-box-bg rounded-none" />
-            <div class="px-3 pb-3 pt-1 text-right flex justify-end">
-              <Button
-                variant="ghost"
-                size="xs"
-                onclick={() => {
-                  startedAtDate = undefined;
-                }}
-                class="text-tui-2xs text-destructive hover:text-red-400 font-bold uppercase tracking-wider font-mono p-0 h-auto bg-transparent"
-              >
-                [Clear]
-              </Button>
-            </div>
+            {#if startedAtOpen}
+              <Calendar type="single" bind:value={startedAtDate} class="bg-box-bg rounded-none" />
+              <div class="px-3 pb-3 pt-1 text-right flex justify-end">
+                <Button
+                  variant="ghost"
+                  size="xs"
+                  onclick={() => {
+                    startedAtDate = undefined;
+                  }}
+                  class="text-tui-2xs text-destructive hover:text-red-400 font-bold uppercase tracking-wider font-mono p-0 h-auto bg-transparent"
+                >
+                  [Clear]
+                </Button>
+              </div>
+            {/if}
           </Popover.Content>
         </Popover.Root>
       </div>
@@ -214,7 +218,7 @@
         <span class="text-tui-2xs text-dim-foreground font-bold uppercase select-none"
           >Date Finished</span
         >
-        <Popover.Root>
+        <Popover.Root bind:open={finishedAtOpen}>
           <Popover.Trigger>
             {#snippet child({ props })}
               <Button
@@ -232,19 +236,21 @@
             class="p-0 border border-border bg-box-bg rounded-none shadow-lg w-auto"
             align="end"
           >
-            <Calendar type="single" bind:value={finishedAtDate} class="bg-box-bg rounded-none" />
-            <div class="px-3 pb-3 pt-1 text-right flex justify-end">
-              <Button
-                variant="ghost"
-                size="xs"
-                onclick={() => {
-                  finishedAtDate = undefined;
-                }}
-                class="text-tui-2xs text-destructive hover:text-red-400 font-bold uppercase tracking-wider font-mono p-0 h-auto bg-transparent"
-              >
-                [Clear]
-              </Button>
-            </div>
+            {#if finishedAtOpen}
+              <Calendar type="single" bind:value={finishedAtDate} class="bg-box-bg rounded-none" />
+              <div class="px-3 pb-3 pt-1 text-right flex justify-end">
+                <Button
+                  variant="ghost"
+                  size="xs"
+                  onclick={() => {
+                    finishedAtDate = undefined;
+                  }}
+                  class="text-tui-2xs text-destructive hover:text-red-400 font-bold uppercase tracking-wider font-mono p-0 h-auto bg-transparent"
+                >
+                  [Clear]
+                </Button>
+              </div>
+            {/if}
           </Popover.Content>
         </Popover.Root>
       </div>
