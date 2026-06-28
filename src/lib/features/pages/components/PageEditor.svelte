@@ -1,6 +1,7 @@
 <script lang="ts">
   import { EditorView } from '@codemirror/view';
   import { EditorState } from '@codemirror/state';
+  import { ensureSyntaxTree } from '@codemirror/language';
   import { createEditorExtensions } from '../editor/index';
   import type { Page } from '../types/page';
   import { marked, type Renderer } from 'marked';
@@ -322,6 +323,9 @@
         }),
       ],
     });
+
+    // Force syntax tree parsing synchronously before creating the view to prevent markup flashes
+    ensureSyntaxTree(state, state.doc.length, 500);
 
     view = new EditorView({ state, parent: node });
 

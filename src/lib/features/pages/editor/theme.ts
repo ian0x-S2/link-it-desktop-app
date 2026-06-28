@@ -99,10 +99,8 @@ export const tuiEditorTheme = EditorView.theme(
     // Inactive code block card styling (Obsidian style)
     '.cm-tui-codeblock-first-line': {
       backgroundColor: 'var(--color-entry-alt-bg)',
-      marginLeft: '-1.5rem',
-      marginRight: '-1.5rem',
-      paddingLeft: '1.5rem',
-      paddingRight: '1.5rem',
+      paddingLeft: '1.25rem',
+      paddingRight: '1.25rem',
       boxSizing: 'border-box',
       borderLeft: '1px solid var(--color-border)',
       borderRight: '1px solid var(--color-border)',
@@ -114,20 +112,16 @@ export const tuiEditorTheme = EditorView.theme(
     },
     '.cm-tui-codeblock-middle-line': {
       backgroundColor: 'var(--color-entry-alt-bg)',
-      marginLeft: '-1.5rem',
-      marginRight: '-1.5rem',
-      paddingLeft: '1.5rem',
-      paddingRight: '1.5rem',
+      paddingLeft: '1.25rem',
+      paddingRight: '1.25rem',
       boxSizing: 'border-box',
       borderLeft: '1px solid var(--color-border)',
       borderRight: '1px solid var(--color-border)',
     },
     '.cm-tui-codeblock-last-line': {
       backgroundColor: 'var(--color-entry-alt-bg)',
-      marginLeft: '-1.5rem',
-      marginRight: '-1.5rem',
-      paddingLeft: '1.5rem',
-      paddingRight: '1.5rem',
+      paddingLeft: '1.25rem',
+      paddingRight: '1.25rem',
       boxSizing: 'border-box',
       borderLeft: '1px solid var(--color-border)',
       borderRight: '1px solid var(--color-border)',
@@ -138,10 +132,8 @@ export const tuiEditorTheme = EditorView.theme(
     },
     '.cm-tui-codeblock-single-line': {
       backgroundColor: 'var(--color-entry-alt-bg)',
-      marginLeft: '-1.5rem',
-      marginRight: '-1.5rem',
-      paddingLeft: '1.5rem',
-      paddingRight: '1.5rem',
+      paddingLeft: '1.25rem',
+      paddingRight: '1.25rem',
       boxSizing: 'border-box',
       borderLeft: '1px solid var(--color-border)',
       borderRight: '1px solid var(--color-border)',
@@ -159,10 +151,8 @@ export const tuiEditorTheme = EditorView.theme(
     // Active code block card styling (when cursor is inside, showing fences)
     '.cm-tui-codeblock-active-first-line': {
       backgroundColor: 'var(--color-entry-alt-bg)',
-      marginLeft: '-1.5rem',
-      marginRight: '-1.5rem',
-      paddingLeft: '1.5rem',
-      paddingRight: '1.5rem',
+      paddingLeft: '1.25rem',
+      paddingRight: '1.25rem',
       boxSizing: 'border-box',
       borderLeft: '1px solid var(--color-border)',
       borderRight: '1px solid var(--color-border)',
@@ -173,20 +163,16 @@ export const tuiEditorTheme = EditorView.theme(
     },
     '.cm-tui-codeblock-active-middle-line': {
       backgroundColor: 'var(--color-entry-alt-bg)',
-      marginLeft: '-1.5rem',
-      marginRight: '-1.5rem',
-      paddingLeft: '1.5rem',
-      paddingRight: '1.5rem',
+      paddingLeft: '1.25rem',
+      paddingRight: '1.25rem',
       boxSizing: 'border-box',
       borderLeft: '1px solid var(--color-border)',
       borderRight: '1px solid var(--color-border)',
     },
     '.cm-tui-codeblock-active-last-line': {
       backgroundColor: 'var(--color-entry-alt-bg)',
-      marginLeft: '-1.5rem',
-      marginRight: '-1.5rem',
-      paddingLeft: '1.5rem',
-      paddingRight: '1.5rem',
+      paddingLeft: '1.25rem',
+      paddingRight: '1.25rem',
       boxSizing: 'border-box',
       borderLeft: '1px solid var(--color-border)',
       borderRight: '1px solid var(--color-border)',
@@ -224,7 +210,7 @@ export const tuiEditorTheme = EditorView.theme(
     // Image preview widget
     '.cm-tui-image-preview-wrapper': {
       display: 'block',
-      margin: '0.75rem 0',
+      padding: '0.75rem 0',
       maxWidth: '100%',
     },
     '.cm-tui-image-preview': {
@@ -248,6 +234,128 @@ export const tuiEditorTheme = EditorView.theme(
       padding: '0.5rem',
       borderRadius: 'var(--radius-sm, 0.2rem)',
       backgroundColor: 'color-mix(in srgb, var(--color-destructive) 10%, transparent)',
+    },
+
+    // Blockquotes & Callouts
+    '.cm-tui-blockquote': {
+      borderLeft: '4px solid var(--code-keyword)',
+      color: 'var(--code-comment)',
+      fontStyle: 'italic',
+      padding: '0.75rem 0 0.75rem 1rem',
+      display: 'block',
+    },
+    '.cm-tui-callout': {
+      borderLeft: '4px solid var(--color-border)',
+      backgroundColor: 'var(--color-entry-alt-bg)',
+      padding: '1.25rem 1rem',
+      borderRadius: 'var(--radius-sm, 0.2rem)',
+      display: 'block',
+    },
+    '.cm-tui-callout-title': {
+      fontWeight: 'bold',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.5rem',
+      fontSize: '0.95em',
+      marginBottom: '0.25rem',
+      textTransform: 'uppercase',
+    },
+    '.cm-tui-callout-body': {
+      fontSize: '0.9em',
+      color: 'var(--color-foreground)',
+    },
+    '.cm-tui-callout-note': {
+      borderLeftColor: 'var(--color-primary)',
+    },
+    '.cm-tui-callout-note .cm-tui-callout-title': {
+      color: 'var(--color-primary)',
+    },
+    '.cm-tui-callout-warning': {
+      borderLeftColor: 'var(--color-destructive, #ef4444)',
+    },
+    '.cm-tui-callout-warning .cm-tui-callout-title': {
+      color: 'var(--color-destructive, #ef4444)',
+    },
+    '.cm-tui-callout-caution': {
+      borderLeftColor: 'var(--color-destructive, #ef4444)',
+    },
+    '.cm-tui-callout-caution .cm-tui-callout-title': {
+      color: 'var(--color-destructive, #ef4444)',
+    },
+    '.cm-tui-callout-tip': {
+      borderLeftColor: 'var(--color-chart-2, #7ec8a0)',
+    },
+    '.cm-tui-callout-tip .cm-tui-callout-title': {
+      color: 'var(--color-chart-2, #7ec8a0)',
+    },
+    '.cm-tui-callout-idea': {
+      borderLeftColor: 'var(--color-chart-2, #7ec8a0)',
+    },
+    '.cm-tui-callout-idea .cm-tui-callout-title': {
+      color: 'var(--color-chart-2, #7ec8a0)',
+    },
+    '.cm-tui-callout-important': {
+      borderLeftColor: 'var(--color-chart-4, #e5c07b)',
+    },
+    '.cm-tui-callout-important .cm-tui-callout-title': {
+      color: 'var(--color-chart-4, #e5c07b)',
+    },
+
+    // Bullet Lists
+    '.cm-tui-bullet': {
+      color: 'var(--color-primary)',
+      fontWeight: 'bold',
+      marginRight: '0.5rem',
+      display: 'inline-block',
+    },
+
+    // Horizontal Rules
+    '.cm-tui-hr-preview': {
+      borderTop: '1px solid var(--color-border)',
+      padding: '1.5rem 0',
+      width: '100%',
+      display: 'block',
+    },
+
+    // Tables
+    '.cm-tui-table-preview-wrapper': {
+      width: '100%',
+      overflowX: 'auto',
+      padding: '0.75rem 0',
+      display: 'block',
+    },
+
+    // Heading line decorations — padding-based visual hierarchy.
+    // MUST use padding (never font-size) so CodeMirror measures line height accurately
+    // and posAtCoords maps clicks to the correct document position.
+    '.cm-tui-heading-1': {
+      paddingTop: '1.2rem',
+      paddingBottom: '0.3rem',
+      fontSize: '1.8em',
+      lineHeight: '1.4',
+    },
+    '.cm-tui-heading-2': {
+      paddingTop: '1rem',
+      paddingBottom: '0.2rem',
+      fontSize: '1.45em',
+      lineHeight: '1.4',
+    },
+    '.cm-tui-heading-3': {
+      paddingTop: '0.75rem',
+      paddingBottom: '0.15rem',
+      fontSize: '1.25em',
+      lineHeight: '1.4',
+    },
+    '.cm-tui-heading-4': {
+      paddingTop: '0.5rem',
+      fontSize: '1.1em',
+    },
+    '.cm-tui-heading-5': {
+      paddingTop: '0.4rem',
+    },
+    '.cm-tui-heading-6': {
+      paddingTop: '0.3rem',
+      color: 'var(--color-muted-foreground)',
     },
   },
   { dark: false },

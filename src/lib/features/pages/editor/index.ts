@@ -6,7 +6,17 @@ import { keymap } from '@codemirror/view';
 import { EditorState } from '@codemirror/state';
 
 import { tuiEditorTheme } from './theme';
-import { tuiMarkdownHighlight, tuiCodeFallbackHighlight, markdownMarkStyling, tuiHighlightPlugin, codeBlockBackgroundPlugin, imagePreviewPlugin } from './markdown';
+import { 
+  tuiMarkdownHighlight, 
+  tuiCodeFallbackHighlight, 
+  markdownMarkStyling, 
+  tuiHighlightPlugin, 
+  codeBlockBackgroundPlugin, 
+  imagePreviewPlugin, 
+  markdownCollapsePlugin,
+  horizontalRulePlugin,
+  blockquotePreviewPlugin
+} from './markdown';
 import { bookRefPlugin } from './book-widget';
 
 /**
@@ -30,6 +40,9 @@ export function createEditorExtensions(onSave?: () => void) {
     tuiHighlightPlugin,
     codeBlockBackgroundPlugin,
     imagePreviewPlugin,
+    markdownCollapsePlugin,
+    horizontalRulePlugin,
+    blockquotePreviewPlugin,
 
     // Book reference widget
     bookRefPlugin,
