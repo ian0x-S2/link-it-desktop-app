@@ -15,6 +15,7 @@ import {
   imagePreviewPlugin, 
   markdownCollapsePlugin,
   horizontalRulePlugin,
+  tablePreviewPlugin,
   blockquotePreviewPlugin
 } from './markdown';
 import { bookRefPlugin } from './book-widget';
@@ -42,6 +43,7 @@ export function createEditorExtensions(onSave?: () => void) {
     imagePreviewPlugin,
     markdownCollapsePlugin,
     horizontalRulePlugin,
+    tablePreviewPlugin,
     blockquotePreviewPlugin,
 
     // Book reference widget

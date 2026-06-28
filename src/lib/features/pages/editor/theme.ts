@@ -317,12 +317,104 @@ export const tuiEditorTheme = EditorView.theme(
       display: 'block',
     },
 
-    // Tables
-    '.cm-tui-table-preview-wrapper': {
+    // Tables (Obsidian-style preview)
+    '.cm-tui-table-preview': {
       width: '100%',
       overflowX: 'auto',
-      padding: '0.75rem 0',
+      padding: '0.5rem 0',
       display: 'block',
+      cursor: 'pointer',
+    },
+    '.cm-tui-table': {
+      borderCollapse: 'collapse',
+      fontFamily: 'var(--font-editor, var(--font-geist-mono, monospace))',
+      fontSize: '13px',
+      lineHeight: '1.5',
+      color: 'var(--color-foreground)',
+    },
+    '.cm-tui-table th, .cm-tui-table td': {
+      border: '1px solid color-mix(in srgb, var(--color-border) 35%, transparent)',
+      padding: '0.5rem 0.75rem',
+      minWidth: '80px',
+      position: 'relative',
+    },
+    '.cm-tui-table th': {
+      fontWeight: 'bold',
+      color: 'var(--color-foreground)',
+      backgroundColor: 'color-mix(in srgb, var(--color-border) 8%, transparent)',
+      textAlign: 'left',
+    },
+    '.cm-tui-table tbody tr:hover': {
+      backgroundColor: 'color-mix(in srgb, var(--color-primary) 3%, transparent)',
+    },
+    '.cm-tui-table [contenteditable="true"]:focus': {
+      outline: '1px solid var(--color-primary)',
+      backgroundColor: 'color-mix(in srgb, var(--color-primary) 10%, transparent)',
+      borderRadius: 'var(--radius-sm, 0.2rem)',
+    },
+
+    /* Interactive Table controls */
+    '.cm-tui-btn': {
+      background: 'var(--color-entry-bg)',
+      border: '1px solid var(--color-border)',
+      color: 'var(--color-muted-foreground)',
+      padding: '0.1rem 0.25rem',
+      fontSize: 'var(--font-tui-2xs, 9px)',
+      cursor: 'pointer',
+      borderRadius: 'var(--radius-sm, 0.2rem)',
+      lineHeight: '1',
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      transition: 'all 0.1s ease',
+      height: '16px',
+    },
+    '.cm-tui-btn:hover': {
+      background: 'var(--color-primary)',
+      color: 'var(--color-primary-foreground)',
+      borderColor: 'var(--color-primary)',
+    },
+    '.cm-tui-col-actions': {
+      position: 'absolute',
+      top: '-12px',
+      left: '50%',
+      transform: 'translateX(-50%)',
+      display: 'none',
+      gap: '0.15rem',
+      backgroundColor: 'var(--color-entry-alt-bg)',
+      padding: '0.15rem',
+      borderRadius: 'var(--radius-sm, 0.2rem)',
+      border: '1px solid var(--color-border)',
+      zIndex: '15',
+      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.15)',
+    },
+    '.cm-tui-table th:hover .cm-tui-col-actions': {
+      display: 'inline-flex',
+    },
+    '.cm-tui-table-row-actions': {
+      border: 'none !important',
+      background: 'transparent !important',
+      opacity: '0',
+      whiteSpace: 'nowrap',
+      textAlign: 'center',
+      verticalAlign: 'middle',
+      width: '60px',
+      padding: '0.25rem 0.5rem !important',
+      transition: 'opacity 0.1s ease',
+    },
+    '.cm-tui-table tr:hover .cm-tui-table-row-actions': {
+      opacity: '1',
+    },
+    '.cm-tui-table-action-header': {
+      border: 'none !important',
+      background: 'transparent !important',
+      width: '60px',
+      padding: '0.4rem 0.5rem !important',
+    },
+    '.cm-tui-table-placeholder': {
+      color: 'var(--color-muted-foreground)',
+      fontStyle: 'italic',
+      textAlign: 'center',
     },
 
     // Heading line decorations — padding-based visual hierarchy.

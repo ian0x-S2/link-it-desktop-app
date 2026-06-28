@@ -3,6 +3,7 @@ import { tags, Tag, styleTags } from '@lezer/highlight';
 import { Decoration, MatchDecorator, ViewPlugin, type ViewUpdate, EditorView, WidgetType, type DecorationSet } from '@codemirror/view';
 import { RangeSetBuilder, StateField, type EditorState } from '@codemirror/state';
 import { marked } from 'marked';
+import type { SyntaxNode } from '@lezer/common';
 
 /**
  * Helper to ensure a fully parsed syntax tree is available on initial mount,
@@ -620,6 +621,448 @@ export const horizontalRulePlugin = StateField.define<DecorationSet>({
   provide: (field) => EditorView.decorations.from(field),
 });
 
+// ─── Table Preview Plugin (Obsidian-style) ────────────────────────────────────
+
+interface ParsedTable {
+  headers: string[];
+  alignments: ('left' | 'center' | 'right' | 'none')[];
+  rows: string[][];
+}
+
+function parseMarkdownTable(text: string): ParsedTable | null {
+  const lines = text.split('\n').filter(l => l.trim().length > 0);
+  if (lines.length < 2) return null;
+
+  const parseCells = (line: string): string[] => {
+    let trimmed = line.trim();
+    if (trimmed.startsWith('|')) trimmed = trimmed.slice(1);
+    if (trimmed.endsWith('|')) trimmed = trimmed.slice(0, -1);
+    return trimmed.split('|').map(c => c.trim());
+  };
+
+  const headers = parseCells(lines[0]);
+  
+  // Parse alignment row
+  const separatorCells = parseCells(lines[1]);
+  const isSeparator = separatorCells.every(c => /^:?-+:?$/.test(c.trim()));
+  if (!isSeparator) return null;
+
+  const alignments: ParsedTable['alignments'] = separatorCells.map(c => {
+    const t = c.trim();
+    if (t.startsWith(':') && t.endsWith(':')) return 'center';
+    if (t.endsWith(':')) return 'right';
+    if (t.startsWith(':')) return 'left';
+    return 'none';
+  });
+
+  const rows: string[][] = [];
+  for (let i = 2; i < lines.length; i++) {
+    rows.push(parseCells(lines[i]));
+  }
+
+  return { headers, alignments, rows };
+}
+
+function serializeMarkdownTable(table: ParsedTable): string {
+  const alignRow = table.alignments.map(align => {
+    if (align === 'left') return ':---';
+    if (align === 'right') return '---:';
+    if (align === 'center') return ':---:';
+    return '---';
+  });
+
+  const headerLine = '| ' + table.headers.join(' | ') + ' |';
+  const sepLine = '| ' + alignRow.join(' | ') + ' |';
+  const bodyLines = table.rows.map(row => {
+    const cells = Array.from({ length: table.headers.length }, (_, i) => row[i] ?? '');
+    return '| ' + cells.join(' | ') + ' |';
+  });
+
+  return [headerLine, sepLine, ...bodyLines].join('\n');
+}
+
+function addRow(table: ParsedTable, rowIndex: number, position: 'above' | 'below'): ParsedTable {
+  const newRow = Array(table.headers.length).fill('');
+  const rows = [...table.rows];
+  const insertIdx = position === 'above' ? rowIndex : rowIndex + 1;
+  rows.splice(insertIdx, 0, newRow);
+  return { ...table, rows };
+}
+
+function deleteRow(table: ParsedTable, rowIndex: number): ParsedTable {
+  const rows = table.rows.filter((_, idx) => idx !== rowIndex);
+  return { ...table, rows };
+}
+
+function addColumn(table: ParsedTable, colIndex: number, position: 'left' | 'right'): ParsedTable {
+  const insertIdx = position === 'left' ? colIndex : colIndex + 1;
+  const headers = [...table.headers];
+  headers.splice(insertIdx, 0, 'Column');
+  const alignments = [...table.alignments];
+  alignments.splice(insertIdx, 0, 'none');
+  const rows = table.rows.map(row => {
+    const newRow = [...row];
+    newRow.splice(insertIdx, 0, '');
+    return newRow;
+  });
+  return { headers, alignments, rows };
+}
+
+function deleteColumn(table: ParsedTable, colIndex: number): ParsedTable {
+  const headers = table.headers.filter((_, idx) => idx !== colIndex);
+  const alignments = table.alignments.filter((_, idx) => idx !== colIndex);
+  const rows = table.rows.map(row => row.filter((_, idx) => idx !== colIndex));
+  return { headers, alignments, rows };
+}
+
+class TablePreviewWidget extends WidgetType {
+  constructor(private content: string, private from: number) {
+    super();
+  }
+
+  eq(other: TablePreviewWidget) {
+    return other.content === this.content && other.from === this.from;
+  }
+
+  toDOM(view: EditorView) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'cm-tui-table-preview';
+
+    const parsed = parseMarkdownTable(this.content);
+    if (!parsed) {
+      wrapper.textContent = this.content;
+      return wrapper;
+    }
+
+    const table = document.createElement('table');
+    table.className = 'cm-tui-table';
+
+    const updateTableDoc = (updated: ParsedTable) => {
+      let node: SyntaxNode | null = syntaxTree(view.state).resolveInner(this.from, 1);
+      while (node && node.name !== 'Table') {
+        node = node.parent;
+      }
+      if (!node) return;
+
+      const startLine = view.state.doc.lineAt(node.from);
+      const endLine = view.state.doc.lineAt(node.to);
+      const newText = serializeMarkdownTable(updated);
+
+      view.dispatch({
+        changes: {
+          from: startLine.from,
+          to: endLine.to,
+          insert: newText
+        },
+        selection: { anchor: startLine.from }
+      });
+      view.focus();
+    };
+
+    const commitChanges = () => {
+      const currentHeaders: string[] = [];
+      table.querySelectorAll('thead th.cm-tui-table-th span').forEach(span => {
+        currentHeaders.push(span.textContent || '');
+      });
+
+      const currentRows: string[][] = [];
+      table.querySelectorAll('tbody tr').forEach(tr => {
+        if (tr.classList.contains('cm-tui-table-placeholder')) return;
+        const rowCells: string[] = [];
+        tr.querySelectorAll('td:not(.cm-tui-table-row-actions)').forEach(td => {
+          rowCells.push(td.textContent || '');
+        });
+        currentRows.push(rowCells);
+      });
+
+      const updated = {
+        headers: currentHeaders,
+        alignments: parsed.alignments,
+        rows: currentRows
+      };
+
+      const newText = serializeMarkdownTable(updated);
+      if (newText !== this.content) {
+        updateTableDoc(updated);
+      }
+    };
+
+    // Header
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+    for (let i = 0; i < parsed.headers.length; i++) {
+      const th = document.createElement('th');
+      th.className = 'cm-tui-table-th';
+      
+      const textSpan = document.createElement('span');
+      textSpan.textContent = parsed.headers[i];
+      textSpan.contentEditable = 'true';
+      th.appendChild(textSpan);
+
+      // Column action buttons
+      const colActions = document.createElement('div');
+      colActions.className = 'cm-tui-col-actions';
+
+      const addLeft = document.createElement('button');
+      addLeft.className = 'cm-tui-btn cm-tui-btn-col-add-left';
+      addLeft.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+      `;
+      addLeft.title = 'Add column left';
+      addLeft.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const updated = addColumn(parsed, i, 'left');
+        updateTableDoc(updated);
+      });
+
+      const delCol = document.createElement('button');
+      delCol.className = 'cm-tui-btn cm-tui-btn-col-del';
+      delCol.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+      `;
+      delCol.title = 'Delete column';
+      delCol.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (parsed.headers.length <= 1) return;
+        const updated = deleteColumn(parsed, i);
+        updateTableDoc(updated);
+      });
+
+      const addRight = document.createElement('button');
+      addRight.className = 'cm-tui-btn cm-tui-btn-col-add-right';
+      addRight.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+          <polyline points="12 5 19 12 12 19"></polyline>
+        </svg>
+      `;
+      addRight.title = 'Add column right';
+      addRight.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const updated = addColumn(parsed, i, 'right');
+        updateTableDoc(updated);
+      });
+
+      colActions.appendChild(addLeft);
+      colActions.appendChild(delCol);
+      colActions.appendChild(addRight);
+      th.appendChild(colActions);
+
+      const align = parsed.alignments[i];
+      if (align !== 'none') th.style.textAlign = align;
+      headerRow.appendChild(th);
+    }
+
+    const actionTh = document.createElement('th');
+    actionTh.className = 'cm-tui-table-action-header';
+    headerRow.appendChild(actionTh);
+
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
+    // Body
+    const tbody = document.createElement('tbody');
+    for (let r = 0; r < parsed.rows.length; r++) {
+      const row = parsed.rows[r];
+      const tr = document.createElement('tr');
+      for (let i = 0; i < parsed.headers.length; i++) {
+        const td = document.createElement('td');
+        td.textContent = row[i] ?? '';
+        td.contentEditable = 'true';
+        const align = parsed.alignments[i];
+        if (align !== 'none') td.style.textAlign = align;
+        tr.appendChild(td);
+      }
+
+      // Row action buttons cell
+      const actionTd = document.createElement('td');
+      actionTd.className = 'cm-tui-table-row-actions';
+
+      const addAbove = document.createElement('button');
+      addAbove.className = 'cm-tui-btn cm-tui-btn-row-add-above';
+      addAbove.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="19" x2="12" y2="5"></line>
+          <polyline points="5 12 12 5 19 12"></polyline>
+        </svg>
+      `;
+      addAbove.title = 'Add row above';
+      addAbove.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const updated = addRow(parsed, r, 'above');
+        updateTableDoc(updated);
+      });
+
+      const delRow = document.createElement('button');
+      delRow.className = 'cm-tui-btn cm-tui-btn-row-del';
+      delRow.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+      `;
+      delRow.title = 'Delete row';
+      delRow.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const updated = deleteRow(parsed, r);
+        updateTableDoc(updated);
+      });
+
+      const addBelow = document.createElement('button');
+      addBelow.className = 'cm-tui-btn cm-tui-btn-row-add-below';
+      addBelow.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <polyline points="19 12 12 19 5 12"></polyline>
+        </svg>
+      `;
+      addBelow.title = 'Add row below';
+      addBelow.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const updated = addRow(parsed, r, 'below');
+        updateTableDoc(updated);
+      });
+
+      actionTd.appendChild(addAbove);
+      actionTd.appendChild(delRow);
+      actionTd.appendChild(addBelow);
+      tr.appendChild(actionTd);
+
+      tbody.appendChild(tr);
+    }
+
+    if (parsed.rows.length === 0) {
+      const placeholderTr = document.createElement('tr');
+      const placeholderTd = document.createElement('td');
+      placeholderTd.colSpan = parsed.headers.length;
+      placeholderTd.className = 'cm-tui-table-placeholder';
+      placeholderTd.textContent = 'No rows. Click + Row to add.';
+      placeholderTr.appendChild(placeholderTd);
+
+      const actionTd = document.createElement('td');
+      actionTd.className = 'cm-tui-table-row-actions';
+      const addRowBtn = document.createElement('button');
+      addRowBtn.className = 'cm-tui-btn';
+      addRowBtn.textContent = '+ Row';
+      addRowBtn.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const updated = addRow(parsed, 0, 'below');
+        updateTableDoc(updated);
+      });
+      actionTd.appendChild(addRowBtn);
+      placeholderTr.appendChild(actionTd);
+      tbody.appendChild(placeholderTr);
+    }
+
+    table.appendChild(tbody);
+    wrapper.appendChild(table);
+
+    // Keyboard navigation within the table cells
+    table.addEventListener('keydown', (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target || target.getAttribute('contenteditable') !== 'true') return;
+
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        const editables = Array.from(table.querySelectorAll('[contenteditable="true"]')) as HTMLElement[];
+        const idx = editables.indexOf(target);
+        const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
+        if (nextIdx >= 0 && nextIdx < editables.length) {
+          editables[nextIdx].focus();
+        } else if (!e.shiftKey) {
+          commitChanges();
+        }
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        
+        const cell = target.closest('td, th');
+        if (!cell) return;
+        
+        const parentRow = cell.parentElement!;
+        const colIndex = Array.from(parentRow.children).indexOf(cell);
+        
+        if (cell.tagName === 'TH') {
+          const firstRow = table.querySelector('tbody tr');
+          if (firstRow) {
+            const nextCell = firstRow.children[colIndex] as HTMLElement;
+            nextCell?.focus();
+          }
+        } else {
+          const tbodyEl = table.querySelector('tbody');
+          if (tbodyEl) {
+            const rows = Array.from(tbodyEl.children);
+            const rowIndex = rows.indexOf(parentRow);
+            const nextRow = rows[rowIndex + 1];
+            if (nextRow && !nextRow.classList.contains('cm-tui-table-placeholder')) {
+              const nextCell = nextRow.children[colIndex] as HTMLElement;
+              nextCell?.focus();
+            } else {
+              commitChanges();
+            }
+          }
+        }
+      }
+    });
+
+    // Commit changes on focus out from the table structure
+    table.addEventListener('focusout', (e) => {
+      const relatedTarget = e.relatedTarget as HTMLElement;
+      if (relatedTarget && table.contains(relatedTarget)) {
+        return;
+      }
+      commitChanges();
+    });
+
+    // Intercept mousedown to stop propagation to CodeMirror, letting the browser natively focus the cell
+    wrapper.addEventListener('mousedown', (e) => {
+      e.stopPropagation();
+    });
+
+    return wrapper;
+  }
+}
+
+function buildTableDecorations(state: EditorState): DecorationSet {
+  const builder = new RangeSetBuilder<Decoration>();
+
+  getParsedTree(state).iterate({
+    enter(node) {
+      if (node.name === 'Table') {
+        const startLine = state.doc.lineAt(node.from);
+        const endLine = state.doc.lineAt(node.to);
+        const content = state.doc.sliceString(startLine.from, endLine.to);
+        const deco = Decoration.replace({
+          widget: new TablePreviewWidget(content, startLine.from),
+          block: true
+        });
+        builder.add(startLine.from, endLine.to, deco);
+      }
+    }
+  });
+
+  return builder.finish();
+}
+
+export const tablePreviewPlugin = StateField.define<DecorationSet>({
+  create(state) {
+    return buildTableDecorations(state);
+  },
+  update(decorations, tr) {
+    return buildTableDecorations(tr.state);
+  },
+  provide: (field) => EditorView.decorations.from(field),
+});
 
 // ─── Blockquote & Callout Preview Plugin ──────────────────────────────────────
 
