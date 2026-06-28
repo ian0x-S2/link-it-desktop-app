@@ -232,3 +232,119 @@ export const codeBlockBackgroundPlugin = StateField.define({
   },
   provide: (field) => EditorView.decorations.from(field),
 });
+
+class ImageWidget extends WidgetType {
+  constructor(private url: string, private alt: string) {
+    super();
+  }
+
+  eq(other: ImageWidget) {
+    return other.url === this.url && other.alt === this.alt;
+  }
+
+  toDOM() {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'cm-tui-image-preview-wrapper';
+
+    const img = document.createElement('img');
+    img.src = this.url;
+    img.alt = this.alt || 'Image';
+    img.className = 'cm-tui-image-preview';
+
+    img.onerror = () => {
+      img.style.display = 'none';
+      const errorMsg = document.createElement('div');
+      errorMsg.className = 'cm-tui-image-preview-error';
+      errorMsg.textContent = `⚠️ Failed to load image: ${this.url}`;
+      wrapper.appendChild(errorMsg);
+    };
+
+    wrapper.appendChild(img);
+
+    if (this.alt) {
+      const caption = document.createElement('div');
+      caption.className = 'cm-tui-image-preview-caption';
+      caption.textContent = this.alt;
+      wrapper.appendChild(caption);
+    }
+
+    return wrapper;
+  }
+}
+
+export const imagePreviewPlugin = StateField.define({
+  create() { return Decoration.none; },
+  update(decorations, tr) {
+    const builder = new RangeSetBuilder<Decoration>();
+    const state = tr.state;
+
+    syntaxTree(state).iterate({
+      enter(node) {
+        if (node.name === 'Image') {
+          const text = state.doc.sliceString(node.from, node.to);
+          
+          let url = '';
+          let alt = '';
+
+          // Match standard Markdown ![alt](url)
+          const mdMatch = /!\[([\s\S]*?)\]\(([^)]+)\)/.exec(text);
+          if (mdMatch) {
+            alt = mdMatch[1];
+            url = mdMatch[2];
+          } else {
+            // Match wiki link style ![[url]] or ![[url|alt]]
+            const wikiMatch = /!\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/.exec(text);
+            if (wikiMatch) {
+              url = wikiMatch[1];
+              alt = wikiMatch[2] || '';
+            }
+          }
+
+          if (url) {
+            const isSelectionInside = state.selection.ranges.some(
+              range => range.from >= node.from && range.to <= node.to
+            );
+
+            if (!isSelectionInside) {
+              const deco = Decoration.replace({
+                widget: new ImageWidget(url, alt),
+                inclusive: false
+              });
+              builder.add(node.from, node.to, deco);
+            }
+          }
+        } else if (
+          node.name === 'HTMLTag' || 
+          node.name === 'HTMLBlock' || 
+          node.name === 'HtmlTag' || 
+          node.name === 'HtmlBlock'
+        ) {
+          const text = state.doc.sliceString(node.from, node.to);
+          const htmlImgRegex = /<img\s+[^>]*src=["']([^"']+)["'][^>]*>/i;
+          const srcMatch = htmlImgRegex.exec(text);
+          
+          if (srcMatch) {
+            const url = srcMatch[1];
+            const altMatch = /alt=["']([^"']+)["']/i.exec(text);
+            const alt = altMatch ? altMatch[1] : '';
+
+            const isSelectionInside = state.selection.ranges.some(
+              range => range.from >= node.from && range.to <= node.to
+            );
+
+            if (!isSelectionInside) {
+              const deco = Decoration.replace({
+                widget: new ImageWidget(url, alt),
+                inclusive: false
+              });
+              builder.add(node.from, node.to, deco);
+            }
+          }
+        }
+      }
+    });
+
+    return builder.finish();
+  },
+  provide: (field) => EditorView.decorations.from(field),
+});

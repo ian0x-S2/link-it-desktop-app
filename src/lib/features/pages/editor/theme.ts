@@ -220,6 +220,35 @@ export const tuiEditorTheme = EditorView.theme(
       color: 'var(--color-primary-foreground)',
       borderColor: 'var(--color-primary)',
     },
+    
+    // Image preview widget
+    '.cm-tui-image-preview-wrapper': {
+      display: 'block',
+      margin: '0.75rem 0',
+      maxWidth: '100%',
+    },
+    '.cm-tui-image-preview': {
+      maxWidth: '100%',
+      maxHeight: '400px',
+      borderRadius: 'var(--radius-md, 0.35rem)',
+      border: '1px solid var(--color-border)',
+      display: 'block',
+    },
+    '.cm-tui-image-preview-caption': {
+      fontSize: 'var(--font-tui-2xs, 9px)',
+      color: 'var(--color-muted-foreground)',
+      marginTop: '0.25rem',
+      textAlign: 'center',
+    },
+    '.cm-tui-image-preview-error': {
+      fontFamily: 'var(--font-mono, monospace)',
+      fontSize: 'var(--font-tui-xs, 11px)',
+      color: 'var(--color-destructive)',
+      border: '1px dashed var(--color-destructive)',
+      padding: '0.5rem',
+      borderRadius: 'var(--radius-sm, 0.2rem)',
+      backgroundColor: 'color-mix(in srgb, var(--color-destructive) 10%, transparent)',
+    },
   },
   { dark: false },
 );

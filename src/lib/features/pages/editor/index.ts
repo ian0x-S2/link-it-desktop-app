@@ -6,7 +6,7 @@ import { keymap } from '@codemirror/view';
 import { EditorState } from '@codemirror/state';
 
 import { tuiEditorTheme } from './theme';
-import { tuiMarkdownHighlight, tuiCodeFallbackHighlight, markdownMarkStyling, tuiHighlightPlugin, codeBlockBackgroundPlugin } from './markdown';
+import { tuiMarkdownHighlight, tuiCodeFallbackHighlight, markdownMarkStyling, tuiHighlightPlugin, codeBlockBackgroundPlugin, imagePreviewPlugin } from './markdown';
 import { bookRefPlugin } from './book-widget';
 
 /**
@@ -29,6 +29,7 @@ export function createEditorExtensions(onSave?: () => void) {
     tuiCodeFallbackHighlight,
     tuiHighlightPlugin,
     codeBlockBackgroundPlugin,
+    imagePreviewPlugin,
 
     // Book reference widget
     bookRefPlugin,
