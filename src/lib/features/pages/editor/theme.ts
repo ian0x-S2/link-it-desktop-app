@@ -13,6 +13,9 @@ export const tuiEditorTheme = EditorView.theme(
       fontFamily: 'var(--font-sans, system-ui, sans-serif)',
       fontSize: '15px',
       lineHeight: '1.8',
+      '-webkit-font-smoothing': 'antialiased',
+      '-moz-osx-font-smoothing': 'grayscale',
+      textRendering: 'optimizeLegibility',
     },
     '&.cm-focused': {
       outline: 'none',
