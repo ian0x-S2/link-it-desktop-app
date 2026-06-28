@@ -1,14 +1,18 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import 'shadcn-svelte/tailwind.css';
+@import '@fontsource-variable/geist';
 @import '@fontsource-variable/geist-mono';
+@import '@fontsource-variable/jetbrains-mono';
 
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --font-sans: Montserrat, sans-serif;
+  --font-sans: "JetBrains Mono Variable", "JetBrainsMono Nerd Font", "JetBrains Mono", "Geist Mono Variable", "Geist Mono", monospace;
   --font-serif: Georgia, serif;
-  --font-mono: Fira Code, monospace;
+  --font-mono: "JetBrains Mono Variable", "JetBrainsMono Nerd Font", "JetBrains Mono", "Geist Mono Variable", "Geist Mono", monospace;
+  --font-editor: "Geist Mono Variable", "Geist Mono", monospace;
+  --font-geist-mono: "Geist Mono Variable", "Geist Mono", monospace;
 }
 
 :root {

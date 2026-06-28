@@ -10,7 +10,7 @@ export const tuiEditorTheme = EditorView.theme(
       height: '100%',
       backgroundColor: 'transparent',
       color: 'var(--color-foreground)',
-      fontFamily: 'var(--font-sans, system-ui, sans-serif)',
+      fontFamily: 'var(--font-editor, var(--font-geist-mono, monospace))',
       fontSize: '15px',
       lineHeight: '1.8',
       '-webkit-font-smoothing': 'antialiased',
