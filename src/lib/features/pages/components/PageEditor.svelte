@@ -195,10 +195,15 @@
 
 
 
-  // Save readOnly preference to localStorage
+  // Save readOnly preference to localStorage and update preview content on toggle
   $effect(() => {
     if (browser) {
       localStorage.setItem('editor-readonly', String(readOnly));
+    }
+    if (readOnly && view) {
+      const docText = view.state.doc.toString();
+      currentContent = docText;
+      props.onSave(docText, bannerImage);
     }
   });
 
@@ -676,20 +681,22 @@
         <PropertiesPanel pageId={props.page.id} />
       </div>
 
-      {#if readOnly}
-        <div class="markdown-preview w-full py-8 px-6">
-          <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-          {@html renderedHtml}
-        </div>
-      {:else}
-        <!-- CodeMirror Mount Point -->
-        <!-- svelte-ignore a11y_no_static_element_interactions -->
-        <div
-          {@attach mountEditor}
-          class="w-full"
-          oncontextmenu={handleContextMenu}
-        ></div>
-      {/if}
+      <div
+        class="markdown-preview w-full py-8 px-6"
+        style:display={readOnly ? 'block' : 'none'}
+      >
+        <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+        {@html renderedHtml}
+      </div>
+
+      <!-- CodeMirror Mount Point -->
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
+      <div
+        {@attach mountEditor}
+        class="w-full"
+        style:display={readOnly ? 'none' : 'block'}
+        oncontextmenu={handleContextMenu}
+      ></div>
     </div>
   </div>
 </div>
