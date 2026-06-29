@@ -591,8 +591,8 @@
 }
 
 .markdown-preview mark {
-  background-color: var(--code-mark);
-  color: var(--background);
+  background-color: color-mix(in srgb, var(--code-mark) 25%, transparent);
+  color: inherit;
   padding: 0.1rem 0.25rem;
   border-radius: 0.15rem;
 }
