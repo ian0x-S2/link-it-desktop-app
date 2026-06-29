@@ -156,7 +156,9 @@
   import { pageStore } from '../stores/page.svelte';
   import PropertiesPanel from './PropertiesPanel.svelte';
   import EditorContextMenu from './EditorContextMenu.svelte';
+  import TableContextMenu from './TableContextMenu.svelte';
   import { themeStore } from '$lib/shared/stores/theme.svelte';
+  import { detectActiveFormats } from '../editor/markdown';
 
   let props = $props<{
     page: Page;
@@ -378,23 +380,145 @@
   }
 
   let contextMenuOpen = $state(false);
+  let tableContextMenuOpen = $state(false);
   let contextMenuX = $state(0);
   let contextMenuY = $state(0);
+
+  // Saved selection context when context menu is triggered from a table cell
+  let tableCellContext = $state<{
+    cell: HTMLElement;
+    selectionStart: number;
+    selectionEnd: number;
+  } | null>(null);
+  let activeFormats = $state<string[]>([]);
+
+  /** Get character offsets of the current selection relative to an element's text content */
+  function getSelectionOffsetsInElement(el: HTMLElement): { start: number; end: number } | null {
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) return null;
+    const range = sel.getRangeAt(0);
+
+    const preRange = document.createRange();
+    preRange.selectNodeContents(el);
+    preRange.setEnd(range.startContainer, range.startOffset);
+    const start = preRange.toString().length;
+
+    const preEndRange = document.createRange();
+    preEndRange.selectNodeContents(el);
+    preEndRange.setEnd(range.endContainer, range.endOffset);
+    const end = preEndRange.toString().length;
+
+    return { start, end };
+  }
 
   function handleContextMenu(e: MouseEvent) {
     if (readOnly) return;
     e.preventDefault();
     contextMenuX = e.clientX;
     contextMenuY = e.clientY;
-    contextMenuOpen = true;
+
+    // Detect if the right-click happened inside a table widget cell
+    const target = e.target as HTMLElement;
+    const editableCell = target.closest('.cm-tui-table-preview [contenteditable="true"]') as HTMLElement | null;
+    if (editableCell) {
+      // Get the raw text (from data-raw if in preview mode, otherwise textContent)
+      const rawText = editableCell.dataset.raw ?? editableCell.textContent ?? '';
+      const offsets = getSelectionOffsetsInElement(editableCell);
+      const selStart = offsets?.start ?? 0;
+      const selEnd = offsets?.end ?? 0;
+      tableCellContext = { cell: editableCell, selectionStart: selStart, selectionEnd: selEnd };
+      activeFormats = detectActiveFormats(rawText, selStart, selEnd);
+      tableContextMenuOpen = true;
+      contextMenuOpen = false;
+    } else {
+      tableCellContext = null;
+      activeFormats = [];
+      tableContextMenuOpen = false;
+      contextMenuOpen = true;
+    }
   }
 
   function handleSelectFormat(type: string) {
     applyFormat(type);
     contextMenuOpen = false;
+    tableContextMenuOpen = false;
+  }
+
+  /** Apply inline formatting directly to a table cell's contentEditable text */
+  function applyTableCellFormat(type: string) {
+    if (!tableCellContext) return;
+    const { cell, selectionStart, selectionEnd } = tableCellContext;
+    // Get raw text — the cell might be in preview mode (data-raw) or edit mode (textContent)
+    const text = cell.dataset.raw ?? cell.textContent ?? '';
+    const selectedText = text.slice(selectionStart, selectionEnd);
+
+    if (type === 'clear-formatting') {
+      // Strip all inline markdown from the selected range
+      let cleaned = selectedText;
+      cleaned = cleaned.replace(/\*\*(.+?)\*\*/g, '$1');
+      cleaned = cleaned.replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, '$1');
+      cleaned = cleaned.replace(/~~(.+?)~~/g, '$1');
+      cleaned = cleaned.replace(/==(.+?)==/g, '$1');
+      cleaned = cleaned.replace(/`([^`]+)`/g, '$1');
+      cleaned = cleaned.replace(/(?<!\$)\$([^$]+)\$(?!\$)/g, '$1');
+      cleaned = cleaned.replace(/%%(.+?)%%/g, '$1');
+      const newText = text.slice(0, selectionStart) + cleaned + text.slice(selectionEnd);
+      cell.dataset.raw = newText;
+      cell.textContent = newText;
+      cell.blur();
+      tableCellContext = null;
+      return;
+    }
+
+    // Determine the wrapper tokens for the format
+    let prefix: string;
+    let suffix: string;
+    let placeholder: string;
+    switch (type) {
+      case 'bold':
+        prefix = '**'; suffix = '**'; placeholder = 'bold text'; break;
+      case 'italic':
+        prefix = '*'; suffix = '*'; placeholder = 'italic text'; break;
+      case 'strikethrough':
+        prefix = '~~'; suffix = '~~'; placeholder = 'strikethrough'; break;
+      case 'highlight':
+        prefix = '=='; suffix = '=='; placeholder = 'highlighted text'; break;
+      case 'inline-code':
+        prefix = '`'; suffix = '`'; placeholder = 'code'; break;
+      case 'math':
+        prefix = '$'; suffix = '$'; placeholder = 'math'; break;
+      case 'comment':
+        prefix = '%%'; suffix = '%%'; placeholder = 'comment'; break;
+      default:
+        tableCellContext = null;
+        return;
+    }
+
+    let newText: string;
+    // Toggle: if the selected text is already wrapped with this format, remove it
+    if (selectedText.startsWith(prefix) && selectedText.endsWith(suffix) && selectedText.length > prefix.length + suffix.length) {
+      const unwrapped = selectedText.slice(prefix.length, -suffix.length);
+      newText = text.slice(0, selectionStart) + unwrapped + text.slice(selectionEnd);
+    } else {
+      const replacement = `${prefix}${selectedText || placeholder}${suffix}`;
+      newText = text.slice(0, selectionStart) + replacement + text.slice(selectionEnd);
+    }
+
+    // Update the raw data and the visible text, then blur to commit
+    cell.dataset.raw = newText;
+    cell.textContent = newText;
+    cell.blur();
+
+    tableCellContext = null;
   }
 
   function applyFormat(type: string) {
+    // If the context menu was triggered from inside a table cell, handle it separately
+    if (tableCellContext) {
+      applyTableCellFormat(type);
+      return;
+    }
+
     if (!view) return;
     const { state, dispatch } = view;
     const mainSelection = state.selection.main;
@@ -711,6 +835,16 @@
     y={contextMenuY}
     onSelect={handleSelectFormat}
     onClose={() => (contextMenuOpen = false)}
+  />
+{/if}
+
+{#if tableContextMenuOpen}
+  <TableContextMenu
+    x={contextMenuX}
+    y={contextMenuY}
+    {activeFormats}
+    onSelect={handleSelectFormat}
+    onClose={() => { tableContextMenuOpen = false; tableCellContext = null; }}
   />
 {/if}
 

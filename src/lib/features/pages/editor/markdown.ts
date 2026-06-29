@@ -1,7 +1,7 @@
 import { HighlightStyle, syntaxHighlighting, defaultHighlightStyle, syntaxTree, ensureSyntaxTree } from '@codemirror/language';
 import { tags, Tag, styleTags } from '@lezer/highlight';
 import { Decoration, MatchDecorator, ViewPlugin, type ViewUpdate, EditorView, WidgetType, type DecorationSet } from '@codemirror/view';
-import { RangeSetBuilder, StateField, type EditorState } from '@codemirror/state';
+import { RangeSetBuilder, StateField, type EditorState, type Text } from '@codemirror/state';
 import { marked } from 'marked';
 import type { SyntaxNode } from '@lezer/common';
 
@@ -715,6 +715,145 @@ function deleteColumn(table: ParsedTable, colIndex: number): ParsedTable {
   return { headers, alignments, rows };
 }
 
+/** Convert inline markdown formatting to HTML for table cell preview */
+function renderCellInlineMarkdown(text: string): string {
+  if (!text) return '';
+  let html = text
+    // Escape HTML first
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+  // Inline code (must be before other patterns to avoid conflicts)
+  html = html.replace(/`([^`]+)`/g, '<code class="cm-tui-cell-code">$1</code>');
+  // Bold **text**
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  // Strikethrough ~~text~~
+  html = html.replace(/~~(.+?)~~/g, '<s>$1</s>');
+  // Italic *text*  (must come after bold)
+  html = html.replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, '<em>$1</em>');
+  // Highlight ==text==
+  html = html.replace(/==(.+?)==/g, '<mark class="cm-tui-cell-highlight">$1</mark>');
+  // Math $text$
+  html = html.replace(/(?<!\$)\$([^$]+)\$(?!\$)/g, '<span class="cm-tui-cell-math">$1</span>');
+  // Comment %%text%%
+  html = html.replace(/%%(.+?)%%/g, '<span class="cm-tui-cell-comment">$1</span>');
+  return html;
+}
+
+/** Check if text contains only plain content (no inline formatting) */
+function hasInlineFormatting(text: string): boolean {
+  return /\*\*.+?\*\*|(?<!\*)\*[^*]+\*(?!\*)|~~.+?~~|==.+?==|`.+?`|(?<!\$)\$[^$]+\$(?!\$)|%%.+?%%/.test(text);
+}
+
+/** Detect which inline formats are active in the given text range */
+export function detectActiveFormats(cellText: string, selStart: number, selEnd: number): string[] {
+  const active: string[] = [];
+  const patterns: [RegExp, string][] = [
+    [/\*\*(.+?)\*\*/g, 'bold'],
+    [/(?<!\*)\*([^*]+)\*(?!\*)/g, 'italic'],
+    [/~~(.+?)~~/g, 'strikethrough'],
+    [/==(.+?)==/g, 'highlight'],
+    [/`([^`]+)`/g, 'inline-code'],
+    [/(?<!\$)\$([^$]+)\$(?!\$)/g, 'math'],
+    [/%%(.+?)%%/g, 'comment'],
+  ];
+  for (const [regex, format] of patterns) {
+    let m: RegExpExecArray | null;
+    while ((m = regex.exec(cellText)) !== null) {
+      // Check if selection overlaps with this match
+      if (m.index < selEnd && m.index + m[0].length > selStart) {
+        active.push(format);
+        break;
+      }
+    }
+  }
+  return active;
+}
+
+/**
+ * Set up a contentEditable element for inline markdown preview.
+ * Shows rendered HTML when not focused, raw markdown when focused.
+ */
+function setupCellPreview(el: HTMLElement, rawText: string) {
+  el.dataset.raw = rawText;
+  if (hasInlineFormatting(rawText)) {
+    el.innerHTML = renderCellInlineMarkdown(rawText);
+  } else {
+    el.textContent = rawText;
+  }
+
+  // Find the containing table cell (th or td) to lock its dimensions
+  const getCell = () => el.tagName === 'SPAN' ? (el.parentElement as HTMLElement) : el;
+
+  el.addEventListener('focus', () => {
+    const cell = getCell();
+    if (cell) {
+      const rect = cell.getBoundingClientRect();
+      cell.style.width = `${rect.width}px`;
+      cell.style.height = `${rect.height}px`;
+    }
+
+    // Switch to raw text editing
+    const raw = el.dataset.raw ?? '';
+    el.textContent = raw;
+    // Place cursor at end
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    range.collapse(false);
+    const sel = window.getSelection();
+    if (sel) {
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+  });
+
+  el.addEventListener('blur', () => {
+    // Save raw text and switch back to preview
+    const raw = el.textContent ?? '';
+    el.dataset.raw = raw;
+
+    const cell = getCell();
+    if (cell) {
+      cell.style.width = '';
+      cell.style.height = '';
+    }
+
+    if (hasInlineFormatting(raw)) {
+      el.innerHTML = renderCellInlineMarkdown(raw);
+    } else {
+      el.textContent = raw;
+    }
+  });
+}
+
+/** Helper to find the actual end of a table by checking line contents for pipe separators */
+function findTableEnd(doc: Text, from: number, to: number): number {
+  const startLine = doc.lineAt(from);
+  let toPos = to;
+  if (toPos > from && doc.sliceString(toPos - 1, toPos) === '\n') {
+    toPos--;
+  }
+  const endLine = doc.lineAt(toPos);
+  let lastValidPos = startLine.to;
+
+  for (let l = startLine.number; l <= endLine.number; l++) {
+    const line = doc.line(l);
+    const text = line.text.trim();
+    
+    // Header and delimiter row must contain '|'
+    if (l === startLine.number || l === startLine.number + 1) {
+      if (!text.includes('|')) break;
+    } else {
+      // Body rows must contain '|' unless empty
+      if (text.length > 0 && !text.includes('|')) {
+        break;
+      }
+    }
+    lastValidPos = line.to;
+  }
+  return lastValidPos;
+}
+
 class TablePreviewWidget extends WidgetType {
   constructor(private content: string, private from: number) {
     super();
@@ -745,7 +884,8 @@ class TablePreviewWidget extends WidgetType {
       if (!node) return;
 
       const startLine = view.state.doc.lineAt(node.from);
-      const endLine = view.state.doc.lineAt(node.to);
+      const actualTo = findTableEnd(view.state.doc, node.from, node.to);
+      const endLine = view.state.doc.lineAt(actualTo);
       const newText = serializeMarkdownTable(updated);
 
       view.dispatch({
@@ -762,7 +902,9 @@ class TablePreviewWidget extends WidgetType {
     const commitChanges = () => {
       const currentHeaders: string[] = [];
       table.querySelectorAll('thead th.cm-tui-table-th span').forEach(span => {
-        currentHeaders.push(span.textContent || '');
+        const el = span as HTMLElement;
+        // Read from data-raw if available (preview mode), otherwise textContent (editing mode)
+        currentHeaders.push(el.dataset.raw ?? el.textContent ?? '');
       });
 
       const currentRows: string[][] = [];
@@ -770,7 +912,8 @@ class TablePreviewWidget extends WidgetType {
         if (tr.classList.contains('cm-tui-table-placeholder')) return;
         const rowCells: string[] = [];
         tr.querySelectorAll('td:not(.cm-tui-table-row-actions)').forEach(td => {
-          rowCells.push(td.textContent || '');
+          const el = td as HTMLElement;
+          rowCells.push(el.dataset.raw ?? el.textContent ?? '');
         });
         currentRows.push(rowCells);
       });
@@ -795,8 +938,8 @@ class TablePreviewWidget extends WidgetType {
       th.className = 'cm-tui-table-th';
       
       const textSpan = document.createElement('span');
-      textSpan.textContent = parsed.headers[i];
       textSpan.contentEditable = 'true';
+      setupCellPreview(textSpan, parsed.headers[i]);
       th.appendChild(textSpan);
 
       // Column action buttons
@@ -875,8 +1018,8 @@ class TablePreviewWidget extends WidgetType {
       const tr = document.createElement('tr');
       for (let i = 0; i < parsed.headers.length; i++) {
         const td = document.createElement('td');
-        td.textContent = row[i] ?? '';
         td.contentEditable = 'true';
+        setupCellPreview(td, row[i] ?? '');
         const align = parsed.alignments[i];
         if (align !== 'none') td.style.textAlign = align;
         tr.appendChild(td);
@@ -1040,7 +1183,8 @@ function buildTableDecorations(state: EditorState): DecorationSet {
     enter(node) {
       if (node.name === 'Table') {
         const startLine = state.doc.lineAt(node.from);
-        const endLine = state.doc.lineAt(node.to);
+        const actualTo = findTableEnd(state.doc, node.from, node.to);
+        const endLine = state.doc.lineAt(actualTo);
         const content = state.doc.sliceString(startLine.from, endLine.to);
         const deco = Decoration.replace({
           widget: new TablePreviewWidget(content, startLine.from),

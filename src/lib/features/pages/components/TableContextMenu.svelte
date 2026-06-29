@@ -4,18 +4,19 @@
   let {
     x,
     y,
+    activeFormats = [],
     onSelect,
     onClose,
   }: {
     x: number;
     y: number;
+    activeFormats?: string[];
     onSelect: (type: string) => void;
     onClose: () => void;
   } = $props();
 
   let menuElement = $state<HTMLDivElement | null>(null);
 
-  // Calculate coordinates to keep the context menu in the visible viewport
   const adjustedX = $derived.by(() => {
     if (!menuElement) return x;
     const rect = menuElement.getBoundingClientRect();
@@ -30,18 +31,14 @@
     return y + rect.height > screenHeight ? screenHeight - rect.height - 8 : y;
   });
 
-  // Close when clicking outside
   function handleOutsideClick(event: MouseEvent) {
     if (menuElement && !menuElement.contains(event.target as Node)) {
       onClose();
     }
   }
 
-  // Keyboard shortcut listener while menu is open
   function handleKeyDown(event: KeyboardEvent) {
-    // Prevent typing into editor when context menu is open
     event.stopPropagation();
-
     const key = event.key.toLowerCase();
     switch (key) {
       case 'b':
@@ -50,39 +47,23 @@
       case 'i':
         onSelect('italic');
         break;
+      case 's':
+        onSelect('strikethrough');
+        break;
       case 'h':
         onSelect('highlight');
         break;
       case 'c':
-        if (event.shiftKey) {
-          onSelect('code-block');
-        } else {
-          onSelect('inline-code');
-        }
+        onSelect('inline-code');
         break;
-      case '1':
-        onSelect('h1');
+      case 'm':
+        onSelect('math');
         break;
-      case '2':
-        onSelect('h2');
+      case '%':
+        onSelect('comment');
         break;
-      case '3':
-        onSelect('h3');
-        break;
-      case 'l':
-        onSelect('unordered-list');
-        break;
-      case 'o':
-        onSelect('ordered-list');
-        break;
-      case 't':
-        onSelect('table');
-        break;
-      case 'q':
-        onSelect('callout');
-        break;
-      case '-':
-        onSelect('hr');
+      case 'x':
+        onSelect('clear-formatting');
         break;
       case 'escape':
         onClose();
@@ -91,34 +72,50 @@
   }
 
   onMount(() => {
-    // Add event listener with slight delay to avoid closing immediately on trigger click
     const timer = setTimeout(() => {
       window.addEventListener('click', handleOutsideClick);
     }, 10);
-
     return () => {
       clearTimeout(timer);
       window.removeEventListener('click', handleOutsideClick);
     };
   });
 
-  const menuItems = [
-    { label: 'Bold', key: 'b', type: 'bold' },
-    { label: 'Italic', key: 'i', type: 'italic' },
-    { label: 'Highlight', key: 'h', type: 'highlight' },
-    { label: 'Inline Code', key: 'c', type: 'inline-code' },
-    { label: 'Code Block', key: 'C', type: 'code-block' },
+  interface MenuItem {
+    label: string;
+    key: string;
+    type: string;
+    icon: string;
+    iconClass?: string;
+    divider?: never;
+  }
+  interface DividerItem {
+    divider: true;
+    label?: never;
+    key?: never;
+    type?: never;
+    icon?: never;
+    iconClass?: never;
+  }
+  type MenuEntry = MenuItem | DividerItem;
+
+  const menuItems: MenuEntry[] = [
+    { label: 'Bold', key: 'b', type: 'bold', icon: 'B', iconClass: 'font-bold' },
+    { label: 'Italic', key: 'i', type: 'italic', icon: 'I', iconClass: 'italic' },
+    {
+      label: 'Strikethrough',
+      key: 's',
+      type: 'strikethrough',
+      icon: 'S',
+      iconClass: 'line-through',
+    },
+    { label: 'Highlight', key: 'h', type: 'highlight', icon: '▓' },
     { divider: true },
-    { label: 'Heading 1', key: '1', type: 'h1' },
-    { label: 'Heading 2', key: '2', type: 'h2' },
-    { label: 'Heading 3', key: '3', type: 'h3' },
+    { label: 'Code', key: 'c', type: 'inline-code', icon: '</>' },
+    { label: 'Math', key: 'm', type: 'math', icon: '∑' },
+    { label: 'Comment', key: '%', type: 'comment', icon: '%' },
     { divider: true },
-    { label: 'Unordered List', key: 'l', type: 'unordered-list' },
-    { label: 'Ordered List', key: 'o', type: 'ordered-list' },
-    { divider: true },
-    { label: 'Table', key: 't', type: 'table' },
-    { label: 'Callout', key: 'q', type: 'callout' },
-    { label: 'Horizontal Line', key: '-', type: 'hr' },
+    { label: 'Clear formatting', key: 'x', type: 'clear-formatting', icon: '✕' },
   ];
 </script>
 
@@ -136,10 +133,20 @@
       <div class="border-t border-border my-1"></div>
     {:else if item.type}
       <button
-        onmousedown={(e) => { e.preventDefault(); onSelect(item.type); }}
-        class="group flex items-center justify-between px-2.5 py-1 text-left hover:bg-primary hover:text-primary-foreground text-foreground transition-colors cursor-pointer w-full rounded-none border-none bg-transparent"
+        onmousedown={(e) => {
+          e.preventDefault();
+          onSelect(item.type);
+        }}
+        class="group flex items-center gap-2 px-2.5 py-1 text-left hover:bg-primary hover:text-primary-foreground text-foreground transition-colors cursor-pointer w-full rounded-none border-none bg-transparent"
       >
-        <span>{item.label}</span>
+        <span
+          class="w-4 shrink-0 inline-flex items-center justify-center text-tui-xs {item.iconClass ??
+            ''}">{item.icon}</span
+        >
+        <span class="flex-1">{item.label}</span>
+        {#if activeFormats.includes(item.type)}
+          <span class="text-primary group-hover:text-primary-foreground text-tui-xs">✓</span>
+        {/if}
         <span class="text-muted-foreground group-hover:text-primary-foreground text-tui-xs"
           >[{item.key}]</span
         >

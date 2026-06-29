@@ -90,8 +90,8 @@ export const tuiEditorTheme = EditorView.theme(
     },
     // Highlight syntax style mapping
     '.cm-tui-highlight': {
-      backgroundColor: 'var(--code-mark)',
-      color: 'var(--background)',
+      backgroundColor: 'color-mix(in srgb, var(--code-mark) 25%, transparent)',
+      color: 'inherit',
       padding: '0.1rem 0.25rem',
       borderRadius: '0.2rem',
       textDecoration: 'none !important',
@@ -344,6 +344,11 @@ export const tuiEditorTheme = EditorView.theme(
       backgroundColor: 'color-mix(in srgb, var(--color-border) 8%, transparent)',
       textAlign: 'left',
     },
+    '.cm-tui-table th span[contenteditable="true"]': {
+      display: 'inline-block',
+      width: '100%',
+      minHeight: '1.2em',
+    },
     '.cm-tui-table tbody tr:hover': {
       backgroundColor: 'color-mix(in srgb, var(--color-primary) 3%, transparent)',
     },
@@ -415,6 +420,41 @@ export const tuiEditorTheme = EditorView.theme(
       color: 'var(--color-muted-foreground)',
       fontStyle: 'italic',
       textAlign: 'center',
+    },
+
+    /* Inline formatting preview inside table cells */
+    '.cm-tui-cell-code': {
+      fontFamily: 'var(--font-editor, var(--font-geist-mono, monospace))',
+      fontSize: '0.9em',
+      backgroundColor: 'color-mix(in srgb, var(--color-primary) 12%, transparent)',
+      color: 'var(--color-primary)',
+      padding: '0.1em 0.3em',
+      borderRadius: 'var(--radius-sm, 0.2rem)',
+      border: '1px solid color-mix(in srgb, var(--color-primary) 20%, transparent)',
+    },
+    '.cm-tui-cell-highlight': {
+      backgroundColor: 'color-mix(in srgb, var(--code-mark) 25%, transparent)',
+      color: 'inherit',
+      padding: '0.1em 0.15em',
+      borderRadius: 'var(--radius-sm, 0.2rem)',
+    },
+    '.cm-tui-cell-math': {
+      fontStyle: 'italic',
+      color: 'var(--color-chart-3, #c678dd)',
+    },
+    '.cm-tui-cell-comment': {
+      color: 'var(--color-muted-foreground)',
+      fontStyle: 'italic',
+      opacity: '0.7',
+    },
+    '.cm-tui-table strong': {
+      fontWeight: 'bold',
+    },
+    '.cm-tui-table em': {
+      fontStyle: 'italic',
+    },
+    '.cm-tui-table s': {
+      textDecoration: 'line-through',
     },
 
     // Heading line decorations — padding-based visual hierarchy.
